@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\LoadOGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\LoadOGLCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwColors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwEventGLFW.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwFonts.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwOpenGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwOpenGLCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwPrecomp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\AntPerfTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\LoadOGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\LoadOGLCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\MiniGLFW.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwColors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwFonts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwOpenGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwOpenGLCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\src\TwPrecomp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\Downloads\Aula\CG\CG_UFPel\external\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{DB7D5658-B5E2-30B2-85FE-867D6717BFD8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D0989DF8-C3CE-3249-B09B-819239286A3A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

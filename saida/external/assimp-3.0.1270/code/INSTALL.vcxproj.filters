@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="F:\Downloads\Aula\CG\saida\CMakeFiles\f7b6844b0f5bafbc540a74577af525c7\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{1D87F018-BFFE-3294-8A28-63C171EFC987}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,339 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGUID>{CB02D975-232E-36D1-842B-88664B3806C6}</ProjectGUID>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>CG_UFPel</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+    <PropertyGroup>
+      <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+      <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">F:\Downloads\Aula\CG\saida\Debug\</OutDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CG_UFPel.dir\Debug\</IntDir>
+      <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CG_UFPel</TargetName>
+      <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
+      <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">F:\Downloads\Aula\CG\saida\Release\</OutDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CG_UFPel.dir\Release\</IntDir>
+      <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CG_UFPel</TargetName>
+      <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</LinkIncremental>
+      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+      <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">F:\Downloads\Aula\CG\saida\MinSizeRel\</OutDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">CG_UFPel.dir\MinSizeRel\</IntDir>
+      <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">CG_UFPel</TargetName>
+      <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.exe</TargetExt>
+      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</LinkIncremental>
+      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
+      <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">F:\Downloads\Aula\CG\saida\RelWithDebInfo\</OutDir>
+      <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">CG_UFPel.dir\RelWithDebInfo\</IntDir>
+      <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">CG_UFPel</TargetName>
+      <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.exe</TargetExt>
+      <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
+      <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
+    </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Debug/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat></DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;glu32.lib;opengl32.lib;external\glfw-3.0.3\src\Debug\glfw3.lib;external\Debug\GLEW_190.lib;external\Debug\ANTTWEAKBAR_116_OGLCORE_GLFW.lib;external\assimp-3.0.1270\code\Debug\assimp.lib;glu32.lib;opengl32.lib;external\assimp-3.0.1270\contrib\zlib\Debug\zlibd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Downloads/Aula/CG/saida/Debug/CG_UFPel.lib</ImportLibrary>
+      <ProgramDataBaseFile>F:/Downloads/Aula/CG/saida/Debug/CG_UFPel.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version></Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat></DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;glu32.lib;opengl32.lib;external\glfw-3.0.3\src\Release\glfw3.lib;external\Release\GLEW_190.lib;external\Release\ANTTWEAKBAR_116_OGLCORE_GLFW.lib;external\assimp-3.0.1270\code\Release\assimp.lib;glu32.lib;opengl32.lib;external\assimp-3.0.1270\contrib\zlib\Release\zlib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Downloads/Aula/CG/saida/Release/CG_UFPel.lib</ImportLibrary>
+      <ProgramDataBaseFile>F:/Downloads/Aula/CG/saida/Release/CG_UFPel.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version></Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat></DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;glu32.lib;opengl32.lib;external\glfw-3.0.3\src\MinSizeRel\glfw3.lib;external\MinSizeRel\GLEW_190.lib;external\MinSizeRel\ANTTWEAKBAR_116_OGLCORE_GLFW.lib;external\assimp-3.0.1270\code\MinSizeRel\assimp.lib;glu32.lib;opengl32.lib;external\assimp-3.0.1270\contrib\zlib\MinSizeRel\zlib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Downloads/Aula/CG/saida/MinSizeRel/CG_UFPel.lib</ImportLibrary>
+      <ProgramDataBaseFile>F:/Downloads/Aula/CG/saida/MinSizeRel/CG_UFPel.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version></Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat></DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>TW_STATIC;TW_NO_LIB_PRAGMA;TW_NO_DIRECT3D;GLEW_STATIC;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Downloads\Aula\CG\CG_UFPel\external\AntTweakBar-1.16\include;F:\Downloads\Aula\CG\CG_UFPel\external\glfw-3.0.3\include\GLFW;F:\Downloads\Aula\CG\CG_UFPel\external\glm-0.9.4.0;F:\Downloads\Aula\CG\CG_UFPel\external\glew-1.9.0\include;F:\Downloads\Aula\CG\CG_UFPel\external\assimp-3.0.1270\include;F:\Downloads\Aula\CG\CG_UFPel\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;glu32.lib;opengl32.lib;external\glfw-3.0.3\src\RelWithDebInfo\glfw3.lib;external\RelWithDebInfo\GLEW_190.lib;external\RelWithDebInfo\ANTTWEAKBAR_116_OGLCORE_GLFW.lib;external\assimp-3.0.1270\code\RelWithDebInfo\assimp.lib;glu32.lib;opengl32.lib;external\assimp-3.0.1270\contrib\zlib\RelWithDebInfo\zlib.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Downloads/Aula/CG/saida/RelWithDebInfo/CG_UFPel.lib</ImportLibrary>
+      <ProgramDataBaseFile>F:/Downloads/Aula/CG/saida/RelWithDebInfo/CG_UFPel.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+      <Version></Version>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HF:/Downloads/Aula/CG/CG_UFPel -BF:/Downloads/Aula/CG/saida --check-stamp-file F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HF:/Downloads/Aula/CG/CG_UFPel -BF:/Downloads/Aula/CG/saida --check-stamp-file F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HF:/Downloads/Aula/CG/CG_UFPel -BF:/Downloads/Aula/CG/saida --check-stamp-file F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -HF:/Downloads/Aula/CG/CG_UFPel -BF:/Downloads/Aula/CG/saida --check-stamp-file F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">F:/Downloads/Aula/CG/CG_UFPel/CMakeLists.txt;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInitialize.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCCompiler.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeCXXCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;F:\Downloads\Aula\CG\saida\CMakeFiles\3.6.1\CMakeRCCompiler.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindOpenGL.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.6\Modules\CMakeParseArguments.cmake;F:\Downloads\Aula\CG\CG_UFPel\CMakeLists.txt;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">F:\Downloads\Aula\CG\saida\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\controls.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\objloader.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\quaternion_utils.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\shader.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\tangentspace.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\text2D.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\texture.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\vboindexer.hpp" />
+    <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\glerror.hpp" />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\controls.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\objloader.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\quaternion_utils.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\shader.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\tangentspace.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\text2D.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\texture.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\vboindexer.cpp"  />
+    <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\glerror.cpp"  />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/ZERO_CHECK.vcxproj">
+      <Project>DDB8CDD1-E52F-32C9-9D0C-E1B79172E8FF</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/external/ANTTWEAKBAR_116_OGLCORE_GLFW.vcxproj">
+      <Project>8152485A-8EBB-36AD-A18E-CDFBEFF9F4D6</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/external/GLEW_190.vcxproj">
+      <Project>DA5B1FE9-3E1F-341C-9310-8020DA6CB7B5</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/external/glfw-3.0.3/src/GLFW_303.vcxproj">
+      <Project>C24411BC-431B-3FAB-903F-74498BE7AB00</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/code/assimp.vcxproj">
+      <Project>6C227868-C460-3066-89A1-B410ED0C5869</Project>
+    </ProjectReference>
+    <ProjectReference Include="F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/contrib/zlib/zlib.vcxproj">
+      <Project>A2D805A9-07AA-393D-ACDB-B72A38C93791</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

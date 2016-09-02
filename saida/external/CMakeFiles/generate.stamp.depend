@@ -1,0 +1,7 @@
+# CMake generation dependency list for this directory.
+F:/Downloads/Aula/CG/CG_UFPel/external/CMakeLists.txt
+C:/Program Files/CMake/share/cmake-3.6/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.6/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.6/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.6/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.6/Modules/CheckFunctionExists.cmake

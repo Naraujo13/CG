@@ -1,0 +1,15 @@
+F:/Downloads/Aula/CG/saida/CMakeFiles/INSTALL.dir
+F:/Downloads/Aula/CG/saida/CMakeFiles/CG_UFPel.dir
+F:/Downloads/Aula/CG/saida/CMakeFiles/ALL_BUILD.dir
+F:/Downloads/Aula/CG/saida/CMakeFiles/ZERO_CHECK.dir
+F:/Downloads/Aula/CG/saida/external/CMakeFiles/GLEW_190.dir
+F:/Downloads/Aula/CG/saida/external/CMakeFiles/ANTTWEAKBAR_116_OGLCORE_GLFW.dir
+F:/Downloads/Aula/CG/saida/external/CMakeFiles/INSTALL.dir
+F:/Downloads/Aula/CG/saida/external/glfw-3.0.3/CMakeFiles/INSTALL.dir
+F:/Downloads/Aula/CG/saida/external/glfw-3.0.3/CMakeFiles/ALL_BUILD.dir
+F:/Downloads/Aula/CG/saida/external/glfw-3.0.3/src/CMakeFiles/GLFW_303.dir
+F:/Downloads/Aula/CG/saida/external/glfw-3.0.3/src/CMakeFiles/INSTALL.dir
+F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/contrib/zlib/CMakeFiles/zlib.dir
+F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/contrib/zlib/CMakeFiles/INSTALL.dir
+F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/code/CMakeFiles/assimp.dir
+F:/Downloads/Aula/CG/saida/external/assimp-3.0.1270/code/CMakeFiles/INSTALL.dir
