@@ -1,3 +1,5 @@
+/* ---------------- Author: Nícolas Oreques de Araujo ---------------- */
+
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -325,7 +327,7 @@ int main(void)
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders("F:/Downloads/Aula/CG/CG_UFPel/shaders/StandardShading.vertexshader", "F:/Downloads/Aula/CG/CG_UFPel/shaders/StandardShading.fragmentshader");
+	GLuint programID = LoadShaders("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID      = glGetUniformLocation(programID, "MVP");
@@ -333,7 +335,7 @@ int main(void)
 	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
 	// Load the texture
-	GLuint Texture = loadDDS("F:/Downloads/Aula/CG/CG_UFPel/mesh/uvmap.DDS");
+	GLuint Texture = loadDDS("mesh/uvmap.DDS");
 
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
@@ -342,7 +344,7 @@ int main(void)
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
-	bool res = loadOBJ("F:/Downloads/Aula/CG/CG_UFPel/mesh/suzanne.obj", vertices, uvs, normals);
+	bool res = loadOBJ("mesh/suzanne.obj", vertices, uvs, normals);
 
 	std::vector<unsigned short> indices;
 	std::vector<glm::vec3> indexed_vertices;
@@ -431,18 +433,22 @@ int main(void)
 
 	/* ---- Instructions to user ---- */
 	std::cout << "-----------------------------------" << std::endl;
-	std::cout << "Instruções:" << std::endl;
-	std::cout << "\t1. Operações unitárias:" << std::endl;
-	std::cout << "\t\t1.1. A tecla \"N\" fará a simplificação de 1 vértice quando pressionada." <<std::endl;
-	std::cout << "\t\t1.2. A tecla \"B\" irá desfazer a simplificação de 1 vértice quando pressionada." << std::endl;
-	std::cout << "\t2. Operações Contínuas:" << std::endl;
-	std::cout << "\t\t2.1. A tecla \"Backspace\" irá colocar o programa num modo de simplificação contínuo." << std::endl;
-	std::cout << "\t\t2.2. A tecla \"=\" irá colocar o programa num modo de desfazer a simplificação contínuo." << std::endl;
-	std::cout << "\t\t2.3. tA tecla \"Space\" irá parar qualquer um dos dois modos contínuos anteriores." << std::endl;
+	std::cout << "Instrucoes:" << std::endl;
+	std::cout << "\t1. Operacoes unitarias:" << std::endl;
+	std::cout << "\t\t1.1. A tecla \"N\" fara a simplificacao de 1 vertice quando pressionada." <<std::endl;
+	std::cout << "\t\t1.2. A tecla \"B\" ira desfazer a simplificacao de 1 vertice quando pressionada." << std::endl;
+	std::cout << "\t2. Operacoes Continuas:" << std::endl;
+	std::cout << "\t\t2.1. A tecla \"Backspace\" ira colocar o programa num modo de simplificacao continuo." << std::endl;
+	std::cout << "\t\t2.2. A tecla \"=\" ira colocar o programa num modo de desfazer a simplificacao continuo." << std::endl;
+	std::cout << "\t\t2.3. tA tecla \"Space\" ira parar qualquer um dos dois modos continuos anteriores." << std::endl;
 	std::cout << "\t3. Modos de desenho:" << std::endl;
-	std::cout << "\t\t3.1. A tecla \"P\" irá setar o modo de desenho para \"pontos\"." << std::endl;
-	std::cout << "\t\t3.2. A tecla \"L\" irá setar o modo de desenho para \"linhas\"." << std::endl;
-	std::cout << "\t\t3.3. A tecla \"F\" irá setar o modo de desenho para \"preenhcer\"." << std::endl;
+	std::cout << "\t\t3.1. A tecla \"P\" ira setar o modo de desenho para \"pontos\"." << std::endl;
+	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
+	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
+	std::cout << "\t4. Movimentação:" << std::endl;
+	std::cout << "\t\t3.1. A tecla \"Control\" libera o mouse." << std::endl;
+	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
+	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
 	std::cout << "-----------------------------------" << std::endl;
 	do{
         check_gl_error();
@@ -629,8 +635,10 @@ int main(void)
 		double currentTime = glfwGetTime();
 		nbFrames++;
 		if (currentTime - lastTime >= 1.0){ // If last prinf() was more than 1sec ago
-			// printf and reset
-			printf("%f ms/frame\tContious state: %d\n", 1000.0 / double(nbFrames), continuousMeshSimplification);
+			if (glfwGetKey(g_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+				// printf and reset
+				printf("%f ms/frame\t Contious state: %d\n", 1000.0 / double(nbFrames), continuousMeshSimplification);
+			}
 			nbFrames  = 0;
 			lastTime += 1.0;
 		}

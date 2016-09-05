@@ -7,12 +7,12 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(750): warn
           [
               _Ty=unsigned short
           ]
-  F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp(59): note: see reference to function template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>::vector(const std::vector<_Ty,std::allocator<_Ty>> &)' being compiled
+  F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp(61): note: see reference to function template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>::vector(const std::vector<_Ty,std::allocator<_Ty>> &)' being compiled
           with
           [
               _Ty=unsigned short
           ]
-  F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp(62): note: see reference to class template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>' being compiled
+  F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp(64): note: see reference to class template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>' being compiled
           with
           [
               _Ty=unsigned short
