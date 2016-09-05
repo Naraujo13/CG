@@ -40,7 +40,7 @@ public:
 	std::uint32_t neighbours;
 	std::set<unsigned short> vizinhos;		//vizinhos no set, acesso ao maior com *(vizinhos.begin())
 };
-
+/*
 //Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
 class Step {
 public:
@@ -50,6 +50,15 @@ public:
 	glm::vec3 replaced_vertice;
 	unsigned short erased_position;
 	glm::vec3 erased_vertice;
+	std::vector<unsigned short> previousIndices;
+};
+*/
+//Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
+class Step {
+public:
+	Step(std::vector<glm::vec3> pVert, std::vector<unsigned short> pInd) :previousVertices(pVert), previousIndices(pInd) {};
+
+	std::vector<glm::vec3> previousVertices;
 	std::vector<unsigned short> previousIndices;
 };
 
@@ -171,7 +180,7 @@ glm::vec3 escolheAresta(std::vector<glm::vec3>& indexed_vertices, std::vector<Ve
 }
 
 Step storesStep(std::pair <unsigned short, unsigned short> edge, std::vector<glm::vec3> indexed_vertices, std::vector<unsigned short>& indices) {
-	Step newStep(edge.first, indexed_vertices.at(edge.first), edge.second, indexed_vertices.at(edge.second), indices);
+	Step newStep(indexed_vertices, indices);
 	return newStep;
 }
 
@@ -185,10 +194,13 @@ bool undoStep(std::stack<Step>& alterations, std::vector<glm::vec3>& indexed_ver
 	Step lastStep = alterations.top();
 	//Undo indices changes (edges)
 	indices.swap(lastStep.previousIndices);
+	indexed_vertices.swap(lastStep.previousVertices);
+	/*
 	//Undo erased vertices changes (re-insert the removed vertice)
 	indexed_vertices.insert(indexed_vertices.begin() + lastStep.erased_position, lastStep.erased_vertice);
 	//Undo replaced vertices changes (re-replaces the replaced vertice)
 	indexed_vertices.at(lastStep.replaced_position) = lastStep.replaced_vertice;
+	*/
 	alterations.pop();
 
 	return true;
