@@ -62,58 +62,12 @@ public:
 	std::vector<unsigned short> previousIndices;
 };
 
-
-
 //Define a comparator class for heap
 struct CompareNeighbours {
 	inline bool operator()(Vertex const &  p1, Vertex const & p2) {
 		return (p1.neighbours < p2.neighbours);
 	}
 };
-
-
-/*	Função que atualiza os vizinhos do vértice na posição vertNumber do vetor vértices
-*	Complexidade 3N, O(N)
-*//*
-bool updateNeighbours(uint16_t vertNumber, std::vector<glm::vec3> indexed_vertices, std::vector<unsigned short> indices, std::vector<Vertex> removeHeap) {
-	std::set<unsigned short> vizinhos;
-
-	//Calcula número de vizinhos para o vértice fornecido
-	for (auto it2 = begin(indices); it2 != end(indices); ++it2) {			//Varre o vetor procurando ocorrências em triângulos para adicioná-los aos vizinhos	O(N)
-		if (*it2 == vertNumber) {			//Ao achar ocorrência
-			if (*it2 % 3 == 0) {		//Se é o primeiro vertice do triangulo
-				vizinhos.insert(*(it2 + 1));
-				vizinhos.insert(*(it2 + 2));
-			}
-			else if (*it2 % 3 == 1) {	//Se é o segundo vertice do triangulo
-				vizinhos.insert(*(it2 - 1));
-				vizinhos.insert(*(it2 + 1));
-			}
-			else {						//Terceiro vértice do triangulo
-				vizinhos.insert(*(it2 - 1));
-				vizinhos.insert(*(it2 - 2));
-			}
-		}
-	}
-
-	glm::vec3 vert;
-	//Recupera o vértice no vector
-	uint16_t i = 0;
-	for (auto it = begin(indexed_vertices); it != end(indexed_vertices); ++it, i++) {	//O(N)
-		if (i == vertNumber) {
-			vert = *it;
-
-		}
-	}
-	//Atualiza heap
-	for (auto it1 = begin(removeHeap); it1 != end(removeHeap); ++it1) {					//O(N)
-		if (it1->vertice == vert) {
-			it1->neighbours = vizinhos.size();
-		}
-	}
-
-}
-*/
 
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
@@ -505,9 +459,8 @@ int main(void)
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 			continuousMeshSimplification = 0;
 	
-		if ((currentTime2 - lastTime2 >= 0.5 && indexed_vertices.size()>3 && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()>3)) {
-			if (continuousMeshSimplification == 0)
-				lastTime2 += 0.5;
+		if ((currentTime2 >= lastTime2 + 0.5 && indexed_vertices.size()>3 && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()>3)) {
+			lastTime2 = glfwGetTime();
 			/* ------------ Trabalho 1 ----------------- *
 			* -- Algoritmo de simplificação de Mesh --- *
 			* - Parte 1: Cálculo inicial de vizinhos ---*
@@ -614,13 +567,12 @@ int main(void)
 
 			//End Bind
 		}
-		else if ((currentTime2 - lastTime2 >= 0.5 && (glfwGetKey(g_pWindow, GLFW_KEY_N) == GLFW_PRESS) && indexed_vertices.size()<=3 && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()<3)) {
+		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_N) == GLFW_PRESS) && indexed_vertices.size()<=3 && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()<3)) {
 			std::cout << "Mesh only have 3 vertices. Cannot simplify anymore." << std::endl;
 			continuousMeshSimplification = 0;
 		}
-		else if ((currentTime2 - lastTime2 >= 0.5 && !alterations.empty() && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == -1 && !alterations.empty())) {
-			if (continuousMeshSimplification == 0)
-				lastTime2 += 0.5;
+		else if (((currentTime2 >= lastTime2 + 0.5) && !alterations.empty() && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == -1 && !alterations.empty())) {
+			lastTime2 = glfwGetTime();
 			if (!undoStep(alterations, indexed_vertices, indices)) {
 				std::cout << "Error. Stack is empty." << std::endl;
 				continuousMeshSimplification = 0;
