@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\controls.cpp">
@@ -31,6 +31,12 @@
     <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\glerror.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\CG_UFPel\sources\meshsimplification.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CG_UFPel\sources\mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\controls.hpp">
@@ -58,6 +64,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\glerror.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CG_UFPel\include\meshsimplification.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CG_UFPel\include\mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

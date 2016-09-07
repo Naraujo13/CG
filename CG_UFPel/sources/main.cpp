@@ -23,6 +23,11 @@ TwBar *g_pToolBar;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+//custom includes
+#include "meshsimplification.hpp"
+
+
 using namespace glm;
 
 #include <shader.hpp>
@@ -33,44 +38,6 @@ using namespace glm;
 #include <glerror.hpp>
 
 
-//Define a custom data type to represent a vertx
-class Vertex {
-public:
-	Vertex(std::uint32_t vert, std::uint32_t n, std::set<unsigned short> v) : vertice(vert), neighbours(n), vizinhos(v) {};
-	
-	std::uint32_t vertice;
-	std::uint32_t neighbours;
-	std::set<unsigned short> vizinhos;		//vizinhos no set, acesso ao maior com *(vizinhos.begin())
-};
-/*
-//Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
-class Step {
-public:
-	Step(unsigned short rPos, glm::vec3 rVert, unsigned short ePos, glm::vec3 eVert, std::vector<unsigned short> pInd) : replaced_position(rPos), replaced_vertice(rVert), erased_position(ePos), erased_vertice(eVert),previousIndices(pInd){};
-
-	unsigned short replaced_position;
-	glm::vec3 replaced_vertice;
-	unsigned short erased_position;
-	glm::vec3 erased_vertice;
-	std::vector<unsigned short> previousIndices;
-};
-*/
-//Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
-class Step {
-public:
-	Step(std::vector<glm::vec3> pVert, std::vector<unsigned short> pInd) :previousVertices(pVert), previousIndices(pInd) {};
-
-	std::vector<glm::vec3> previousVertices;
-	std::vector<unsigned short> previousIndices;
-};
-
-//Define a comparator class for heap
-struct CompareNeighbours {
-	inline bool operator()(Vertex const &  p1, Vertex const & p2) {
-		return (p1.neighbours < p2.neighbours);
-	}
-};
-
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
 	g_nWidth = nWidth;
@@ -78,178 +45,6 @@ void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 	glViewport(0, 0, g_nWidth, g_nHeight);
 	TwWindowSize(g_nWidth, g_nHeight);
 }
-
-void calculaVizinhos(std::vector<unsigned short>& indices, std::vector<glm::vec3>& indexed_vertices, std::set<unsigned short>& vizinhosNewVert, std::vector<Vertex>& removeHeap) {
-	std::make_heap(removeHeap.begin(), removeHeap.end(), CompareNeighbours());
-	//std::cout << "Iniciando cálculo inicial dos vizinhos...\n";
-	int i = 0;
-	for (auto it1 = begin(indexed_vertices); it1 != end(indexed_vertices); ++it1, i++) {	//Para cada vértice
-		vizinhosNewVert.clear();
-		int j = 0;
-		for (auto it2 = begin(indices); it2 != end(indices); ++it2, j++) {			//Varre o vetor procurando ocorrências em triângulos para adicioná-los aos vizinhos
-			if (*it2 == i) {			//Ao achar ocorrência
-										//printf("\tOcorrencia encontrada...\n");
-				if (j % 3 == 0) {		//Se é o primeiro vertice do triangulo
-					vizinhosNewVert.insert(*(it2 + 1));
-					vizinhosNewVert.insert(*(it2 + 2));
-				}
-				else if (j % 3 == 1) {	//Se é o segundo vertice do triangulo;
-					vizinhosNewVert.insert(*(it2 - 1));
-					vizinhosNewVert.insert(*(it2 + 1));
-				}
-				else {						//Terceiro vértice do triangulo
-					vizinhosNewVert.insert(*(it2 - 1));
-					vizinhosNewVert.insert(*(it2 - 2));
-				}
-
-			}
-		}
-
-
-		vizinhosNewVert.erase(i);
-		Vertex v(i, vizinhosNewVert.size(), vizinhosNewVert);
-		removeHeap.push_back(v);
-	}
-	
-	//PRINT DE DEBUG DA HEAP
-	std::make_heap(removeHeap.begin(), removeHeap.end(), CompareNeighbours());
-/*	printf("Elementos do Heap:\n");
-	for (auto it = begin(removeHeap); it != end(removeHeap); ++it) {
-	printf("Vértice %d: %d vizinhos\n", it->vertice, it->neighbours);
-	printf("Vizinhos: |");
-	for (auto it2 = begin(it->vizinhos); it2 != end(it->vizinhos); ++it2) {
-	printf(" %hu |", *it2);
-	}
-	printf("\n");
-	}
-*/
-}
-
-glm::vec3 escolheAresta(std::vector<glm::vec3>& indexed_vertices, std::vector<Vertex>& removeHeap) {
-	float x, y, z;
-	x = (indexed_vertices.at(removeHeap.front().vertice).x + indexed_vertices.at(*(removeHeap.front().vizinhos.begin())).x) / 2;
-	y = (indexed_vertices.at(removeHeap.front().vertice).y + indexed_vertices.at(*(removeHeap.front().vizinhos.begin())).y) / 2;
-	z = (indexed_vertices.at(removeHeap.front().vertice).z + indexed_vertices.at(*(removeHeap.front().vizinhos.begin())).z) / 2;
-	glm::vec3 newVert(x, y, z);		//novo vértice na posição "ideal"
-
-	return newVert;
-}
-
-Step storesStep(std::pair <unsigned short, unsigned short> edge, std::vector<glm::vec3> indexed_vertices, std::vector<unsigned short>& indices) {
-	Step newStep(indexed_vertices, indices);
-	return newStep;
-}
-
-bool undoStep(std::stack<Step>& alterations, std::vector<glm::vec3>& indexed_vertices, std::vector<unsigned short>& indices) {
-	//std::cout << "Remoção na pilha. Tamanho atual: " << alterations.size() << std::endl;
-	//getchar();
-	if (alterations.empty())
-		return false;
-	
-	//Gets last step from stack
-	Step lastStep = alterations.top();
-	//Undo indices changes (edges)
-	indices.swap(lastStep.previousIndices);
-	indexed_vertices.swap(lastStep.previousVertices);
-	/*
-	//Undo erased vertices changes (re-insert the removed vertice)
-	indexed_vertices.insert(indexed_vertices.begin() + lastStep.erased_position, lastStep.erased_vertice);
-	//Undo replaced vertices changes (re-replaces the replaced vertice)
-	indexed_vertices.at(lastStep.replaced_position) = lastStep.replaced_vertice;
-	*/
-	alterations.pop();
-
-	return true;
-}
-
-
-Vertex collapse(std::vector<unsigned short>& indices, std::vector<glm::vec3>& indexed_vertices, std::vector<Vertex>& removeHeap, std::pair <unsigned short, unsigned short>& edge, glm::vec3& newVert, std::stack<Step>& alterations) {
-	//percorre vetor de indices criando novas arestas e deletando antigas (consertando o "buraco" criando novos triangulos)
-	std::set<unsigned short> vizinhosNewVert;
-	int i = 0;
-	for (auto it = begin(indices); it != end(indices); ++it, i++) {
-		if (*it == edge.first || *it == edge.second) {		//se é ao que será substituido
-			if (i % 3 == 0) {	//posição 0 da tupl
-				//Teste
-				vizinhosNewVert.insert(*(it + 1));
-				vizinhosNewVert.insert(*(it + 2));
-				if (*it == edge.second)
-					*it = edge.first;
-			}
-			else if (i % 3 == 1) {	//posição 1 da tupla
-				//Teste
-				vizinhosNewVert.insert(*(it - 1));
-				vizinhosNewVert.insert(*(it + 1));
-				if (*it == edge.second)
-					*it = edge.first;
-			}
-			else {		//posição 2 da tupla
-				//Teste
-				vizinhosNewVert.insert(*(it - 2));
-				vizinhosNewVert.insert(*(it - 1));
-				if (*it == edge.second)
-					*it = edge.first;
-			}
-
-		}
-		//Atualiza referências no de índice
-		if (*it > edge.second)
-			*it = *it - 1;
-	}
-	//Exclui vértice 2
-	indexed_vertices.erase(indexed_vertices.begin() + edge.second);
-
-	//Remove problema de triangulos que possuiam os dois ângulos 
-	
-	i = 0;
-	int flag;
-	std::vector<Vertex>::iterator v;
-	for (auto it = begin(indices); it != end(indices); it = it + 3, i++) {
-		if (*it == *(it + 1) || *it == *(it + 2) || *(it + 1) == *(it + 2)) {
-			if (*it == *(it + 1)) {
-				for (v = begin(removeHeap); v != end(removeHeap) && v->vertice != *(it + 2); ++v);		//Procura referência do vértice "que não é o repetido", salvando-a em v
-
-				flag = 0;
-				for (auto it2 = removeHeap.front().vizinhos.begin(); it2 != removeHeap.front().vizinhos.end() && flag != 1; ++it2) {	//Percorre vizinhos procurando outro substituto
-					if (*it2 != v->vertice && v->vizinhos.find(*it2) == v->vizinhos.end() || vizinhosNewVert.find(*it2) == vizinhosNewVert.end()) {		//Ao encontrar um que não seja vizinho de um deles, o substitui  REVISAR CONDIÇÂO
-						*(it + 1) = *it2;
-						flag = 1;
-					}
-				}
-				if (flag == 0) {
-					indices.erase(indices.begin() + i);
-					indices.erase(indices.begin() + i);
-					indices.erase(indices.begin() + i);
-				}
-			}
-			else if (*it == *(it + 2) || *(it + 1) == *(it + 2)) {
-				if (*it == *(it + 2))
-					for (v = begin(removeHeap); v != end(removeHeap) && v->vertice != *(it + 1); ++v);		//Procura referência do vértice "que não é o repetido", salvando-a em v
-				else if (*(it + 1) == *(it + 2))
-					for (v = begin(removeHeap); v != end(removeHeap) && v->vertice != *(it); ++v);		//Procura referência do vértice "que não é o repetido", salvando-a em v
-
-				int flag = 0;
-				for (auto it2 = removeHeap.front().vizinhos.begin(); it2 != removeHeap.front().vizinhos.end() && flag != 1; ++it2) {	//Percorre vizinhos procurando outro substituto
-					if (*it2 != v->vertice && v->vizinhos.find(*it2) == v->vizinhos.end() || vizinhosNewVert.find(*it2) == vizinhosNewVert.end()) {		//Ao encontrar um que não seja vizinho de um deles, o substitui  REVISAR CONDIÇÂO
-						*(it + 2) = *it2;
-						flag = 1;
-					}
-				}
-				if (flag == 0) {
-					indices.erase(indices.begin() + i);
-					indices.erase(indices.begin() + i);
-					indices.erase(indices.begin() + i);
-				}
-			}
-		}
-	}
-	
-	
-	indexed_vertices.at(edge.first) = newVert;
-	Vertex newVertex(edge.first, vizinhosNewVert.size(), vizinhosNewVert);
-	return newVertex;
-}
-
 
 int main(void)
 {
@@ -311,7 +106,7 @@ int main(void)
 	glfwSetInputMode(g_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetCursorPos(g_pWindow, g_nWidth / 2, g_nHeight / 2);
 
-	// Dark blue background
+	//Gray background
 	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
 	// Enable depth test
@@ -341,57 +136,8 @@ int main(void)
 	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
 
 	// Read our .obj file
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
-	bool res = loadOBJ("mesh/suzanne.obj", vertices, uvs, normals);
-
-	std::vector<unsigned short> indices;
-	std::vector<glm::vec3> indexed_vertices;
-	std::vector<glm::vec2> indexed_uvs;
-	std::vector<glm::vec3> indexed_normals;
-	indexVBO(vertices, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
-
-	// Load it into a VBO
-
-	/* ------------ Trabalho 1 ----------------- * 
-	 * -- Algoritmo de simplificação de Mesh --- *
-	 * - Parte 1: Cálculo inicial de vizinhos ---*
-	 * - Parte 2: Remoção do Vértice ----------- *
-	 * - Parte 3: Collapse --------------------- *
-	 * - Parte 4: Cálculo dos vizinhos alterados *
-	 * ----------------------------------------- */
-
-	//Define vecotre contendo a struct definida no início do código (Contendo o número que representa o vértice no vetor de indices(uint32) e o número de vizinhos(uint32).
-	std::vector<Vertex> removeHeap;
-
-	//Set usado para definir os vizinhos
-	std::set<unsigned short> vizinhosNewVert;
+	Mesh suzanne("mesh/suzanne.obj");
 	
-	//Pilha usada para armazenar as alterações realizadas
-	std::stack<Step> alterations;	
-
-	GLuint vertexbuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-	GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_uvs.size() * sizeof(glm::vec2), &indexed_uvs[0], GL_STATIC_DRAW);
-
-	GLuint normalbuffer;
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_normals.size() * sizeof(glm::vec3), &indexed_normals[0], GL_STATIC_DRAW);
-
-	// Generate a buffer for the indices as well
-	GLuint elementbuffer;
-	glGenBuffers(1, &elementbuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
-
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
@@ -403,33 +149,11 @@ int main(void)
 	
 	
 
-	//Bind
-
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_uvs.size() * sizeof(glm::vec2), &indexed_uvs[0], GL_STATIC_DRAW);
-
-
-	glGenBuffers(1, &normalbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-	glBufferData(GL_ARRAY_BUFFER, indexed_normals.size() * sizeof(glm::vec3), &indexed_normals[0], GL_STATIC_DRAW);
-
-	// Generate a buffer for the indices as well
-
-	glGenBuffers(1, &elementbuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
-
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(programID);
 	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 	int continuousMeshSimplification = 0;
-
+	MeshSimplification MS;
 
 	/* ---- Instructions to user ---- */
 	std::cout << "-----------------------------------" << std::endl;
@@ -450,6 +174,9 @@ int main(void)
 	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
 	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
 	std::cout << "-----------------------------------" << std::endl;
+
+
+
 	do{
         check_gl_error();
 		// Measure speed
@@ -465,7 +192,8 @@ int main(void)
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 			continuousMeshSimplification = 0;
 	
-		if ((currentTime2 >= lastTime2 + 0.5 && indexed_vertices.size()>3 && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()>3)) {
+		if ((currentTime2 >= lastTime2 + 0.5  && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
+
 			lastTime2 = glfwGetTime();
 			/* ------------ Trabalho 1 ----------------- *
 			* -- Algoritmo de simplificação de Mesh --- *
@@ -474,147 +202,27 @@ int main(void)
 			* - Parte 3: Collapse --------------------- *
 			* - Parte 4: Cálculo dos vizinhos alterados *
 			* ----------------------------------------- */
-			removeHeap.clear();
-			vizinhosNewVert.clear();
 
-			calculaVizinhos(indices, indexed_vertices, vizinhosNewVert, removeHeap);
-
-			int i = 0;
-
-			//std::cout << "Fim parte 1\n";
-			/* --------------------------------------- *
-			* ----------     Fim  Parte1    ---------- *
-			*----------------------------------------- */
-
-			/* --------------------------------------- *
-			* ----------       Parte2      ----------- *
-			*----------------------------------------- */
-			//std::cout << "Início da parte2: escolha da aresta, remõção dos vértices e cálculo do novo.\n";
-			std::pair <unsigned short, unsigned short> edge;	//edge to be collapsed (d1 and d2)
-
-			edge = std::make_pair(removeHeap.front().vertice, *(removeHeap.front().vizinhos.begin()));	//cria par com aresta a sofrer collapse
-			glm::vec3 newVert = escolheAresta(indexed_vertices, removeHeap);
-
-			vizinhosNewVert.clear();						//set de vizinhos do novo vértice
-
-			alterations.push(storesStep(edge, indexed_vertices, indices));	//store the changes done in this step, so they can be undone if needed
-
-			/*		
-			//Makes the transition "smooth"
-			int passos = 1000;
-			glm::vec3 v1Diff = (newVert - indexed_vertices.at(edge.first)) / glm::vec3(passos, passos, passos);
-			glm::vec3 v2Diff = (newVert - indexed_vertices.at(edge.second)) / glm::vec3(passos, passos, passos);
-			for (int i = 0; i < passos; i++) {
-				indexed_vertices.at(edge.first) += v1Diff;
-				indexed_vertices.at(edge.second) += v2Diff;
-		
-				//Bind, //Draw
-		
-			
-					glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-
-					glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
-
-					// Draw tweak bars
-					TwDraw();
-			}
-			 */
-
-
-			//Faz o collapse na aresta escolhida(edge), recebendo como retorno o novo vertex
-			Vertex newVertex = collapse(indices, indexed_vertices, removeHeap, edge, newVert, alterations);
-			std::pop_heap(removeHeap.begin(), removeHeap.end(), CompareNeighbours());
-			removeHeap.pop_back();
-
-			//Remove vértices antigos da Heap e recalcula os vizinhos dos vértices alterados(not yet)s
-			int flag = 0;
-			i = 0;
-			for (auto it = removeHeap.begin(); it != removeHeap.end() && flag != 1; ++it, i++) {
-				if (it->vertice == edge.second) {
-					removeHeap.erase(it);
-					flag = 1;
-				}
-			}
-			//adiciona novo Vertex na Heap
-			removeHeap.push_back(newVertex);
-			std::push_heap(removeHeap.begin(), removeHeap.end(), CompareNeighbours());
-
-			/* -------------------------------------- *
-			* ---------- Fim do trabalho 1 -----------*
-			*-----------------------------------------*/
-
+			//Calls function to reduce the mesh
+			MS.reduce(*suzanne.getIndexedVertices(), *suzanne.getIndices(), *suzanne.getIndexedNormals(), continuousMeshSimplification);
 
 			//Bind
-
-			glGenBuffers(1, &vertexbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-
-			glGenBuffers(1, &uvbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_uvs.size() * sizeof(glm::vec2), &indexed_uvs[0], GL_STATIC_DRAW);
-
-
-			glGenBuffers(1, &normalbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_normals.size() * sizeof(glm::vec3), &indexed_normals[0], GL_STATIC_DRAW);
-
-			// Generate a buffer for the indices as well
-
-			glGenBuffers(1, &elementbuffer);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+			suzanne.rebind();
 
 			// Get a handle for our "LightPosition" uniform
 			glUseProgram(programID);
 			LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 
 			//End Bind
+		
 		}
-		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_N) == GLFW_PRESS) && indexed_vertices.size()<=3 && continuousMeshSimplification == 0) || (continuousMeshSimplification == 1 && indexed_vertices.size()<3)) {
-			std::cout << "Mesh only have 3 vertices. Cannot simplify anymore." << std::endl;
-			continuousMeshSimplification = 0;
-		}
-		else if (((currentTime2 >= lastTime2 + 0.5) && !alterations.empty() && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || (continuousMeshSimplification == -1 && !alterations.empty())) {
+		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
 			lastTime2 = glfwGetTime();
-			if (!undoStep(alterations, indexed_vertices, indices)) {
-				std::cout << "Error. Stack is empty." << std::endl;
-				continuousMeshSimplification = 0;
-			}
+			MS.reconstruct(*suzanne.getIndexedVertices(), *suzanne.getIndices(), continuousMeshSimplification);
 
 			//Bind
+			suzanne.rebind();
 
-			glGenBuffers(1, &vertexbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_vertices.size() * sizeof(glm::vec3), &indexed_vertices[0], GL_STATIC_DRAW);
-
-
-			glGenBuffers(1, &uvbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_uvs.size() * sizeof(glm::vec2), &indexed_uvs[0], GL_STATIC_DRAW);
-
-
-			glGenBuffers(1, &normalbuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-			glBufferData(GL_ARRAY_BUFFER, indexed_normals.size() * sizeof(glm::vec3), &indexed_normals[0], GL_STATIC_DRAW);
-
-			// Generate a buffer for the indices as well
-
-			glGenBuffers(1, &elementbuffer);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
-
-			// Get a handle for our "LightPosition" uniform
-			glUseProgram(programID);
-			LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
-
-			//End Bind
-		}
-		else if ((alterations.empty() && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || ((continuousMeshSimplification == -1 && alterations.empty()))) {
-			std::cout << "Mesh is complete. There are no steps to be undone." << std::endl;
-			continuousMeshSimplification = 0;
 		}
 
 		//Set the draw mode. L to lines, P to points and F to fill.
@@ -671,49 +279,12 @@ int main(void)
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i(TextureID, 0);
 
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-			);
-
-		// 2nd attribute buffer : UVs
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glVertexAttribPointer(
-			1,                                // attribute
-			2,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-			);
-
-		// 3rd attribute buffer : normals
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-		glVertexAttribPointer(
-			2,                                // attribute
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-			);
-
-		// Index buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+		suzanne.loadMesh();
 
 		// Draw the triangles !
 		glDrawElements(
 			GL_TRIANGLES,        // mode
-			indices.size(),      // count
+			(*(suzanne.getIndices())).size(),      // count
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0             // element array buffer offset
 			);
@@ -734,10 +305,7 @@ int main(void)
 	glfwWindowShouldClose(g_pWindow) == 0);
 
 	// Cleanup VBO and shader
-	glDeleteBuffers(1, &vertexbuffer);
-	glDeleteBuffers(1, &uvbuffer);
-	glDeleteBuffers(1, &normalbuffer);
-	glDeleteBuffers(1, &elementbuffer);
+	suzanne.cleanup();
 	glDeleteProgram(programID);
 	glDeleteTextures(1, &Texture);
 	glDeleteVertexArrays(1, &VertexArrayID);
