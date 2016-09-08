@@ -306,6 +306,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   <ItemGroup>
     <ClInclude Include="..\CG_UFPel\include\mesh.hpp" />
     <ClInclude Include="..\CG_UFPel\include\meshsimplification.hpp" />
+    <ClInclude Include="..\CG_UFPel\include\model.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\controls.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\objloader.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\quaternion_utils.hpp" />
@@ -317,6 +318,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\glerror.hpp" />
     <ClCompile Include="..\CG_UFPel\sources\mesh.cpp" />
     <ClCompile Include="..\CG_UFPel\sources\meshsimplification.cpp" />
+    <ClCompile Include="..\CG_UFPel\sources\model.cpp" />
     <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\controls.cpp" />
     <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\main.cpp" />
     <ClCompile Include="F:\Downloads\Aula\CG\CG_UFPel\sources\objloader.cpp" />

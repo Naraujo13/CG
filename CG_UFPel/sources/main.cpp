@@ -26,7 +26,7 @@ TwBar *g_pToolBar;
 
 //custom includes
 #include "meshsimplification.hpp"
-
+#include "model.hpp"
 
 using namespace glm;
 
@@ -37,6 +37,27 @@ using namespace glm;
 #include <vboindexer.hpp>
 #include <glerror.hpp>
 
+void printInstructions() {
+	/* ---- Instructions to user ---- */
+	std::cout << "-----------------------------------" << std::endl;
+	std::cout << "Instrucoes:" << std::endl;
+	std::cout << "\t1. Operacoes unitarias:" << std::endl;
+	std::cout << "\t\t1.1. A tecla \"N\" fara a simplificacao de 1 vertice quando pressionada." << std::endl;
+	std::cout << "\t\t1.2. A tecla \"B\" ira desfazer a simplificacao de 1 vertice quando pressionada." << std::endl;
+	std::cout << "\t2. Operacoes Continuas:" << std::endl;
+	std::cout << "\t\t2.1. A tecla \"Backspace\" ira colocar o programa num modo de simplificacao continuo." << std::endl;
+	std::cout << "\t\t2.2. A tecla \"=\" ira colocar o programa num modo de desfazer a simplificacao continuo." << std::endl;
+	std::cout << "\t\t2.3. tA tecla \"Space\" ira parar qualquer um dos dois modos continuos anteriores." << std::endl;
+	std::cout << "\t3. Modos de desenho:" << std::endl;
+	std::cout << "\t\t3.1. A tecla \"P\" ira setar o modo de desenho para \"pontos\"." << std::endl;
+	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
+	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
+	std::cout << "\t4. Movimentação:" << std::endl;
+	std::cout << "\t\t3.1. A tecla \"Control\" libera o mouse." << std::endl;
+	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
+	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
+	std::cout << "-----------------------------------" << std::endl;
+}
 
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
@@ -124,20 +145,17 @@ int main(void)
 	// Create and compile our GLSL program from the shaders
 	GLuint programID = LoadShaders("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
 
+	// Read our .obj file and creates mesh
+	Mesh suzanne("mesh/suzanne.obj");
+
+	//Creates model
+	Model model("mesh/uvmap.DDS", "myTextureSampler", programID, &suzanne);
+
+
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID      = glGetUniformLocation(programID, "MVP");
 	GLuint ViewMatrixID  = glGetUniformLocation(programID, "V");
-	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
-	// Load the texture
-	GLuint Texture = loadDDS("mesh/uvmap.DDS");
-
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
-
-	// Read our .obj file
-	Mesh suzanne("mesh/suzanne.obj");
-	
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
@@ -155,26 +173,7 @@ int main(void)
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
 
-	/* ---- Instructions to user ---- */
-	std::cout << "-----------------------------------" << std::endl;
-	std::cout << "Instrucoes:" << std::endl;
-	std::cout << "\t1. Operacoes unitarias:" << std::endl;
-	std::cout << "\t\t1.1. A tecla \"N\" fara a simplificacao de 1 vertice quando pressionada." <<std::endl;
-	std::cout << "\t\t1.2. A tecla \"B\" ira desfazer a simplificacao de 1 vertice quando pressionada." << std::endl;
-	std::cout << "\t2. Operacoes Continuas:" << std::endl;
-	std::cout << "\t\t2.1. A tecla \"Backspace\" ira colocar o programa num modo de simplificacao continuo." << std::endl;
-	std::cout << "\t\t2.2. A tecla \"=\" ira colocar o programa num modo de desfazer a simplificacao continuo." << std::endl;
-	std::cout << "\t\t2.3. tA tecla \"Space\" ira parar qualquer um dos dois modos continuos anteriores." << std::endl;
-	std::cout << "\t3. Modos de desenho:" << std::endl;
-	std::cout << "\t\t3.1. A tecla \"P\" ira setar o modo de desenho para \"pontos\"." << std::endl;
-	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
-	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
-	std::cout << "\t4. Movimentação:" << std::endl;
-	std::cout << "\t\t3.1. A tecla \"Control\" libera o mouse." << std::endl;
-	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
-	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
-
+	printInstructions();
 
 
 	do{
@@ -204,10 +203,10 @@ int main(void)
 			* ----------------------------------------- */
 
 			//Calls function to reduce the mesh
-			MS.reduce(*suzanne.getIndexedVertices(), *suzanne.getIndices(), *suzanne.getIndexedNormals(), continuousMeshSimplification);
+			MS.reduce(*(*model.getMesh()).getIndexedVertices(), *(*model.getMesh()).getIndices(), *(*model.getMesh()).getIndexedNormals(), continuousMeshSimplification);
 
 			//Bind
-			suzanne.rebind();
+			(*model.getMesh()).rebind();
 
 			// Get a handle for our "LightPosition" uniform
 			glUseProgram(programID);
@@ -218,10 +217,10 @@ int main(void)
 		}
 		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
 			lastTime2 = glfwGetTime();
-			MS.reconstruct(*suzanne.getIndexedVertices(), *suzanne.getIndices(), continuousMeshSimplification);
+			MS.reconstruct(*(*model.getMesh()).getIndexedVertices(), *(*model.getMesh()).getIndices(), continuousMeshSimplification);
 
 			//Bind
-			suzanne.rebind();
+			(*model.getMesh()).rebind();
 
 		}
 
@@ -267,7 +266,7 @@ int main(void)
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(model.getModelMatrixID(), 1, GL_FALSE, &ModelMatrix[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		glm::vec3 lightPos = glm::vec3(4, 4, 4);
@@ -275,16 +274,16 @@ int main(void)
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Texture);
+		glBindTexture(GL_TEXTURE_2D, *model.getTexture());
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
-		glUniform1i(TextureID, 0);
+		glUniform1i(model.getTextureID(), 0);
 
-		suzanne.loadMesh();
+		(*model.getMesh()).loadMesh();
 
 		// Draw the triangles !
 		glDrawElements(
 			GL_TRIANGLES,        // mode
-			(*(suzanne.getIndices())).size(),      // count
+			(*(*model.getMesh()).getIndices()).size(),      // count
 			GL_UNSIGNED_SHORT,   // type
 			(void*)0             // element array buffer offset
 			);
@@ -305,9 +304,9 @@ int main(void)
 	glfwWindowShouldClose(g_pWindow) == 0);
 
 	// Cleanup VBO and shader
-	suzanne.cleanup();
+	(*model.getMesh()).cleanup();
 	glDeleteProgram(programID);
-	glDeleteTextures(1, &Texture);
+	glDeleteTextures(1, model.getTexture());
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 	// Terminate AntTweakBar and GLFW

@@ -37,6 +37,9 @@
     <ClCompile Include="..\CG_UFPel\sources\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\CG_UFPel\sources\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\controls.hpp">
@@ -70,6 +73,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\CG_UFPel\include\mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CG_UFPel\include\model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
