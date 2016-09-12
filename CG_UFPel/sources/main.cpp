@@ -23,10 +23,12 @@ TwBar *g_pToolBar;
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp> 
 
 //custom includes
 #include "meshsimplification.hpp"
 #include "model.hpp"
+#include "modelManager.hpp"
 
 using namespace glm;
 
@@ -66,6 +68,8 @@ void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 	glViewport(0, 0, g_nWidth, g_nHeight);
 	TwWindowSize(g_nWidth, g_nHeight);
 }
+
+
 
 int main(void)
 {
@@ -123,6 +127,12 @@ int main(void)
 	vec3 oColor(0.0f);
 	TwAddVarRW(g_pToolBar, "bgColor", TW_TYPE_COLOR3F, &oColor[0], " label='Background color' ");
 
+	glm::vec3 translationVector(0,0,0);
+	//Add 'Translation' options
+	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation (Y) to put to queue:");
+
+
+
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(g_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
 	glfwSetCursorPos(g_pWindow, g_nWidth / 2, g_nHeight / 2);
@@ -138,38 +148,42 @@ int main(void)
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
+	//GLuint programID = LoadShaders("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
+
+	//Model Manager
+	ModelManager manager("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
+	//GLuint programID = manager.getProgramID();
+	
+	GLuint VertexArrayID = manager.getVertexArrayID();
 
 	// Read our .obj file and creates mesh
-	Mesh suzanne("mesh/suzanne.obj");
+	manager.createMesh("mesh/suzanne.obj");
 
+	Mesh mesh = manager.getMeshes().at(0);
 	//Creates model
-	Model model("mesh/uvmap.DDS", "myTextureSampler", programID, &suzanne);
-
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", mesh);
+	Model model = manager.getModels()[0];
 
 	// Get a handle for our "MVP" uniform
-	GLuint MatrixID      = glGetUniformLocation(programID, "MVP");
-	GLuint ViewMatrixID  = glGetUniformLocation(programID, "V");
+	GLuint MatrixID      = glGetUniformLocation(manager.getProgramID(), "MVP");
+	GLuint ViewMatrixID  = glGetUniformLocation(manager.getProgramID(), "V");
 
 	// Get a handle for our "LightPosition" uniform
-	glUseProgram(programID);
-	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+	glUseProgram(manager.getProgramID());
+	GLuint LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 
 	// For speed computation
 	double lastTime = glfwGetTime(), lastTime2 = glfwGetTime();
 	int nbFrames    = 0;
 	int simplify = 1;
-	
+	double lastTime3 = glfwGetTime();
 	
 
 	// Get a handle for our "LightPosition" uniform
-	glUseProgram(programID);
-	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+	glUseProgram(manager.getProgramID());
+	LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
 
@@ -191,6 +205,7 @@ int main(void)
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
 			continuousMeshSimplification = 0;
 	
+		//Trabalho 1 - Mesh Simplification
 		if ((currentTime2 >= lastTime2 + 0.5  && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
 
 			lastTime2 = glfwGetTime();
@@ -209,8 +224,8 @@ int main(void)
 			(*model.getMesh()).rebind();
 
 			// Get a handle for our "LightPosition" uniform
-			glUseProgram(programID);
-			LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
+			glUseProgram(manager.getProgramID());
+			LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 
 			//End Bind
 		
@@ -237,36 +252,56 @@ int main(void)
 			nUseMouse = 0;
 		else
 			nUseMouse = 1;
+		double currentTime = glfwGetTime();
+
+		/* --- Trabalho 2 --- */
+		//Translação ao pressionar T
+		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {
+			lastTime3 = glfwGetTime();
+			model.addTransformation(translationVector);
+			std::cout << "Queue size:" << model.getTranslationQueue().size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {
+			lastTime3 = glfwGetTime();
+			model.applyTranslation();
+			std::cout << "Queue size:" << model.getTranslationQueue().size() << std::endl;
+		}
+
 
 		// Measure speed
-		double currentTime = glfwGetTime();
+		currentTime = glfwGetTime();
 		nbFrames++;
-		if (currentTime - lastTime >= 1.0){ // If last prinf() was more than 1sec ago
+		if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1sec ago
 			if (glfwGetKey(g_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 				// printf and reset
 				printf("%f ms/frame\t Contious state: %d\n", 1000.0 / double(nbFrames), continuousMeshSimplification);
 			}
-			nbFrames  = 0;
+			nbFrames = 0;
 			lastTime += 1.0;
 		}
-
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Use our shader
-		glUseProgram(programID);
 
 		// Compute the MVP matrix from keyboard and mouse input
 		computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix       = getViewMatrix();
-		glm::mat4 ModelMatrix      = glm::mat4(1.0);
-		glm::mat4 MVP              = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		glm::mat4 ViewMatrix = getViewMatrix();
+		//::mat4 ModelMatrix      = model.getModelMatrix();
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * model.getModelMatrix();
+
+		manager.drawModels(ViewMatrixID, ViewMatrix, MVP, g_pWindow);
+
+		/**
+		// Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Use our shader
+		glUseProgram(manager.getProgramID());
+
+		
 
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		glUniformMatrix4fv(model.getModelMatrixID(), 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(model.getModelMatrixID(), 1, GL_FALSE, &model.getModelMatrix()[0][0]);
 		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		glm::vec3 lightPos = glm::vec3(4, 4, 4);
@@ -298,16 +333,14 @@ int main(void)
 		// Swap buffers
 		glfwSwapBuffers(g_pWindow);
 		glfwPollEvents();
+		*/
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(g_pWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
 	glfwWindowShouldClose(g_pWindow) == 0);
 
 	// Cleanup VBO and shader
-	(*model.getMesh()).cleanup();
-	glDeleteProgram(programID);
-	glDeleteTextures(1, model.getTexture());
-	glDeleteVertexArrays(1, &VertexArrayID);
+	manager.cleanup();
 
 	// Terminate AntTweakBar and GLFW
 	TwTerminate();

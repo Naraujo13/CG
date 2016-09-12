@@ -28,7 +28,7 @@ private:
 	glm::mat4 modelMatrix;
 
 	//Queue to store the transformations to be applied to this model
-	std::vector<glm::mat4> operationsQueue;
+	std::vector<glm::vec3> transformationQueue;
 
 	//Texture info
 	GLuint texture;
@@ -39,16 +39,22 @@ private:
 
 public:
 	//Constructor
-	Model::Model(const char *textPath, const char *textSample, GLuint programID, Mesh *mesh);
+	Model::Model(const char *textPath, const char *textSample, GLuint programID, Mesh &mesh);
 	//Getters
 	GLuint getModelMatrixID();
 	GLuint getTextureID();
 	GLuint *getTexture();
 	glm::mat4 getModelMatrix();
 	Mesh* getMesh();
-	
+	std::vector<glm::vec3> getTranslationQueue();
+
+	//Set
+	 void setModelMatrix(glm::mat4 transformation);
+
 	//Translations
-	
+	void Model::addTransformation(glm::vec3 transformation);
+	void Model::applyTranslation();
+
 
 
 };
