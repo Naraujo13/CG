@@ -18,6 +18,28 @@ using namespace glm;
 
 #include <glerror.hpp>
 
+//Define a transformation
+class Transformation{
+private:
+	glm::vec3 transformation;
+	double timeBtwn;
+public:
+//Constructor
+	Transformation::Transformation(glm::vec3 transformation, double time) {
+		Transformation::transformation = transformation;
+		Transformation::timeBtwn = time;
+	}
+//Getters
+	glm::vec3 getTransformation() {
+		return transformation;
+	}
+	double getTimeBtwn() {
+		return timeBtwn;
+	}
+};
+
+
+
 
 //Define a custom data type to represent a model
 class Model {
@@ -28,7 +50,10 @@ private:
 	glm::mat4 modelMatrix;
 
 	//Queue to store the transformations to be applied to this model
-	std::vector<glm::vec3> transformationQueue;
+	std::vector<Transformation> transformationQueue;
+	int state;	//0 = still, 1 = transforming;
+	double lastTransformed;
+	double timeBtwn;
 
 	//Texture info
 	GLuint texture;
@@ -46,13 +71,17 @@ public:
 	GLuint *getTexture();
 	glm::mat4 getModelMatrix();
 	Mesh* getMesh();
-	std::vector<glm::vec3> getTranslationQueue();
+	std::vector<Transformation> getTransformationQueue();
+	int getState();
+	double getLastTransformed();
+	double getTimeBtwn();
 
 	//Set
 	 void setModelMatrix(glm::mat4 transformation);
+	 void setState(int newState);
 
 	//Translations
-	void Model::addTransformation(glm::vec3 transformation);
+	void Model::addTransformation(glm::vec3 transformation, double time);
 	void Model::applyTranslation();
 
 

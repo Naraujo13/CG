@@ -10,7 +10,7 @@
 #include <functional>
 // Include GLEW
 #include <GL/glew.h>
-
+  
 // Include GLFW
 #include <glfw3.h>
 GLFWwindow* g_pWindow;
@@ -128,10 +128,11 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "bgColor", TW_TYPE_COLOR3F, &oColor[0], " label='Background color' ");
 
 	glm::vec3 translationVector(0,0,0);
+	double translationTime;
 	//Add 'Translation' options
-	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation (Y) to put to queue:");
-
-
+	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_FLOAT, &translationTime, " label='Time to do the tranlsation:");
+	
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(g_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
@@ -258,15 +259,20 @@ int main(void)
 		//Translação ao pressionar T
 		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {
 			lastTime3 = glfwGetTime();
-			model.addTransformation(translationVector);
-			std::cout << "Queue size:" << model.getTranslationQueue().size() << std::endl;
+			model.addTransformation(translationVector, translationTime);
+			std::cout << "Queue size:" << model.getTransformationQueue().size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {
 			lastTime3 = glfwGetTime();
-			model.applyTranslation();
-			std::cout << "Queue size:" << model.getTranslationQueue().size() << std::endl;
+			//model.applyTranslation();
+			//std::cout << "Queue size:" << model.getTransformationQueue().size() << std::endl;
+			model.setState(1);
+			//manager.setModelTransformation(0);
 		}
 
+		//manager.transformModels();
+		if (model.getState() == 1)
+			model.applyTranslation();
 
 		// Measure speed
 		currentTime = glfwGetTime();

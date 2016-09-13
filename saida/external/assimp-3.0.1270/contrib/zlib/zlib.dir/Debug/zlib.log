@@ -1,12 +1,1 @@
-﻿  Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/external/assimp-3.0.1270/contrib/zlib/CMakeLists.txt
-  CMake does not need to re-run because F:\Downloads\Aula\CG\saida\external\assimp-3.0.1270\contrib\zlib\CMakeFiles\generate.stamp is up-to-date.
-  adler32.c
-  compress.c
-  crc32.c
-  deflate.c
-  inffast.c
-  inflate.c
-  inftrees.c
-  trees.c
-  zutil.c
-  zlib.vcxproj -> F:\Downloads\Aula\CG\saida\external\assimp-3.0.1270\contrib\zlib\Debug\zlibd.lib
+﻿  zlib.vcxproj -> F:\Downloads\Aula\CG\saida\external\assimp-3.0.1270\contrib\zlib\Debug\zlibd.lib

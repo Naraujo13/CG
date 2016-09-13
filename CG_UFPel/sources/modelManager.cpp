@@ -39,6 +39,14 @@ GLuint ModelManager::getLightID() {
 	return LightID;
 }
 
+double Model::getLastTransformed() {
+	return lastTransformed;
+}
+
+double Model::getTimeBtwn() {
+	return timeBtwn;
+}
+
 //creates a new model and adds to the vector
 void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh) {
 	models.push_back(Model(textPath, textSampler, programID, mesh));
@@ -110,5 +118,28 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 	glfwPollEvents();
 
 
+}
+
+void ModelManager::transformModels() {
+	int i = 0;
+	for (auto it = models.begin(); it != models.end(); ++it, i++) {
+		//Queue not empty, state == 1, transformation ocurring, get time bewtween transformations and tests if it has already passed
+		if (it->getState()) {		
+			it->applyTranslation();
+		}
+	//	else if (it->getState() && !(it->getTransformationQueue().empty()))
+		//	std::cout << "Not enough time on model " << i << " has passed since last transformation..." << std::endl;
+		//else if (it->getState() && it->getTransformationQueue().empty()) {		//Queue empty, transformations finished
+			//std::cout << "Transformation of model " << i << " has finished. Queue is empty? " << it->getTransformationQueue().empty() << " Size: " << models[0].getTransformationQueue().size() << std::endl;
+			//it->setState(0);
+		//}
+	}
+}
+
+void ModelManager::setModelTransformation(int modelID) {
+	if (models.size() >= modelID) {
+		models.at(modelID).setState(1);
+		std::cout << "State of model " << modelID << " is now "<< models.at(modelID).getState() << ". Model is tranforming." << std::endl;
+	}
 }
 

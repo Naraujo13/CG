@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
+#define STEPS 20 //number of steps of an animations
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh)
 {
@@ -13,6 +14,9 @@ Model::Model(const char *textPath, const char *textSampler, GLuint programID, Me
 	mesh = &modelMesh;
 	modelMatrixID = glGetUniformLocation(programID, "M");
 	modelMatrix = glm::mat4(1);
+	state = 0;
+	timeBtwn = 0;
+	lastTransformed = glfwGetTime();
 }
 
 //Getters
@@ -31,24 +35,48 @@ glm::mat4 Model::getModelMatrix() {
 Mesh* Model::getMesh() {
 	return mesh;
 }
+std::vector<Transformation> Model::getTransformationQueue() {
+	return transformationQueue;
+}
+int Model::getState() {
+	return state;
+}
+
+//Setter
 void Model::setModelMatrix(glm::mat4 matrix) {
 	Model::modelMatrix = matrix;
 }
+void Model::setState(int newState) {
+	Model::state = newState;
+}
 
-void Model::addTransformation(glm::vec3 transformation) {
-	transformationQueue.push_back(transformation);
+//Others
+void Model::addTransformation(glm::vec3 transformation, double time) {
+	//Split and push all the transformations to queue with the time between them
+	double stepTime = time / STEPS;
+	glm::vec3 stepTransformation = transformation / (glm::vec3 (STEPS, STEPS, STEPS));
+	int firstFlag = 1;
+
+	for (int i = 0; i < STEPS; i++) {
+		if (firstFlag == 1) {
+			transformationQueue.push_back(Transformation(stepTransformation, 0));
+			firstFlag = 0;
+		}
+		else
+			transformationQueue.push_back(Transformation(stepTransformation, stepTime));
+	}
+	//transformationQueue.push_back(Transformation (transformation, time));
 }
 
 void Model::applyTranslation() {
 	if (transformationQueue.empty())
 		return;
-	setModelMatrix(glm::mat4(glm::translate(modelMatrix, transformationQueue.front())));
+	setModelMatrix(glm::mat4(glm::translate(modelMatrix, transformationQueue.front().getTransformation())));
 	transformationQueue.erase(transformationQueue.begin());
+	lastTransformed = glfwGetTime();
 }
 
-std::vector<glm::vec3> Model::getTranslationQueue() {
-	return transformationQueue;
-}
+
 
 //Translations
 /*

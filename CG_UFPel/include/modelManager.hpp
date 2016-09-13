@@ -47,7 +47,8 @@ public:
 	void createMesh(char *path);
 	void cleanup();
 	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 MVP, GLFWwindow* g_pWindow);
-
+	void transformModels();
+	void setModelTransformation(int modelID);
 };
 
 #endif

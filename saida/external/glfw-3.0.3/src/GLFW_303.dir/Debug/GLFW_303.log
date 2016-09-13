@@ -1,6 +1,4 @@
-﻿  Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/external/glfw-3.0.3/src/CMakeLists.txt
-  CMake does not need to re-run because F:\Downloads\Aula\CG\saida\external\glfw-3.0.3\src\CMakeFiles\generate.stamp is up-to-date.
-  clipboard.c
+﻿  clipboard.c
   context.c
   gamma.c
   init.c
@@ -8,7 +6,7 @@
   joystick.c
   monitor.c
   time.c
-  window.c
+  wgl_context.c
   win32_clipboard.c
   win32_gamma.c
   win32_init.c
@@ -16,5 +14,5 @@
   win32_monitor.c
   win32_time.c
   win32_window.c
-  wgl_context.c
+  window.c
   GLFW_303.vcxproj -> F:\Downloads\Aula\CG\saida\external\glfw-3.0.3\src\Debug\glfw3.lib
