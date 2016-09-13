@@ -128,10 +128,10 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "bgColor", TW_TYPE_COLOR3F, &oColor[0], " label='Background color' ");
 
 	glm::vec3 translationVector(0,0,0);
-	double translationTime;
+	short translationTime=1;
 	//Add 'Translation' options
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_FLOAT, &translationTime, " label='Time to do the tranlsation:");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_INT8, &translationTime, " label='Time to do the tranlsation:");
 	
 
 	// Ensure we can capture the escape key being pressed below

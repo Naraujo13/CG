@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
-#define STEPS 20 //number of steps of an animations
+#define STEPS 200 //number of steps of an animations
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh)
 {
@@ -65,15 +65,22 @@ void Model::addTransformation(glm::vec3 transformation, double time) {
 		else
 			transformationQueue.push_back(Transformation(stepTransformation, stepTime));
 	}
-	//transformationQueue.push_back(Transformation (transformation, time));
 }
 
 void Model::applyTranslation() {
-	if (transformationQueue.empty())
+	if (transformationQueue.empty()){
+		Model::state = 0;
 		return;
-	setModelMatrix(glm::mat4(glm::translate(modelMatrix, transformationQueue.front().getTransformation())));
-	transformationQueue.erase(transformationQueue.begin());
-	lastTransformed = glfwGetTime();
+	}
+	else if (glfwGetTime() > lastTransformed + timeBtwn) {
+		setModelMatrix(glm::mat4(glm::translate(modelMatrix, transformationQueue.front().getTransformation())));
+		transformationQueue.erase(transformationQueue.begin());
+		lastTransformed = glfwGetTime();
+		if (!transformationQueue.empty())
+			timeBtwn = transformationQueue.front().getTimeBtwn();
+		else
+			timeBtwn = 0;
+	}
 }
 
 
