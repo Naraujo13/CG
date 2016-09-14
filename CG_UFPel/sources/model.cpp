@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
-#define STEPS 200 //number of steps of an animations
+#define STEPS 1000 //number of steps of an animations
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
 {
@@ -51,30 +51,59 @@ void Model::setState(int newState) {
 }
 
 //Others
-void Model::addTransformation(glm::vec3 transformation, double time) {
+void Model::addTransformation(glm::vec3 transformation, double time, char type) {
 	//Split and push all the transformations to queue with the time between them
 	double stepTime = time / STEPS;
-	glm::vec3 stepTransformation = transformation / (glm::vec3 (STEPS, STEPS, STEPS));
-	int firstFlag = 1;
+	
+	if (type == 'T') {			//Translação
+		glm::vec3 stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
+		int firstFlag = 1;
 
-	for (int i = 0; i < STEPS; i++) {
-		if (firstFlag == 1) {
-			transformationQueue.push_back(Transformation(stepTransformation, 0));
-			firstFlag = 0;
+		for (int i = 0; i < STEPS; i++) {
+			if (firstFlag == 1) {
+				transformationQueue.push_back(Transformation(stepTransformation, 0, type));
+				firstFlag = 0;
+			}
+			else
+				transformationQueue.push_back(Transformation(stepTransformation, stepTime, type));
 		}
-		else
-			transformationQueue.push_back(Transformation(stepTransformation, stepTime));
+	}
+	else if (type == 'S') {
+		glm::vec3 stepTransformation;
+		double raiz = (1.0/(double)STEPS);
+		
+		stepTransformation.x = pow(transformation.x, raiz) / 2 + 0.5;
+		//std::cout << "pow(" << transformation.x << ", " << raiz << std::endl;
+		stepTransformation.y = pow(transformation.y, raiz) / 2 + 0.5;
+		//std::cout << "pow(" << transformation.y << ", " << raiz << std::endl;
+		stepTransformation.z = pow(transformation.z, raiz) / 2 + 0.5;
+		//std::cout << "pow(" << transformation.z << ", " << raiz << std::endl;
+		//std::cout << pow(transformation.x, raiz) / 2 << "," << pow(transformation.y, raiz) / 2 << "," << pow(transformation.z, raiz) / 2 << std::endl;
+		for (int i = 0; i < STEPS; i++) {
+			transformationQueue.push_back(Transformation(stepTransformation, stepTime, 'S'));
+		}
+	}
+	else if (type == 'R') {
+		transformationQueue.push_back(Transformation(transformation, 1, 'R'));
 	}
 }
 
-void Model::applyTranslation() {
+void Model::applyTransformation() {
 	if (transformationQueue.empty()){
 		Model::state = 0;
 		std::cout << "empty" << std::endl;
 		return;
 	}
 	else if (glfwGetTime() > lastTransformed + timeBtwn) {
-		setModelMatrix(glm::mat4(glm::translate(modelMatrix, transformationQueue.front().getTransformation())));
+		//Aplica operação
+		if(transformationQueue.front().getType() == 'T')	//Se for uma translação
+			setModelMatrix((glm::translate(modelMatrix, transformationQueue.front().getTransformation())));
+		else if (transformationQueue.front().getType() == 'S') {	//Se for uma escala
+			//std::cout << "("<< transformationQueue.front().getTransformation().x << "," << transformationQueue.front().getTransformation().y << "," << transformationQueue.front().getTransformation().z << ")" << std::endl;
+			setModelMatrix(glm::scale(modelMatrix, transformationQueue.front().getTransformation()));
+		}
+
+		//Apaga operação e atualiza controle
 		transformationQueue.erase(transformationQueue.begin());
 		lastTransformed = glfwGetTime();
 		if (!transformationQueue.empty())
@@ -83,50 +112,3 @@ void Model::applyTranslation() {
 			timeBtwn = 0;
 	}
 }
-
-
-
-//Translations
-/*
-void Model::translateModel(glm::mat4 translationMatrix) {
-	std::cout << "Matriz de translacao:" << std::endl;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << translationMatrix[i][j] << "|";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Matriz do objeto antes:" << std::endl;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << modelMatrix[i][j] << "|";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	std::cout << std::endl;
-
-
-	glm::vec3 translate = glm::vec3(50.0f,1.0f,1.0f);
-	modelMatrix = glm::translate(modelMatrix,  translate);
-	/*
-	if (modelMatrix == modelMatrix)
-		std::cout << "Nao deu certo. Matriz continua igual." << std::endl;
-	else
-		std::cout << "Deu certo. Matriz diferente." << std::endl;
-	*/
-/*	std::cout << "Matriz do objeto depois:" << std::endl;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			std::cout << modelMatrix[i][j] << "|";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	std::cout << std::endl;
-	
-	}
-*/

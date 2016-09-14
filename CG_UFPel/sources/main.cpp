@@ -24,6 +24,8 @@ TwBar *g_pToolBar;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp> 
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 //custom includes
 #include "meshsimplification.hpp"
@@ -69,7 +71,10 @@ void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 	TwWindowSize(g_nWidth, g_nHeight);
 }
 
-
+void TW_CALL transformModel(void *, ModelManager manager, int model)
+{
+	manager.setModelTransformation(model);
+}
 
 int main(void)
 {
@@ -120,24 +125,41 @@ int main(void)
 
 	//create the toolbar
 	g_pToolBar = TwNewBar("CG UFPel ToolBar");
-	// Add 'speed' to 'bar': it is a modifable (RW) variable of type TW_TYPE_DOUBLE. Its key shortcuts are [s] and [S].
-	double speed = 0.0;
-	TwAddVarRW(g_pToolBar, "speed", TW_TYPE_DOUBLE, &speed, " label='Rot speed' min=0 max=2 step=0.01 keyIncr=s keyDecr=S help='Rotation speed (turns/second)' ");
-	// Add 'bgColor' to 'bar': it is a modifable variable of type TW_TYPE_COLOR3F (3 floats color)
-	vec3 oColor(0.0f);
-	TwAddVarRW(g_pToolBar, "bgColor", TW_TYPE_COLOR3F, &oColor[0], " label='Background color' ");
+	
+	//Meshes
+	// Create an internal enum to name the meshes
+	typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
+
+	// A variable for the current selection - will be updated by ATB
+	MESH_TYPE m_currentMesh = SUZANNE;
+
+	// Array of drop down items
+	TwEnumVal Meshes[] = { { SUZANNE, "Suzanne" },{ CUBE, "Cube" },{ GOOSE, "Goose" } };
+
+	// ATB identifier for the array
+	TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 3);
+
+	// Link it to the tweak bar
+	TwAddVarRW(g_pToolBar, "Mesh", MeshTwType, &m_currentMesh, NULL);
+
 
 	glm::vec3 translationVector(0,0,0);
-	short translationTime=1;
+	double translationTime=1.0;
 	//Add 'Translation' options
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_INT8, &translationTime, " label='Time to do the tranlsation:");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &translationTime, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
 	
+
 	//Add 'Scale' options
-	glm::vec3 scaleVector(0, 0, 0);
-	short scaleTime = 1;
-	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &scaleVector, " label='Scale to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_INT8, &scaleTime, " label='Time to do the scaling:");
+	double scaleVector = 1.0;
+	double scaleTime = 1.0;
+	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DOUBLE, &scaleVector, "min=0.1 step=0.1 label='Scale to put to queue:");
+	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &scaleTime, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
+
+	quat rotationQuat;
+	//Add 'Rotation' options
+	TwAddVarRW(g_pToolBar, "ObjRotation", TW_TYPE_QUAT4F, &rotationQuat, " axisz=-z ");
+
 
 
 	// Ensure we can capture the escape key being pressed below
@@ -186,7 +208,7 @@ int main(void)
 
 	// For speed computation
 	double lastTime = glfwGetTime(), lastTime2 = glfwGetTime();
-	int nbFrames    = 0;
+	int nbFrames = 0;
 	int simplify = 1;
 	double lastTime3 = glfwGetTime();
 	
@@ -196,8 +218,12 @@ int main(void)
 	LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
-
+	int currentModelID = -1;
 	printInstructions();
+	 
+	//TwAddButton(g_pToolBar, "Transform model 0", transformModel(NULL, manager, 0) , NULL, "label='Tranform 0' ");
+	//TwAddButton(g_pToolBar, "Transform model 0", manager.setModelTransformation(1), NULL, "label='Tranform 0' ");
+	//TwAddButton(g_pToolBar, "Transform model 0", manager.setModelTransformation(2), NULL, "label='Tranform 0' ");
 
 
 	do{
@@ -265,16 +291,39 @@ int main(void)
 		double currentTime = glfwGetTime();
 
 		/* --- Trabalho 2 --- */
+		//Modelo atual
+		if (glfwGetKey(g_pWindow, GLFW_KEY_0) == GLFW_PRESS)
+			currentModelID = 0;
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_1) == GLFW_PRESS)
+			currentModelID = 1;
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_2) == GLFW_PRESS)
+			currentModelID = 2;
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_3) == GLFW_PRESS)
+			currentModelID = 3;
+
+
 		//Translação ao pressionar T
-		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {
+		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Translation
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[0].addTransformation(translationVector, translationTime);
-			std::cout << "Queue size:" << (*(*manager.getModels())[0].getTransformationQueue()).size() << std::endl;
+			(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T');
+			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale
 			lastTime3 = glfwGetTime();
-			manager.setModelTransformation(0);
+			(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S');
+			std::cout << "Queue size of model" << currentModelID <<  ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation
+			lastTime3 = glfwGetTime();
+			//glm::mat4 RotationMatrix = quaternion::toMat4(rotationQuat);
+			//(*manager.getModels())[currentModelID].addTransformation(glMultMatrixf(&glm::mat4_cast(rotationQuat)[0][0]), scaleTime, 'R');
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
+			lastTime3 = glfwGetTime();
+			manager.setModelTransformation(currentModelID);
+		}
+
 
 		manager.transformModels();
 		

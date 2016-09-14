@@ -23,11 +23,13 @@ class Transformation{
 private:
 	glm::vec3 transformation;
 	double timeBtwn;
+	char type;	//usado para controle interno. T - Translação, R - rotação, S - shear, P - rotação ao redor de ponto, E  rotação ao redor de eixo, B - bspine, Z - bezier
 public:
 //Constructor
-	Transformation::Transformation(glm::vec3 transformation, double time) {
+	Transformation::Transformation(glm::vec3 transformation, double time, char type) {
 		Transformation::transformation = transformation;
 		Transformation::timeBtwn = time;
+		Transformation::type = type;
 	}
 //Getters
 	glm::vec3 getTransformation() {
@@ -35,6 +37,9 @@ public:
 	}
 	double getTimeBtwn() {
 		return timeBtwn;
+	}
+	char getType() {
+		return type;
 	}
 };
 
@@ -81,8 +86,8 @@ public:
 	 void setState(int newState);
 
 	//Translations
-	void Model::addTransformation(glm::vec3 transformation, double time);
-	void Model::applyTranslation();
+	void Model::addTransformation(glm::vec3 transformation, double time, char type);
+	void Model::applyTransformation();
 
 
 
