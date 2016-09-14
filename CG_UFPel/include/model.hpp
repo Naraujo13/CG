@@ -64,14 +64,14 @@ private:
 
 public:
 	//Constructor
-	Model::Model(const char *textPath, const char *textSample, GLuint programID, Mesh &mesh);
+	Model::Model(const char *textPath, const char *textSample, GLuint programID, Mesh &mesh, glm::vec3 position);
 	//Getters
 	GLuint getModelMatrixID();
 	GLuint getTextureID();
 	GLuint *getTexture();
 	glm::mat4 getModelMatrix();
 	Mesh* getMesh();
-	std::vector<Transformation> getTransformationQueue();
+	std::vector<Transformation> * getTransformationQueue();
 	int getState();
 	double getLastTransformed();
 	double getTimeBtwn();

@@ -20,11 +20,11 @@ ModelManager::ModelManager(char *shaderPath1, char *shaderPath2)
 }
 
 //Getters
-std::vector<Model> ModelManager::getModels() {
-	return models;
+std::vector<Model> * ModelManager::getModels() {
+	return &models;
 }
-std::vector<Mesh> ModelManager::getMeshes() {
-	return meshes;
+std::vector<Mesh> * ModelManager::getMeshes() {
+	return &meshes;
 }
 GLuint ModelManager::getProgramID() {
 	return programID;
@@ -48,8 +48,8 @@ double Model::getTimeBtwn() {
 }
 
 //creates a new model and adds to the vector
-void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh) {
-	models.push_back(Model(textPath, textSampler, programID, mesh));
+void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
+	models.push_back(Model(textPath, textSampler, programID, mesh, position));
 }
 void ModelManager::createMesh(char *path) {
 	meshes.push_back(Mesh(path));
@@ -70,7 +70,7 @@ void ModelManager::cleanup() {
 
 }
 
-void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 MVP, GLFWwindow* g_pWindow) {
+void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow) {
 	
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -80,6 +80,8 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 
 	//For each model in the manager 
 	for (auto it = models.begin(); it != models.end(); ++it) {
+		//Calculate MVP matrix
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
 
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform
@@ -122,9 +124,10 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 
 void ModelManager::transformModels() {
 	int i = 0;
-	for (auto it = models.begin(); it != models.end(); ++it, i++) {
+	for (auto it = ModelManager::models.begin(); it != ModelManager::models.end(); ++it, i++) {
+		std::cout << (*it->getTransformationQueue()).size() << std::endl;
 		//Queue not empty, state == 1, transformation ocurring, get time bewtween transformations and tests if it has already passed
-		if (it->getState()) {		
+		if (it->getState()) {
 			it->applyTranslation();
 		}
 	//	else if (it->getState() && !(it->getTransformationQueue().empty()))

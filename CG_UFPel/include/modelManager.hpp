@@ -36,17 +36,17 @@ public:
 	//Constructor
 	ModelManager::ModelManager(char *shaderPath1, char *shaderPath2);
 	//Getters
-	std::vector<Model> getModels();
-	std::vector<Mesh> getMeshes();
+	std::vector<Model> * getModels();
+	std::vector<Mesh> * getMeshes();
 	GLuint getVertexArrayID();
 	GLuint getProgramID();
 	GLuint getMatrixID();
 	GLuint getLightID();
 	//models
-	void createModel(char *textPath, char *textSampler, Mesh &mesh);
+	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);
 	void createMesh(char *path);
 	void cleanup();
-	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 MVP, GLFWwindow* g_pWindow);
+	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow);
 	void transformModels();
 	void setModelTransformation(int modelID);
 };

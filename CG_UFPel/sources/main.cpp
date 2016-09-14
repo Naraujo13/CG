@@ -133,6 +133,12 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_INT8, &translationTime, " label='Time to do the tranlsation:");
 	
+	//Add 'Scale' options
+	glm::vec3 scaleVector(0, 0, 0);
+	short scaleTime = 1;
+	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &scaleVector, " label='Scale to put to queue:");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_INT8, &scaleTime, " label='Time to do the scaling:");
+
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(g_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
@@ -159,13 +165,16 @@ int main(void)
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
 
-	// Read our .obj file and creates mesh
+	// Read our .obj file and creates meshes
 	manager.createMesh("mesh/suzanne.obj");
-
-	Mesh mesh = manager.getMeshes().at(0);
-	//Creates model
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", mesh);
-	Model model = manager.getModels()[0];
+	manager.createMesh("mesh/goose.obj");
+	manager.createMesh("mesh/cube.obj");
+	
+	//Creates models
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,3,0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3,3,0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3,-3,0));
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID      = glGetUniformLocation(manager.getProgramID(), "MVP");
@@ -219,10 +228,10 @@ int main(void)
 			* ----------------------------------------- */
 
 			//Calls function to reduce the mesh
-			MS.reduce(*(*model.getMesh()).getIndexedVertices(), *(*model.getMesh()).getIndices(), *(*model.getMesh()).getIndexedNormals(), continuousMeshSimplification);
+			MS.reduce(*(*(*manager.getModels())[0].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[0].getMesh()).getIndices(), *(*(*manager.getModels())[0].getMesh()).getIndexedNormals(), continuousMeshSimplification);
 
 			//Bind
-			(*model.getMesh()).rebind();
+			(*(*manager.getModels())[0].getMesh()).rebind();
 
 			// Get a handle for our "LightPosition" uniform
 			glUseProgram(manager.getProgramID());
@@ -233,10 +242,10 @@ int main(void)
 		}
 		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
 			lastTime2 = glfwGetTime();
-			MS.reconstruct(*(*model.getMesh()).getIndexedVertices(), *(*model.getMesh()).getIndices(), continuousMeshSimplification);
+			MS.reconstruct(*(*(*manager.getModels())[0].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[0].getMesh()).getIndices(), continuousMeshSimplification);
 
 			//Bind
-			(*model.getMesh()).rebind();
+			(*(*manager.getModels())[0].getMesh()).rebind();
 
 		}
 
@@ -259,21 +268,16 @@ int main(void)
 		//Translação ao pressionar T
 		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {
 			lastTime3 = glfwGetTime();
-			model.addTransformation(translationVector, translationTime);
-			std::cout << "Queue size:" << model.getTransformationQueue().size() << std::endl;
+			(*manager.getModels())[0].addTransformation(translationVector, translationTime);
+			std::cout << "Queue size:" << (*(*manager.getModels())[0].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {
 			lastTime3 = glfwGetTime();
-			//model.applyTranslation();
-			//std::cout << "Queue size:" << model.getTransformationQueue().size() << std::endl;
-			model.setState(1);
-			//manager.setModelTransformation(0);
+			manager.setModelTransformation(0);
 		}
 
-		//manager.transformModels();
-		if (model.getState() == 1)
-			model.applyTranslation();
-
+		manager.transformModels();
+		
 		// Measure speed
 		currentTime = glfwGetTime();
 		nbFrames++;
@@ -291,9 +295,9 @@ int main(void)
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 		//::mat4 ModelMatrix      = model.getModelMatrix();
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * model.getModelMatrix();
+		//glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*manager.getModels())[0].getModelMatrix();
 
-		manager.drawModels(ViewMatrixID, ViewMatrix, MVP, g_pWindow);
+		manager.drawModels(ViewMatrixID, ViewMatrix, ProjectionMatrix, g_pWindow);
 
 		/**
 		// Clear the screen

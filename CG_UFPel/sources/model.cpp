@@ -7,13 +7,13 @@
 #include <iostream>
 #define STEPS 200 //number of steps of an animations
 //Constructor
-Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh)
+Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
 {
 	texture = loadDDS(textPath);
 	textureID = glGetUniformLocation(programID, "myTextureSampler");
 	mesh = &modelMesh;
 	modelMatrixID = glGetUniformLocation(programID, "M");
-	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::mat4(glm::translate(glm::mat4(1), pos));
 	state = 0;
 	timeBtwn = 0;
 	lastTransformed = glfwGetTime();
@@ -35,8 +35,8 @@ glm::mat4 Model::getModelMatrix() {
 Mesh* Model::getMesh() {
 	return mesh;
 }
-std::vector<Transformation> Model::getTransformationQueue() {
-	return transformationQueue;
+std::vector<Transformation> * Model::getTransformationQueue() {
+	return &transformationQueue;
 }
 int Model::getState() {
 	return state;
@@ -70,6 +70,7 @@ void Model::addTransformation(glm::vec3 transformation, double time) {
 void Model::applyTranslation() {
 	if (transformationQueue.empty()){
 		Model::state = 0;
+		std::cout << "empty" << std::endl;
 		return;
 	}
 	else if (glfwGetTime() > lastTransformed + timeBtwn) {
