@@ -56,11 +56,22 @@ void printInstructions() {
 	std::cout << "\t\t3.1. A tecla \"P\" ira setar o modo de desenho para \"pontos\"." << std::endl;
 	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
 	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
-	std::cout << "\t4. Movimentação:" << std::endl;
+	std::cout << "\t4. Movimentação da câmera:" << std::endl;
 	std::cout << "\t\t3.1. A tecla \"Control\" libera o mouse." << std::endl;
 	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
+	std::cout << "\t5. Controle Geral:" << std::endl;
+	std::cout << "\t\t5.1.O modelo ativo no momento pode ser escolhido atraves do campo da interface ou das teclas numericas." << std::endl;
+	std::cout << "\t\t5.2. A tecla \"Delete\" ira resetar todas as entradas da interface." << std::endl;
+	std::cout << "\t6. Transformacoes sobre modelos:" << std::endl;
+	std::cout << "\t\t6.1. A tecla \"T\" adiciona uma translacao com os parametros selecionados na interface." << std::endl;
+	std::cout << "\t\t6.2. A tecla \"S\" adiciona uma escala com os parametros selecionados na interface." << std::endl;
+	std::cout << "\t\t6.3. A tecla \"R\" adiciona uma rotacao com os parametros selecionados na interface." << std::endl;
+	std::cout << "\t\t6.4. A tecla \"I\" adiciona uma transformacao composta usando os parametros de rotacao e translacao." << std::endl;
+	std::cout << "\t\t6.5. A tecla \"H\" adiciona uma transformacao de shear com os parametros selecionados na interface" << std::endl;
+	std::cout << "\t\t6.6. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
+	std::cout << "\t\t Todos os comandos da secao 6 serao realizados para o modelo ativo no momento." << std::endl;
 	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
-	std::cout << "-----------------------------------" << std::endl;
+	std::cout << "----------------------------------" << std::endl;
 }
 
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
@@ -183,6 +194,14 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Point to be rotated: ", TW_TYPE_DIR3F, &rotationAP, "step=0.1");
 	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &rotationAPTime, " min=0.1 step=0.1 label='Rotation around point time'");
 
+	//Add 'Shear' Options
+	TwAddSeparator(g_pToolBar, "Shear", NULL);
+	TwAddButton(g_pToolBar, "Shear:", NULL, NULL, "");
+	glm::vec3 shearVector(0, 0, 0);
+	double shearTime = 1.0f;
+	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &shearVector, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &shearTime, " min=0.0 step=0.1 label='Shear time'");
+
 	TwAddSeparator(g_pToolBar, "End", NULL);
 
 
@@ -203,11 +222,9 @@ int main(void)
 
 
 	// Create and compile our GLSL program from the shaders
-	//GLuint programID = LoadShaders("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
 
 	//Model Manager
 	ModelManager manager("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
-	//GLuint programID = manager.getProgramID();
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
 
@@ -219,7 +236,7 @@ int main(void)
 	//Creates models
 	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,3,0));
 	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3,3,0));
-	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
 	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3,-3,0));
 
 	// Get a handle for our "MVP" uniform
@@ -335,7 +352,7 @@ int main(void)
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale
 			lastTime3 = glfwGetTime();
 			(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S', 0);
-			std::cout << "Queue size of model" << currentModelID <<  ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation
 			lastTime3 = glfwGetTime();
@@ -351,6 +368,22 @@ int main(void)
 			lastTime3 = glfwGetTime();
 			(*manager.getModels())[currentModelID].addCompTransformation(translationVector, translationTime, 'T', 0, rotationDirection, rotationTime, 'R', rotationDegrees);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Shear ('H')
+			lastTime3 = glfwGetTime();
+			(*manager.getModels())[currentModelID].addTransformation(shearVector, shearTime, 'H', 0);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input
+			translationVector = glm::vec3(0, 0, 0);
+			translationTime = 0;
+			scaleVector = 0;
+			scaleTime = 0;
+			rotationDirection = glm::vec3(0, 0, 0);
+			rotationDegrees = 0;
+			rotationTime = 0;
+			shearVector = glm::vec3(0, 0, 0);
+			shearTime = 0;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
 			lastTime3 = glfwGetTime();

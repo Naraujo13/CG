@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
-#define STEPS 500 //number of steps of an animations
+#define STEPS 300 //number of steps of an animations
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
 {
@@ -55,7 +55,7 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 	//Split and push all the transformations to queue with the time between them
 	double stepTime = time / STEPS;
 	
-	if (type == 'T') {			//Translação
+	if (type == 'T') {	//Translation
 		glm::vec3 stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
 		int firstFlag = 1;
 
@@ -68,7 +68,7 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 				transformationQueue.push_back(Transformation(stepTransformation, stepTime, type, 0));
 		}
 	}
-	else if (type == 'S') {
+	else if (type == 'S') {	//Scale
 		glm::vec3 stepTransformation;
 		double raiz = (1.0/(double)STEPS);
 		
@@ -83,7 +83,7 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 			transformationQueue.push_back(Transformation(stepTransformation, stepTime, 'S', 0));
 		}
 	}
-	else if (type == 'R') {
+	else if (type == 'R') {	//Rotation
 		int firstFlag = 1;
 		double rotationDegreesStep = rotationDegrees / STEPS;
 		for (int i = 0; i < STEPS; i++) {
@@ -93,6 +93,19 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 			}
 			else
 				transformationQueue.push_back(Transformation(transformation, stepTime, type, rotationDegreesStep));
+		}
+	}
+	else if (type == 'H') {	//Shear
+		int firstFlag = 1;
+		glm::vec3 stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
+		//transformationQueue.push_back(Transformation(transformation, 0, type, 0));
+		for (int i = 0; i < STEPS; i++) {
+			if (firstFlag == 1) {
+				transformationQueue.push_back(Transformation(stepTransformation, 0, type, 0));
+				firstFlag = 0;
+			}
+			else
+				transformationQueue.push_back(Transformation(stepTransformation, stepTime, type, 0));
 		}
 	}
 }
@@ -175,6 +188,13 @@ void Model::applyTransformation() {
 		}
 		else if (transformationQueue.front().getType() == 'R') {
 			setModelMatrix(glm::rotate(modelMatrix, transformationQueue.front().getRotationDegrees(),transformationQueue.front().getTransformation()));
+		}
+		else if (transformationQueue.front().getType() == 'H') {
+			glm::mat4 shearMatrix(1.0);
+			shearMatrix[0][1] = transformationQueue.front().getTransformation().x;
+			shearMatrix[0][2] = transformationQueue.front().getTransformation().y;
+			shearMatrix[0][3] = transformationQueue.front().getTransformation().z;
+			setModelMatrix(modelMatrix * shearMatrix);
 		}
 
 		//Apaga operação e atualiza controle
