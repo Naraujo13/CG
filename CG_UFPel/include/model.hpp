@@ -22,14 +22,16 @@ using namespace glm;
 class Transformation{
 private:
 	glm::vec3 transformation;
+	float rotationDegrees;
 	double timeBtwn;
 	char type;	//usado para controle interno. T - Translação, R - rotação, S - shear, P - rotação ao redor de ponto, E  rotação ao redor de eixo, B - bspine, Z - bezier
 public:
 //Constructor
-	Transformation::Transformation(glm::vec3 transformation, double time, char type) {
+	Transformation::Transformation(glm::vec3 transformation, double time, char type, float rotationDegrees) {
 		Transformation::transformation = transformation;
 		Transformation::timeBtwn = time;
 		Transformation::type = type;
+		Transformation::rotationDegrees = rotationDegrees;
 	}
 //Getters
 	glm::vec3 getTransformation() {
@@ -40,6 +42,9 @@ public:
 	}
 	char getType() {
 		return type;
+	}
+	float getRotationDegrees() {
+		return rotationDegrees;
 	}
 };
 
@@ -86,7 +91,8 @@ public:
 	 void setState(int newState);
 
 	//Translations
-	void Model::addTransformation(glm::vec3 transformation, double time, char type);
+	void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees);
+	void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2);
 	void Model::applyTransformation();
 
 

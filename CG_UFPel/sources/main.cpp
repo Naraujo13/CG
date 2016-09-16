@@ -78,6 +78,7 @@ void TW_CALL transformModel(void *, ModelManager manager, int model)
 
 int main(void)
 {
+	int currentModelID = 0;
 	int nUseMouse = 0;
 
 	// Initialise GLFW
@@ -125,7 +126,8 @@ int main(void)
 
 	//create the toolbar
 	g_pToolBar = TwNewBar("CG UFPel ToolBar");
-	
+	TwAddSeparator(g_pToolBar, "Mesh", NULL);
+	TwAddButton(g_pToolBar, "Mesh options", NULL, NULL, "");
 	//Meshes
 	// Create an internal enum to name the meshes
 	typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
@@ -141,25 +143,47 @@ int main(void)
 
 	// Link it to the tweak bar
 	TwAddVarRW(g_pToolBar, "Mesh", MeshTwType, &m_currentMesh, NULL);
+	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=3 step=1 label='Active model");
 
 
+	//Add 'Translation' options
+	TwAddSeparator(g_pToolBar, "Translation", NULL);
+	TwAddButton(g_pToolBar, "Translation parameters:", NULL, NULL, "");
 	glm::vec3 translationVector(0,0,0);
 	double translationTime=1.0;
-	//Add 'Translation' options
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &translationTime, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
 	
 
 	//Add 'Scale' options
+	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
+	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
 	double scaleVector = 1.0;
 	double scaleTime = 1.0;
 	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DOUBLE, &scaleVector, "min=0.1 step=0.1 label='Scale to put to queue:");
 	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &scaleTime, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
 
-	quat rotationQuat;
 	//Add 'Rotation' options
-	TwAddVarRW(g_pToolBar, "ObjRotation", TW_TYPE_QUAT4F, &rotationQuat, " axisz=-z ");
+	TwAddSeparator(g_pToolBar, "Rotation", NULL);
+	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
+	//quat rotationQuat;
+	float rotationDegrees = 0.0f;
+	double rotationTime = 1.0f;
+	glm::vec3 rotationDirection(1, 0, 0);
+	//TwAddVarRW(g_pToolBar, "ObjRotation", TW_TYPE_QUAT4F, &rotationQuat, " axisz=-z ");
+	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &rotationDirection, " label='Translation to put to queue:");
+	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &rotationDegrees, " min=0.0 step=0.5 label='Rotation angle'");
+	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &rotationTime, " min=0.1 step=0.1 label='Rotation time'");
+	
+	//Add 'Rotation around point' options
+	TwAddSeparator(g_pToolBar, "Rotation around point", NULL);
+	TwAddButton(g_pToolBar, "Rotation around point parameters:", NULL, NULL, "");
+	glm::vec3 rotationAP(1, 0, 0);
+	double rotationAPTime = 1.0f;
+	TwAddVarRW(g_pToolBar, "Point to be rotated: ", TW_TYPE_DIR3F, &rotationAP, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &rotationAPTime, " min=0.1 step=0.1 label='Rotation around point time'");
 
+	TwAddSeparator(g_pToolBar, "End", NULL);
 
 
 	// Ensure we can capture the escape key being pressed below
@@ -194,8 +218,8 @@ int main(void)
 	
 	//Creates models
 	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,3,0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3,3,0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
+	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3,3,0));
+	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
 	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3,-3,0));
 
 	// Get a handle for our "MVP" uniform
@@ -218,7 +242,7 @@ int main(void)
 	LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
-	int currentModelID = -1;
+	
 	printInstructions();
 	 
 	//TwAddButton(g_pToolBar, "Transform model 0", transformModel(NULL, manager, 0) , NULL, "label='Tranform 0' ");
@@ -305,18 +329,27 @@ int main(void)
 		//Translação ao pressionar T
 		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Translation
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T');
+			(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T', 0);
 			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S');
+			(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S', 0);
 			std::cout << "Queue size of model" << currentModelID <<  ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation
 			lastTime3 = glfwGetTime();
-			//glm::mat4 RotationMatrix = quaternion::toMat4(rotationQuat);
-			//(*manager.getModels())[currentModelID].addTransformation(glMultMatrixf(&glm::mat4_cast(rotationQuat)[0][0]), scaleTime, 'R');
+			(*manager.getModels())[currentModelID].addTransformation(rotationDirection, rotationTime, 'R', rotationDegrees);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_P) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotation Around point (not working)
+			lastTime3 = glfwGetTime();
+			(*manager.getModels())[currentModelID].addCompTransformation(rotationDirection, rotationTime, 'R', rotationDegrees, translationVector, translationTime, 'T', 0);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_I) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação
+			lastTime3 = glfwGetTime();
+			(*manager.getModels())[currentModelID].addCompTransformation(translationVector, translationTime, 'T', 0, rotationDirection, rotationTime, 'R', rotationDegrees);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
