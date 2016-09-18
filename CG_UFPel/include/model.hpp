@@ -92,7 +92,7 @@ public:
 
 	//Translations
 	void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees);
-	void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2);
+	void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2, glm::vec3 transformation3, double time3, char type3, float rotationDegrees3);
 	void Model::applyTransformation();
 
 

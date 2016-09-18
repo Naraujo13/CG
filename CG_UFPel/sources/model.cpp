@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
-#define STEPS 300 //number of steps of an animations
+#define STEPS 100 //number of steps of an animations
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
 {
@@ -53,13 +53,14 @@ void Model::setState(int newState) {
 //Others
 void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees) {
 	//Split and push all the transformations to queue with the time between them
-	double stepTime = time / STEPS;
+	int steps = (int)time * STEPS;
+	double stepTime = time / steps;
 	
 	if (type == 'T') {	//Translation
-		glm::vec3 stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
+		glm::vec3 stepTransformation = transformation / (glm::vec3(steps, steps, steps));
 		int firstFlag = 1;
 
-		for (int i = 0; i < STEPS; i++) {
+		for (int i = 0; i < steps; i++) {
 			if (firstFlag == 1) {
 				transformationQueue.push_back(Transformation(stepTransformation, 0, type, 0));
 				firstFlag = 0;
@@ -70,7 +71,7 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 	}
 	else if (type == 'S') {	//Scale
 		glm::vec3 stepTransformation;
-		double raiz = (1.0/(double)STEPS);
+		double raiz = (1.0/(double)steps);
 		
 		stepTransformation.x = pow(transformation.x, raiz) / 2 + 0.5;
 		//std::cout << "pow(" << transformation.x << ", " << raiz << std::endl;
@@ -79,14 +80,14 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 		stepTransformation.z = pow(transformation.z, raiz) / 2 + 0.5;
 		//std::cout << "pow(" << transformation.z << ", " << raiz << std::endl;
 		//std::cout << pow(transformation.x, raiz) / 2 << "," << pow(transformation.y, raiz) / 2 << "," << pow(transformation.z, raiz) / 2 << std::endl;
-		for (int i = 0; i < STEPS; i++) {
+		for (int i = 0; i < steps; i++) {
 			transformationQueue.push_back(Transformation(stepTransformation, stepTime, 'S', 0));
 		}
 	}
 	else if (type == 'R') {	//Rotation
 		int firstFlag = 1;
-		double rotationDegreesStep = rotationDegrees / STEPS;
-		for (int i = 0; i < STEPS; i++) {
+		double rotationDegreesStep = rotationDegrees / steps;
+		for (int i = 0; i < steps; i++) {
 			if (firstFlag == 1) {
 				transformationQueue.push_back(Transformation(transformation, 0, type, rotationDegreesStep));
 				firstFlag = 0;
@@ -97,9 +98,9 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 	}
 	else if (type == 'H') {	//Shear
 		int firstFlag = 1;
-		glm::vec3 stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
+		glm::vec3 stepTransformation = transformation / (glm::vec3(steps, steps, steps));
 		//transformationQueue.push_back(Transformation(transformation, 0, type, 0));
-		for (int i = 0; i < STEPS; i++) {
+		for (int i = 0; i < steps; i++) {
 			if (firstFlag == 1) {
 				transformationQueue.push_back(Transformation(stepTransformation, 0, type, 0));
 				firstFlag = 0;
@@ -110,22 +111,26 @@ void Model::addTransformation(glm::vec3 transformation, double time, char type, 
 	}
 }
 
-void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2) {
+void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2, glm::vec3 transformation3, double time3, char type3, float rotationDegrees3) {
 	//Split and push all the transformations to queue with the time between them
-	double stepTime = time / STEPS;
+	int steps = (int)time * STEPS;
+	double stepTime = time / steps;
 	glm::vec3 stepTransformation;
 	double rotationDegreesStep = 0;
-	double stepTime2 = time2 / STEPS;
+	double stepTime2 = time2 / steps;
 	glm::vec3 stepTransformation2;
 	double rotationDegreesStep2 = 0;
+	double stepTime3 = time3 / steps;
+	glm::vec3 stepTransformation3;
+	double rotationDegreesStep3 = 0;
 
 
 	//Transformation 1
 	if (type == 'T') {			//Translação
-		stepTransformation = transformation / (glm::vec3(STEPS, STEPS, STEPS));
+		stepTransformation = transformation / (glm::vec3(steps, steps, steps));
 	}
 	else if (type == 'S') {
-		double raiz = (1.0 / (double)STEPS);
+		double raiz = (1.0 / (double)steps);
 		stepTransformation.x = pow(transformation.x, raiz) / 2 + 0.5;
 
 		stepTransformation.y = pow(transformation.y, raiz) / 2 + 0.5;
@@ -134,15 +139,15 @@ void Model::addCompTransformation(glm::vec3 transformation, double time, char ty
 	
 	}
 	else if (type == 'R') {
-		rotationDegreesStep = rotationDegrees / STEPS;
+		rotationDegreesStep = rotationDegrees / steps;
 	}
-
+	
 	//Transformation 2
 	if (type2 == 'T') {			//Translação
-		stepTransformation2 = transformation2 / (glm::vec3(STEPS, STEPS, STEPS));
+		stepTransformation2 = transformation2 / (glm::vec3(steps, steps, steps));
 	}
 	else if (type2 == 'S') {
-		double raiz = (1.0 / (double)STEPS);
+		double raiz = (1.0 / (double)steps);
 		stepTransformation2.x = pow(transformation2.x, raiz) / 2 + 0.5;
 
 		stepTransformation2.y = pow(transformation2.y, raiz) / 2 + 0.5;
@@ -152,21 +157,41 @@ void Model::addCompTransformation(glm::vec3 transformation, double time, char ty
 	}
 	else if (type2 == 'R') {
 		stepTransformation2 = transformation2;
-		rotationDegreesStep2 = rotationDegrees2 / STEPS;
+		rotationDegreesStep2 = rotationDegrees2 / steps;
+	}
+
+	//Transformation 3
+	if (type3 == 'T') {			//Translação
+		stepTransformation3 = transformation3 / (glm::vec3(steps, steps, steps));
+	}
+	else if (type3 == 'S') {
+		double raiz = (1.0 / (double)steps);
+		stepTransformation3.x = pow(transformation3.x, raiz) / 2 + 0.5;
+
+		stepTransformation3.y = pow(transformation3.y, raiz) / 2 + 0.5;
+
+		stepTransformation3.z = pow(transformation3.z, raiz) / 2 + 0.5;
+
+	}
+	else if (type3 == 'R') {
+		stepTransformation3 = transformation3;
+		rotationDegreesStep3 = rotationDegrees3 / steps;
 	}
 
 
-	//Do both transformations
+	//Do all transformations
 	int firstFlag = 1;
-	for (int i = 0; i < STEPS; i++) {
+	for (int i = 0; i < steps; i++) {
 		if (firstFlag > 0) {
 			transformationQueue.push_back(Transformation(stepTransformation, 0, type, rotationDegreesStep));
-			transformationQueue.push_back(Transformation(stepTransformation2, 0, type2, rotationDegreesStep2));
+			transformationQueue.push_back(Transformation(stepTransformation2, stepTime / 3, type2, rotationDegreesStep2));
+			transformationQueue.push_back(Transformation(stepTransformation3, stepTime / 3, type3, rotationDegreesStep3));
 			firstFlag=0;
 		}
 		else {
-			transformationQueue.push_back(Transformation(stepTransformation, stepTime, type, rotationDegreesStep));
-			transformationQueue.push_back(Transformation(stepTransformation2, 0, type2, rotationDegreesStep2));
+			transformationQueue.push_back(Transformation(stepTransformation, stepTime/3, type, rotationDegreesStep));
+			transformationQueue.push_back(Transformation(stepTransformation2, stepTime / 3, type2, rotationDegreesStep2));
+			transformationQueue.push_back(Transformation(stepTransformation3, stepTime / 3, type3, rotationDegreesStep3));
 		}
 	}
 
