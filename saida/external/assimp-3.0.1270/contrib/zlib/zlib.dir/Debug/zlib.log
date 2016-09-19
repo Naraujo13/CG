@@ -1,1 +1,10 @@
-﻿  zlib.vcxproj -> F:\Downloads\Aula\CG\saida\external\assimp-3.0.1270\contrib\zlib\Debug\zlibd.lib
+﻿  adler32.c
+  compress.c
+  crc32.c
+  deflate.c
+  inffast.c
+  inflate.c
+  inftrees.c
+  trees.c
+  zutil.c
+  zlib.vcxproj -> F:\Downloads\Aula\CG\saida\external\assimp-3.0.1270\contrib\zlib\Debug\zlibd.lib

@@ -18,35 +18,56 @@ using namespace glm;
 
 #include <glerror.hpp>
 
+//Transformation auxiliares
+struct translation {
+	glm::vec3 translationVec;
+	double time;
+};
+struct scale {
+	glm::vec3 scaleVec;
+	double time;
+};
+struct rotation {
+	glm::vec3 rotationVec;
+	double rotationDegrees;
+	double time;
+};
+struct shear {
+	glm::vec3 shearVec;
+	double time;
+};
+
+
 //Define a transformation
 class Transformation{
 private:
-	glm::vec3 transformation;
-	float rotationDegrees;
+	glm::mat4 transformation;
+	//float rotationDegrees;
 	double timeBtwn;
-	char type;	//usado para controle interno. T - Translação, R - rotação, S - shear, P - rotação ao redor de ponto, E  rotação ao redor de eixo, B - bspine, Z - bezier
+	//char type;	//usado para controle interno. T - Translação, R - rotação, S - shear, P - rotação ao redor de ponto, E  rotação ao redor de eixo, B - bspine, Z - bezier
 public:
 //Constructor
-	Transformation::Transformation(glm::vec3 transformation, double time, char type, float rotationDegrees) {
+	Transformation::Transformation(glm::mat4 transformation, double time) {
 		Transformation::transformation = transformation;
 		Transformation::timeBtwn = time;
-		Transformation::type = type;
-		Transformation::rotationDegrees = rotationDegrees;
+//		Transformation::type = type;
+//		Transformation::rotationDegrees = rotationDegrees;
 	}
 //Getters
-	glm::vec3 getTransformation() {
+	glm::mat4 getTransformation() {
 		return transformation;
 	}
 	double getTimeBtwn() {
 		return timeBtwn;
 	}
-	char getType() {
-		return type;
-	}
-	float getRotationDegrees() {
-		return rotationDegrees;
-	}
+//	char getType() {
+//		return type;
+//	}
+//	float getRotationDegrees() {
+//		return rotationDegrees;
+//	}
 };
+
 
 
 
@@ -94,7 +115,7 @@ public:
 	void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees);
 	void Model::addCompTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees, glm::vec3 transformation2, double time2, char type2, float rotationDegrees2, glm::vec3 transformation3, double time3, char type3, float rotationDegrees3);
 	void Model::applyTransformation();
-
+	
 
 
 };

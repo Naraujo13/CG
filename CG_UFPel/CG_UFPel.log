@@ -3,4 +3,41 @@ C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.target
   model.cpp
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\xlocale(341): warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cmath(86): warning C4577: 'noexcept' used with no exception handling mode specified; termination on exception is not guaranteed. Specify /EHsc
+  modelManager.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(1604): warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(1601): note: while compiling class template member function 'void std::vector<Model,std::allocator<_Ty>>::_Reallocate(unsigned int)'
+          with
+          [
+              _Ty=Model
+          ]
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(1631): note: see reference to function template instantiation 'void std::vector<Model,std::allocator<_Ty>>::_Reallocate(unsigned int)' being compiled
+          with
+          [
+              _Ty=Model
+          ]
+  F:\Downloads\Aula\CG\CG_UFPel\include\modelManager.hpp(28): note: see reference to class template instantiation 'std::vector<Model,std::allocator<_Ty>>' being compiled
+          with
+          [
+              _Ty=Model
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cmath(131): warning C4577: 'noexcept' used with no exception handling mode specified; termination on exception is not guaranteed. Specify /EHsc
+  main.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(750): warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(743): note: while compiling class template member function 'std::vector<unsigned short,std::allocator<_Ty>>::vector(const std::vector<_Ty,std::allocator<_Ty>> &)'
+          with
+          [
+              _Ty=unsigned short
+          ]
+  F:\Downloads\Aula\CG\CG_UFPel\include\meshsimplification.hpp(52): note: see reference to function template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>::vector(const std::vector<_Ty,std::allocator<_Ty>> &)' being compiled
+          with
+          [
+              _Ty=unsigned short
+          ]
+  f:\downloads\aula\cg\cg_ufpel\include\Mesh.hpp(50): note: see reference to class template instantiation 'std::vector<unsigned short,std::allocator<_Ty>>' being compiled
+          with
+          [
+              _Ty=unsigned short
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cmath(131): warning C4577: 'noexcept' used with no exception handling mode specified; termination on exception is not guaranteed. Specify /EHsc
+  Generating Code...
   CG_UFPel.vcxproj -> F:\Downloads\Aula\CG\saida\..\CG_UFPel\CG_UFPel.exe

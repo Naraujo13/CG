@@ -177,13 +177,11 @@ int main(void)
 	//Add 'Rotation' options
 	TwAddSeparator(g_pToolBar, "Rotation", NULL);
 	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
-	//quat rotationQuat;
 	float rotationDegrees = 0.0f;
 	double rotationTime = 1.0f;
 	glm::vec3 rotationDirection(1, 0, 0);
-	//TwAddVarRW(g_pToolBar, "ObjRotation", TW_TYPE_QUAT4F, &rotationQuat, " axisz=-z ");
 	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &rotationDirection, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &rotationDegrees, " min=0.0 step=0.5 label='Rotation angle'");
+	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &rotationDegrees, "step=0.5 label='Rotation angle'");
 	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &rotationTime, " min=0.1 step=0.1 label='Rotation time'");
 	
 	//Add 'Composition animation' options
@@ -207,6 +205,19 @@ int main(void)
 	double shearTime = 1.0f;
 	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &shearVector, "step=0.1");
 	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &shearTime, " min=0.0 step=0.1 label='Shear time'");
+
+	//Add 'Bezier' Options
+	//Add 'Shear' Options
+	TwAddSeparator(g_pToolBar, "Bezier curve", NULL);
+	TwAddButton(g_pToolBar, "Bezier Curve:", NULL, NULL, "");
+	//Control points
+	glm::vec4 p1(0.0), p2(0.0), p3(0.0), p4(0.0);
+	TwAddVarRW(g_pToolBar, "Control point 1:", TW_TYPE_DIR3F, &p1, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Control point 2:", TW_TYPE_DIR3F, &p2, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Control point 3:", TW_TYPE_DIR3F, &p3, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Control point 4:", TW_TYPE_DIR3F, &p4, "step=0.1");
+
+
 
 	TwAddSeparator(g_pToolBar, "End", NULL);
 
@@ -372,7 +383,7 @@ int main(void)
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_I) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), compositionTime, 'S', 0, translationVector, compositionTime, 'T', 0, rotationDirection, compositionTime, 'R', rotationDegrees);
+			(*manager.getModels())[currentModelID].addCompTransformation(translationVector, compositionTime, 'T', 0, rotationDirection, compositionTime, 'R', rotationDegrees, glm::vec3(scaleVector, scaleVector, scaleVector), compositionTime, 'S', 0);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Shear ('H')
