@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
 #include <iostream>
+#include <glm/gtx/transform2.hpp>
+
 #define STEPS 40 //number of steps of an animations
 #define LOD 100	//Level of detail of the curve
 //Constructor
@@ -60,7 +62,7 @@ long double Model::getTimeBtwn() {
 //Others
 
 
-void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, long double time){
+void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, struct extraProjection3D *p3D, long double time){
 	//Split and push all the transformations to queue with the time between them
 	int steps = ceil (time * STEPS);
 	if (steps <= 0)
@@ -94,45 +96,10 @@ void Model::addCompTransformation(struct translation *t, struct rotation *r, str
 		stepTransformation = stepTransformation * shearMatrix;
 	}
 
-	/*
-	//Transformation 1
-	if (type == 'T') {			//Translação
-		stepTransformation = glm::translate(stepTransformation, transformation / glm::vec3(steps, steps, steps));
+	if (p3D != NULL) {
+		stepTransformation = glm::proj3D(stepTransformation, p3D->projVector / glm::vec3(steps));
+		std::cout << "Projection DONE!" << std::endl;
 	}
-	else if (type == 'S') {
-		double raiz = (1.0 / (double)steps);
-		stepTransformation = glm::scale(stepTransformation, glm::vec3(pow(transformation.x, raiz) / 2 + 0.5, pow(transformation.y, raiz) / 2 + 0.5, pow(transformation.z, raiz) / 2 + 0.5));
-	
-	}
-	else if (type == 'R') {
-		stepTransformation = glm::rotate(stepTransformation, rotationDegrees / steps, transformation);
-	}
-	
-	//Transformation 2
-	if (type2 == 'T') {			//Translação
-		stepTransformation = glm::translate(stepTransformation, transformation2 / glm::vec3(steps, steps, steps));
-	}
-	else if (type2 == 'S') {
-		double raiz = (1.0 / (double)steps);
-		stepTransformation = glm::scale(stepTransformation, glm::vec3(pow(transformation2.x, raiz) / 2 + 0.5, pow(transformation2.y, raiz) / 2 + 0.5, pow(transformation2.z, raiz) / 2 + 0.5));
-	}
-	else if (type2 == 'R') {
-		stepTransformation = glm::rotate(stepTransformation, rotationDegrees2 / steps, transformation2);
-	}
-
-	//Transformation 3
-	if (type3 == 'T') {			//Translação
-		stepTransformation = glm::translate(stepTransformation, transformation3 / glm::vec3(steps, steps, steps));
-	}
-	else if (type3 == 'S') {
-		double raiz = (1.0 / (double)steps);
-		stepTransformation = glm::scale(stepTransformation, glm::vec3(pow(transformation3.x, raiz) / 2 + 0.5, pow(transformation3.y, raiz) / 2 + 0.5, pow(transformation3.z, raiz) / 2 + 0.5));
-	}
-	else if (type3 == 'R') {
-		stepTransformation = glm::rotate(stepTransformation, rotationDegrees3 / steps, transformation3);
-	}
-	*/
-
 
 	//Push all transformations
 	int firstFlag = 1;
@@ -175,7 +142,7 @@ void Model::rotationAroundPoint(struct rotationAP *p) {
 	r.rotationDegrees = p->rotationAngle;
 	r.rotationVec = rotationAxis;
 
-	addCompTransformation(&t, &r, NULL, NULL, p->time);
+	addCompTransformation(&t, &r, NULL, NULL, NULL,  p->time);
 }
 
 /*Bezier evaluation function, given 3 control points and a t, returns the bezier curve point at t (B(t))*/
@@ -204,20 +171,20 @@ void Model::bezierCurve(struct bezier b) {
 	//if (step < 0.0000001)
 		//step = 1;
 
-	std::cout << "Bezier points | vector:" << std::endl;
+	//std::cout << "Bezier points | vector:" << std::endl;
 
 	for (double t = 0; t < 1; t += 0.01) {
 		
 		//Calculate next position
 		newPoint = evaluateBezierCurve(b, t);
-		std::cout << "Point: (" << newPoint.x << "," << newPoint.y << "," << newPoint.z << ")";
+		//std::cout << "Point: (" << newPoint.x << "," << newPoint.y << "," << newPoint.z << ")";
 
 		//Calculate vector from current to next
 		trans.translationVec = newPoint - currentPos;
-		std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
+		//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 			
 		//Puts translation into queue
-		addCompTransformation(&trans, NULL, NULL, NULL, b.time/100);
+		addCompTransformation(&trans, NULL, NULL, NULL, NULL, b.time/100);
 
 		//Update current pos
 		currentPos += trans.translationVec;
@@ -227,11 +194,11 @@ void Model::bezierCurve(struct bezier b) {
 
 //Auxiliar para bsplineTest
 glm::vec3 GetPoint(int i, struct bspline l) {
-	// return 1st point
+	//retorna primeiro ponto
 	if (i<0) {
 		return	l.controlPoints[0];
 	}
-	// return last point
+	//retorna ultimo ponto
 	if (i<4)
 		return l.controlPoints[i];
 
@@ -252,16 +219,16 @@ void Model::BSplineTest(struct bspline l) {
 
 		float t = (float)i / LOD;
 
-		// the t value inverted
+		// t complement
 		float it = 1.0f - t;
 
-		// calculate blending functions
+		// calculate b functions
 		float b0 = it*it*it / 6.0f;
 		float b1 = (3 * t*t*t - 6 * t*t + 4) / 6.0f;
 		float b2 = (-3 * t*t*t + 3 * t*t + 3 * t + 1) / 6.0f;
 		float b3 = t*t*t / 6.0f;
 
-		// sum the control points mulitplied by their respective blending functions
+		// sum the control points mulitplied by their b
 		float x = b0 * GetPoint(i + 0, l).x +
 			b1 * GetPoint(i + 1, l).x +
 			b2 * GetPoint(i + 2, l).x +
@@ -277,21 +244,19 @@ void Model::BSplineTest(struct bspline l) {
 			b2 * GetPoint(i + 2, l).z +
 			b3 * GetPoint(i + 3, l).z;
 		
-		std::cout << "Point: (" << x << "," << y << "," << z << ")";
+		//std::cout << "Point: (" << x << "," << y << "," << z << ")";
 
 		//Calculates vector
 		trans.translationVec = glm::vec3(x,y,z) - currentPos;
 
-		std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
+		//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 
 		//Puts translation to queue
-		addCompTransformation(&trans, NULL, NULL, NULL, l.time/5 );
+		addCompTransformation(&trans, NULL, NULL, NULL, NULL, l.time/5 );
 
 		//Update current pos
 		currentPos += trans.translationVec;
 
-		// specify the point
-		//glVertex3f(x, y, z);
 	}
 }
 

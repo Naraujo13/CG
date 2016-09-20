@@ -49,7 +49,10 @@ struct bspline {
 	glm::vec3 controlPoints[4];
 	long double time;
 };
-
+struct extraProjection3D {
+	glm::vec3 projVector;
+	long double time;
+};
 
 
 
@@ -119,7 +122,7 @@ public:
 
 
 	//Transformations
-	void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, long double time);
+	void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, struct extraProjection3D *p3D, long double time);
  	void Model::applyTransformation();
 	void Model::rotationAroundPoint(struct rotationAP *p);
 	void bezierCurve(struct bezier b);

@@ -119,17 +119,9 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 void ModelManager::transformModels() {
 	int i = 0;
 	for (auto it = ModelManager::models.begin(); it != ModelManager::models.end(); ++it, i++) {
-		//std::cout << (*it->getTransformationQueue()).size() << std::endl;
-		//Queue not empty, state == 1, transformation ocurring, get time bewtween transformations and tests if it has already passed
 		if (it->getState()) {
 			it->applyTransformation();
 		}
-	//	else if (it->getState() && !(it->getTransformationQueue().empty()))
-		//	std::cout << "Not enough time on model " << i << " has passed since last transformation..." << std::endl;
-		//else if (it->getState() && it->getTransformationQueue().empty()) {		//Queue empty, transformations finished
-			//std::cout << "Transformation of model " << i << " has finished. Queue is empty? " << it->getTransformationQueue().empty() << " Size: " << models[0].getTransformationQueue().size() << std::endl;
-			//it->setState(0);
-		//}
 	}
 }
 

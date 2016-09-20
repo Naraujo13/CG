@@ -57,21 +57,23 @@ void printInstructions() {
 	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
 	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
 	std::cout << "\t4. Movimentação da câmera:" << std::endl;
-	std::cout << "\t\t3.1. A tecla \"Control\" libera o mouse." << std::endl;
-	std::cout << "\t\t3.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
+	std::cout << "\t\t4.1. A tecla \"Control\" libera o mouse." << std::endl;
+	std::cout << "\t\t4.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
 	std::cout << "\t5. Controle Geral:" << std::endl;
-	std::cout << "\t\t5.1.O modelo ativo no momento pode ser escolhido atraves do campo da interface ou das teclas numericas." << std::endl;
-	std::cout << "\t\t5.2. A tecla \"Delete\" ira resetar todas as entradas da interface." << std::endl;
+	std::cout << "\t\t5.1. O modelo ativo no momento pode ser escolhido atraves do campo da interface ou das teclas numericas." << std::endl;
+	std::cout << "\t\t5.2. A tecla \"Insert\" adiciona um novo modelo utilizando a mesh e a posicao inicial selecionadas na interface" << std::endl;
+	std::cout << "\t\t5.3. A tecla \"Delete\" ira resetar todas as entradas da interface." << std::endl;
 	std::cout << "\t6. Transformacoes sobre modelos:" << std::endl;
 	std::cout << "\t\t6.1. A tecla \"T\" adiciona uma translacao com os parametros selecionados na interface." << std::endl;
 	std::cout << "\t\t6.2. A tecla \"S\" adiciona uma escala com os parametros selecionados na interface." << std::endl;
 	std::cout << "\t\t6.3. A tecla \"R\" adiciona uma rotacao com os parametros selecionados na interface." << std::endl;
 	std::cout << "\t\t6.4. A tecla \"C\" adiciona uma transformacao composta usando os parametros de rotacao e translacao, e o tempo pra realizar a animacao composta." << std::endl;
 	std::cout << "\t\t6.5. A tecla \"H\" adiciona uma transformacao de shear com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.6. A tecla \"A\" adiciona uma rotação ao redor de ponto com os parametros selecionados na interface" << std::endl;
+	std::cout << "\t\t6.6. A tecla \"A\" adiciona uma rotacao ao redor de ponto com os parametros selecionados na interface" << std::endl;
 	std::cout << "\t\t6.7. A tecla \"B\" adiciona uma curva B-Spline com os parametros selecionados na interface" << std::endl;
 	std::cout << "\t\t6.8. A tecla \"Z\" adiciona uma curva Bezier com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.9. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
+	std::cout << "\t\t6.9. A tecla \"D\" adiciona uma projecao 3Dom os parametros selecionados na interface." << std::endl;
+	std::cout << "\t\t6.10. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
 	std::cout << "\t\t Todos os comandos da secao 6 serao realizados para o modelo ativo no momento." << std::endl;
 	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
 	std::cout << "----------------------------------" << std::endl;
@@ -103,29 +105,31 @@ int main(void)
 	struct bezier b;
 	struct bspline l;
 	struct rotationAP p;
+	struct extraProjection3D p3D;
 
 	t.translationVec = glm::vec3 (0,0,0);
-	t.time = 0.0f;
-	s.scaleVec = glm::vec3(0, 0, 0);
-	s.time = 0.0f;
-	r.rotationVec = glm::vec3(0, 0, 0);
+	t.time = 1.0f;
+	s.scaleVec = glm::vec3(1);
+	s.time = 1.0f;
+	r.rotationVec = glm::vec3(1, 0, 0);
 	r.rotationDegrees = 0.0f;
-	r.time = 0.0f;
+	r.time = 1.0f;
 	h.shearVec = glm::vec3(0, 0, 0);
-	h.time = 0.0f;
+	h.time = 1.0f;
 	b.controlPoints[0] = glm::vec3(0);
 	b.controlPoints[1] = glm::vec3(0);
 	b.controlPoints[2] = glm::vec3(0);
-	b.time = 0.0f;
+	b.time = 1.0f;
 	l.controlPoints[0] = glm::vec3(0);
 	l.controlPoints[1] = glm::vec3(0);
 	l.controlPoints[2] = glm::vec3(0);
 	l.controlPoints[3] = glm::vec3(0);
-	l.time = 0.0f;
+	l.time = 1.0f;
 	p.rotationAngle = 0.0f;
 	p.point = glm::vec3(0);
-	p.time = 0.0f;
-
+	p.time = 1.0f;
+	p3D.projVector = glm::vec3(0,0,2);
+	p3D.time = 0.0f;
 
 	// Initialise GLFW
 	if (!glfwInit())
@@ -174,7 +178,10 @@ int main(void)
 	g_pToolBar = TwNewBar("CG UFPel ToolBar");
 	TwAddSeparator(g_pToolBar, "Mesh", NULL);
 	TwAddButton(g_pToolBar, "Mesh options", NULL, NULL, "");
-	//Meshes
+	
+
+	//Número de modelos
+	int numModelos = 4;//Meshes
 	// Create an internal enum to name the meshes
 	typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
 
@@ -188,41 +195,50 @@ int main(void)
 	TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 3);
 
 	// Link it to the tweak bar
-	TwAddVarRW(g_pToolBar, "Mesh", MeshTwType, &m_currentMesh, NULL);
-	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=3 step=1 label='Active model");
+	TwAddVarRW(g_pToolBar, "Mesh: ", MeshTwType, &m_currentMesh, NULL);
+	//New Model position
+	glm::vec3 newModelPos(0);
+	TwAddVarRW(g_pToolBar, "New Model position:", TW_TYPE_DIR3D, &newModelPos, NULL);
+	
+	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=20 step=1 label='Active model");
 
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
 	TwAddButton(g_pToolBar, "Translation parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &t.translationVec, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.0 step=0.1 label='Time to do the translation (seconds):");
 	
 
 	//Add 'Scale' options
 	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
 	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
-	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
+	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.0 step=0.1 help='Time to do the scaling (seconds)' ");
 
 	//Add 'Rotation' options
 	TwAddSeparator(g_pToolBar, "Rotation", NULL);
 	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &r.rotationVec, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &r.rotationDegrees, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.1 step=0.1 label='Rotation time'");
+	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.0 step=0.1 label='Rotation time'");
 	
 	//Add 'Composition animation' options
 	double compositionTime = 0.0f;
 	TwAddSeparator(g_pToolBar, "Composition", NULL);
 	TwAddButton(g_pToolBar, "Compasition parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Composition Time:", TW_TYPE_DOUBLE, &compositionTime, " min=0.1 step=0.1 label='Composition time'");
+	TwAddVarRW(g_pToolBar, "Composition Time:", TW_TYPE_DOUBLE, &compositionTime, " min=0.0 step=0.1 label='Composition time'");
 
 	//Add 'Rotation around point' options
 	TwAddSeparator(g_pToolBar, "Rotation around point", NULL);
 	TwAddButton(g_pToolBar, "Rotation around point parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Point to be rotated around: ", TW_TYPE_DIR3F, &p.point, "step=0.1");
 	TwAddVarRW(g_pToolBar, "Orbit degrees:", TW_TYPE_FLOAT, &p.rotationAngle, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &p.time, " min=0.1 step=0.1 label='Rotation around point time'");
+	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &p.time, " min=0.0 step=0.1 label='Rotation around point time'");
+
+	TwAddSeparator(g_pToolBar, "Projection 3D", NULL);
+	TwAddButton(g_pToolBar, "Projection 3D:", NULL, NULL, "");
+	TwAddVarRW(g_pToolBar, "Projection Vector: ", TW_TYPE_DIR3F, &p3D.projVector, "step=0.1");
+	//TwAddVarRW(g_pToolBar, "Projection Time", TW_TYPE_DOUBLE, &p3D.time, " min=0.0 step=0.1");
 
 	//Add 'Shear' Options
 	TwAddSeparator(g_pToolBar, "Shear", NULL);
@@ -236,7 +252,7 @@ int main(void)
 	TwAddButton(g_pToolBar, "P0: current position.", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "P1:", TW_TYPE_DIR3F, &b.controlPoints[1], "step=0.1");
 	TwAddVarRW(g_pToolBar, "P2:", TW_TYPE_DIR3F, &b.controlPoints[2], "step=0.1");
-	TwAddVarRW(g_pToolBar, "Bezier Time:", TW_TYPE_DOUBLE, &b.time, " min=0.1 step=0.1 label='Bezier time'");
+	TwAddVarRW(g_pToolBar, "Bezier Time:", TW_TYPE_DOUBLE, &b.time, " min=0.0 step=0.1 label='Bezier time'");
 
 	//Add 'B-Spline' Options
 	TwAddSeparator(g_pToolBar, "B-Spline curve", NULL);
@@ -245,7 +261,9 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "P1: ", TW_TYPE_DIR3F, &l.controlPoints[1], "step=0.1");
 	TwAddVarRW(g_pToolBar, "P2: ", TW_TYPE_DIR3F, &l.controlPoints[2], "step=0.1");
 	TwAddVarRW(g_pToolBar, "P3: ", TW_TYPE_DIR3F, &l.controlPoints[3], "step=0.1");
-	TwAddVarRW(g_pToolBar, "B-Spline Time:", TW_TYPE_DOUBLE, &l.time, " min=0.1 step=0.1 label='B-Spline time'");
+	TwAddVarRW(g_pToolBar, "B-Spline Time:", TW_TYPE_DOUBLE, &l.time, " min=0.0 step=0.1 label='B-Spline time'");
+
+
 
 	TwAddSeparator(g_pToolBar, "End", NULL);
 
@@ -384,74 +402,89 @@ int main(void)
 
 
 		//Translação ao pressionar T
-		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Translation ('T')
+		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T')
 			lastTime3 = glfwGetTime();
-			//(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T', 0);
-			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, t.time);
+			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
 			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale ('S')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
 			lastTime3 = glfwGetTime();
-			//(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S', 0);
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, s.time);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, NULL, s.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation ('R')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Rotation ('R')
 			lastTime3 = glfwGetTime();
-			//(*manager.getModels())[currentModelID].addTransformation(rotationDirection, rotationTime, 'R', rotationDegrees);
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, r.time);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotation Around point ('A') (not working yet)
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotation Around point ('A') (not working yet)
 			lastTime3 = glfwGetTime();
 			(*manager.getModels())[currentModelID].rotationAroundPoint(&p);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala ('C')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotação + Translação + Escala ('C')
 			lastTime3 = glfwGetTime();		
-			(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, compositionTime);
+			(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, NULL, compositionTime);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Shear ('H')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Shear ('H')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, h.time);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, NULL, h.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Bezier ('Z')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Bezier ('Z')
 			lastTime3 = glfwGetTime();
 			(*manager.getModels())[currentModelID].bezierCurve(b);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//B-Spline ('B')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//B-Spline ('B')
 			lastTime3 = glfwGetTime();
-			//(*manager.getModels())[currentModelID].BSplineCurve(l);
 			(*manager.getModels())[currentModelID].BSplineTest(l);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos){	//Projection 3D ('D')
+			lastTime3 = glfwGetTime();
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, NULL, &p3D, 0);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
+			lastTime3 = glfwGetTime();
+
+			if (m_currentMesh == SUZANNE)
+				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
+			else if(m_currentMesh == GOOSE)
+				manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
+			else if(m_currentMesh == CUBE)
+				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
+			numModelos++;
+		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input data
 			t.translationVec = glm::vec3(0, 0, 0);
-			t.time = 0.0f;
-			s.scaleVec = glm::vec3(0, 0, 0);
-			s.time = 0.0f;
-			r.rotationVec = glm::vec3(0, 0, 0);
+			t.time = 1.0f;
+			s.scaleVec = glm::vec3(1);
+			s.time = 1.0f;
+			r.rotationVec = glm::vec3(1, 0, 0);
 			r.rotationDegrees = 0.0f;
-			r.time = 0.0f;
+			r.time = 1.0f;
 			h.shearVec = glm::vec3(0, 0, 0);
-			h.time = 0.0f;
+			h.time = 1.0f;
 			b.controlPoints[0] = glm::vec3(0);
 			b.controlPoints[1] = glm::vec3(0);
 			b.controlPoints[2] = glm::vec3(0);
-			b.time = 0.0f;
+			b.time = 1.0f;
 			l.controlPoints[0] = glm::vec3(0);
 			l.controlPoints[1] = glm::vec3(0);
 			l.controlPoints[2] = glm::vec3(0);
 			l.controlPoints[3] = glm::vec3(0);
-			l.time = 0.0f;
+			l.time = 1.0f;
 			p.rotationAngle = 0.0f;
 			p.point = glm::vec3(0);
-			p.time = 0.0f;
+			p.time = 1.0f;
+			p3D.projVector = glm::vec3(0,0,2);
+			p3D.time = 1.0f;
+			newModelPos = glm::vec3(0);
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
 			lastTime3 = glfwGetTime();
 			manager.setModelTransformation(currentModelID);
 		}
