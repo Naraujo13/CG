@@ -92,6 +92,33 @@ int main(void)
 	int currentModelID = 0;
 	int nUseMouse = 0;
 
+	//Transformation auxiliaries
+	struct translation t;
+	struct rotation r;
+	struct scale s;
+	struct shear h;
+	struct bezier b;
+	struct bspline l;
+	t.translationVec = glm::vec3 (0,0,0);
+	t.time = 0.0f;
+	s.scaleVec = glm::vec3(0, 0, 0);
+	s.time = 0.0f;
+	r.rotationVec = glm::vec3(0, 0, 0);
+	r.rotationDegrees = 0.0f;
+	r.time = 0.0f;
+	h.shearVec = glm::vec3(0, 0, 0);
+	h.time = 0.0f;
+	b.controlPoints[0] = glm::vec3(0);
+	b.controlPoints[1] = glm::vec3(0);
+	b.controlPoints[2] = glm::vec3(0);
+	b.time = 0.0f;
+	l.controlPoints[0] = glm::vec3(0);
+	l.controlPoints[1] = glm::vec3(0);
+	l.controlPoints[2] = glm::vec3(0);
+	l.controlPoints[3] = glm::vec3(0);
+	l.time = 0.0f;
+
+
 	// Initialise GLFW
 	if (!glfwInit())
 	{
@@ -160,29 +187,29 @@ int main(void)
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
 	TwAddButton(g_pToolBar, "Translation parameters:", NULL, NULL, "");
-	glm::vec3 translationVector(0,0,0);
-	double translationTime=1.0;
-	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &translationVector, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &translationTime, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
+	//glm::vec3 translationVector(0,0,0);
+	//double translationTime=1.0;
+	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &t.translationVec, " label='Translation to put to queue:");
+	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
 	
 
 	//Add 'Scale' options
 	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
 	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
-	double scaleVector = 1.0;
-	double scaleTime = 1.0;
-	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DOUBLE, &scaleVector, "min=0.1 step=0.1 label='Scale to put to queue:");
-	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &scaleTime, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
+	//double scaleVector = 1.0;
+	//double scaleTime = 1.0;
+	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
+	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
 
 	//Add 'Rotation' options
 	TwAddSeparator(g_pToolBar, "Rotation", NULL);
 	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
-	float rotationDegrees = 0.0f;
-	double rotationTime = 1.0f;
-	glm::vec3 rotationDirection(1, 0, 0);
-	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &rotationDirection, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &rotationDegrees, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &rotationTime, " min=0.1 step=0.1 label='Rotation time'");
+	//float rotationDegrees = 0.0f;
+	//double rotationTime = 1.0f;
+	//glm::vec3 rotationDirection(1, 0, 0);
+	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &r.rotationVec, " label='Translation to put to queue:");
+	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &r.rotationDegrees, "step=0.5 label='Rotation angle'");
+	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.1 step=0.1 label='Rotation time'");
 	
 	//Add 'Composition animation' options
 	double compositionTime = 0.0f;
@@ -201,23 +228,29 @@ int main(void)
 	//Add 'Shear' Options
 	TwAddSeparator(g_pToolBar, "Shear", NULL);
 	TwAddButton(g_pToolBar, "Shear:", NULL, NULL, "");
-	glm::vec3 shearVector(0, 0, 0);
-	double shearTime = 1.0f;
-	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &shearVector, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &shearTime, " min=0.0 step=0.1 label='Shear time'");
+	//glm::vec3 shearVector(0, 0, 0);
+	//double shearTime = 1.0f;
+	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &h.shearVec, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &h.time, " min=0.0 step=0.1 label='Shear time'");
 
 	//Add 'Bezier' Options
 	//Add 'Shear' Options
 	TwAddSeparator(g_pToolBar, "Bezier curve", NULL);
 	TwAddButton(g_pToolBar, "Bezier Curve:", NULL, NULL, "");
 	//Control points
-	glm::vec4 p1(0.0), p2(0.0), p3(0.0), p4(0.0);
-	TwAddVarRW(g_pToolBar, "Control point 1:", TW_TYPE_DIR3F, &p1, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Control point 2:", TW_TYPE_DIR3F, &p2, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Control point 3:", TW_TYPE_DIR3F, &p3, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Control point 4:", TW_TYPE_DIR3F, &p4, "step=0.1");
+	TwAddButton(g_pToolBar, "P0: current position.", NULL, NULL, "");
+	TwAddVarRW(g_pToolBar, "P1:", TW_TYPE_DIR3F, &b.controlPoints[1], "step=0.1");
+	TwAddVarRW(g_pToolBar, "P2:", TW_TYPE_DIR3F, &b.controlPoints[2], "step=0.1");
+	TwAddVarRW(g_pToolBar, "Bezier Time:", TW_TYPE_DOUBLE, &b.time, " min=0.1 step=0.1 label='Bezier time'");
 
-
+	//Add 'B-Spline' Options
+	TwAddSeparator(g_pToolBar, "B-Spline curve", NULL);
+	TwAddButton(g_pToolBar, "B-Spline Curve:", NULL, NULL, "");
+	TwAddButton(g_pToolBar, "P0: current position. ", NULL, NULL, "");
+	TwAddVarRW(g_pToolBar, "P1: ", TW_TYPE_DIR3F, &l.controlPoints[1], "step=0.1");
+	TwAddVarRW(g_pToolBar, "P2: ", TW_TYPE_DIR3F, &l.controlPoints[2], "step=0.1");
+	TwAddVarRW(g_pToolBar, "P3: ", TW_TYPE_DIR3F, &l.controlPoints[3], "step=0.1");
+	TwAddVarRW(g_pToolBar, "B-Spline Time:", TW_TYPE_DOUBLE, &l.time, " min=0.1 step=0.1 label='B-Spline time'");
 
 	TwAddSeparator(g_pToolBar, "End", NULL);
 
@@ -361,19 +394,22 @@ int main(void)
 
 
 		//Translação ao pressionar T
-		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Translation
+		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Translation ('T')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T', 0);
+			//(*manager.getModels())[currentModelID].addTransformation(translationVector, translationTime, 'T', 0);
+			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, t.time);
 			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Scale ('S')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S', 0);
+			//(*manager.getModels())[currentModelID].addTransformation(glm::vec3(scaleVector, scaleVector, scaleVector), scaleTime, 'S', 0);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, s.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Rotation ('R')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(rotationDirection, rotationTime, 'R', rotationDegrees);
+			//(*manager.getModels())[currentModelID].addTransformation(rotationDirection, rotationTime, 'R', rotationDegrees);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, r.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_P) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotation Around point (not working)
@@ -381,33 +417,53 @@ int main(void)
 			//(*manager.getModels())[currentModelID].addCompTransformation(rotationDirection, rotationTime, 'R', rotationDegrees, translationVector, translationTime, 'T', 0);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_I) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala
-			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(translationVector, compositionTime, 'T', 0, rotationDirection, compositionTime, 'R', rotationDegrees, glm::vec3(scaleVector, scaleVector, scaleVector), compositionTime, 'S', 0);
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_I) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala ('I')
+			lastTime3 = glfwGetTime();		
+			(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, compositionTime);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Shear ('H')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addTransformation(shearVector, shearTime, 'H', 0);
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, h.time);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//Bezier ('Z')
+			lastTime3 = glfwGetTime();
+			(*manager.getModels())[currentModelID].bezierCurve(b);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_L) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//B-Spline ('L')
+			lastTime3 = glfwGetTime();
+			//(*manager.getModels())[currentModelID].BSplineCurve(l);
+			(*manager.getModels())[currentModelID].BSplineTest(l);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input
-			translationVector = glm::vec3(0, 0, 0);
-			translationTime = 0;
-			scaleVector = 0;
-			scaleTime = 0;
-			rotationDirection = glm::vec3(0, 0, 0);
-			rotationDegrees = 0;
-			rotationTime = 0;
-			shearVector = glm::vec3(0, 0, 0);
-			shearTime = 0;
+			t.translationVec = glm::vec3(0, 0, 0);
+			t.time = 0.0f;
+			s.scaleVec = glm::vec3(0, 0, 0);
+			s.time = 0.0f;
+			r.rotationVec = glm::vec3(0, 0, 0);
+			r.rotationDegrees = 0.0f;
+			r.time = 0.0f;
+			h.shearVec = glm::vec3(0, 0, 0);
+			h.time = 0.0f;
+			b.controlPoints[0] = glm::vec3(0);
+			b.controlPoints[1] = glm::vec3(0);
+			b.controlPoints[2] = glm::vec3(0);
+			b.time = 0.0f;
+			l.controlPoints[0] = glm::vec3(0);
+			l.controlPoints[1] = glm::vec3(0);
+			l.controlPoints[2] = glm::vec3(0);
+			l.controlPoints[3] = glm::vec3(0);
+			l.time = 0.0f;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
 			lastTime3 = glfwGetTime();
 			manager.setModelTransformation(currentModelID);
 		}
 
-
+		//Transform models
 		manager.transformModels();
 		
 		// Measure speed
@@ -426,56 +482,9 @@ int main(void)
 		computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
-		//::mat4 ModelMatrix      = model.getModelMatrix();
-		//glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*manager.getModels())[0].getModelMatrix();
 
+		//Draw
 		manager.drawModels(ViewMatrixID, ViewMatrix, ProjectionMatrix, g_pWindow);
-
-		/**
-		// Clear the screen
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Use our shader
-		glUseProgram(manager.getProgramID());
-
-		
-
-		// Send our transformation to the currently bound shader,
-		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		glUniformMatrix4fv(model.getModelMatrixID(), 1, GL_FALSE, &model.getModelMatrix()[0][0]);
-		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
-
-		glm::vec3 lightPos = glm::vec3(4, 4, 4);
-		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-
-		// Bind our texture in Texture Unit 0
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, *model.getTexture());
-		// Set our "myTextureSampler" sampler to user Texture Unit 0
-		glUniform1i(model.getTextureID(), 0);
-
-		(*model.getMesh()).loadMesh();
-
-		// Draw the triangles !
-		glDrawElements(
-			GL_TRIANGLES,        // mode
-			(*(*model.getMesh()).getIndices()).size(),      // count
-			GL_UNSIGNED_SHORT,   // type
-			(void*)0             // element array buffer offset
-			);
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-
-		// Draw tweak bars
-		TwDraw();
-
-		// Swap buffers
-		glfwSwapBuffers(g_pWindow);
-		glfwPollEvents();
-		*/
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(g_pWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

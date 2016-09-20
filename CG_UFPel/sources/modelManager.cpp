@@ -39,13 +39,7 @@ GLuint ModelManager::getLightID() {
 	return LightID;
 }
 
-double Model::getLastTransformed() {
-	return lastTransformed;
-}
 
-double Model::getTimeBtwn() {
-	return timeBtwn;
-}
 
 //creates a new model and adds to the vector
 void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
