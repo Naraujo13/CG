@@ -59,89 +59,6 @@ long double Model::getTimeBtwn() {
 }
 //Others
 
-void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees) {
-	//Split and push all the transformations to queue with the time between them
-	int steps = (int)time * STEPS;
-	double stepTime = time / steps;
-	
-	if (type == 'T') {	//Translation
-		glm::vec3 stepTransformationVec = transformation / (glm::vec3(steps, steps, steps));
-		glm::mat4 stepTransformation(1.0);
-		stepTransformation[3][0] = stepTransformationVec.x;
-		stepTransformation[3][1] = stepTransformationVec.y;
-		stepTransformation[3][2] = stepTransformationVec.z;
-
-		int firstFlag = 1;
-
-		for (int i = 0; i < steps; i++) {
-			if (firstFlag == 1) {
-				transformationQueue.push_back(Transformation(stepTransformation, 0));
-				firstFlag = 0;
-			}
-			else
-				transformationQueue.push_back(Transformation(stepTransformation, stepTime));
-		}
-	}
-	else if (type == 'S') {	//Scale
-		//glm::vec3 stepTransformationVec;
-		glm::mat4 stepTransformation(1.0);
-		double raiz = (1.0/(double)steps);
-		
-
-		//stepTransformationVec.x = pow(transformation.x, raiz) / 2 + 0.5;
-		//stepTransformationVec.y = pow(transformation.y, raiz) / 2 + 0.5;
-		//stepTransformationVec.z = pow(transformation.z, raiz) / 2 + 0.5;
-
-		stepTransformation[0][0] = pow(transformation.x, raiz) / 2 + 0.5;
-		stepTransformation[1][1] = pow(transformation.y, raiz) / 2 + 0.5;
-		stepTransformation[2][2] = pow(transformation.z, raiz) / 2 + 0.5;
-
-		for (int i = 0; i < steps; i++) {
-			transformationQueue.push_back(Transformation(stepTransformation, stepTime));
-		}
-	}
-	else if (type == 'R') {	//Rotation
-		int firstFlag = 1;
-		//double rotationDegreesStep = rotationDegrees / steps;
-		
-		glm::mat4 stepTransformation(1.0);
-
-		stepTransformation = glm::rotate(stepTransformation, rotationDegrees/steps, transformation);
-		for (int i = 0; i < steps; i++) {
-			if (firstFlag == 1) {
-				transformationQueue.push_back(Transformation(stepTransformation, 0));
-				firstFlag = 0;
-			}
-			else
-				transformationQueue.push_back(Transformation(stepTransformation, stepTime));
-		}
-	}
-	else if (type == 'H') {	//Shear
-
-		int firstFlag = 1;
-		glm::vec3 stepTransformation = transformation / (glm::vec3(steps, steps, steps));
-
-		glm::mat4 shearMatrix(1.0);
-		shearMatrix[0][1] = stepTransformation.x;
-		shearMatrix[0][2] = stepTransformation.y;
-		shearMatrix[0][3] = stepTransformation.z;
-
-
-		//transformationQueue.push_back(Transformation(transformation, 0, type, 0));
-		for (int i = 0; i < steps; i++) {
-			if (firstFlag == 1) {
-				transformationQueue.push_back(Transformation(shearMatrix, 0));
-				firstFlag = 0;
-			}
-			else
-				transformationQueue.push_back(Transformation(shearMatrix, stepTime));
-		}
-	}
-	else if (type = 'B') {	//Bezier curve
-		int firstFlag = 1;
-	}
-}
-
 
 void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, long double time){
 	//Split and push all the transformations to queue with the time between them
@@ -228,6 +145,37 @@ void Model::addCompTransformation(struct translation *t, struct rotation *r, str
 			transformationQueue.push_back(Transformation(stepTransformation, stepTime));
 		}
 	}
+}
+
+void Model::rotationAroundPoint(struct rotationAP *p) {
+	//Split and push all the transformations to queue with the time between them
+	int steps = ceil(p->time * STEPS);
+	if (steps <= 0)
+		steps = 1;
+	long double stepTime = (long double)p->time / (long double)steps - 0.005;
+	
+	//Gest current pos
+	glm::vec3 currentPos;
+	currentPos.x = modelMatrix[3][0];
+	currentPos.y = modelMatrix[3][1];
+	currentPos.z = modelMatrix[3][2];
+
+	//Calculate vector to point
+	glm::vec3 toPoint = p->point - currentPos;
+
+	//Transformation matrix
+	glm::mat4 stepTransformation(1.0f);
+
+
+	struct translation t;
+	t.translationVec = toPoint * glm::vec3(2);
+
+	glm::vec3 rotationAxis = glm::cross(t.translationVec, vec3(0.0, 0.0, 1.0));
+	struct rotation r;
+	r.rotationDegrees = p->rotationAngle;
+	r.rotationVec = rotationAxis;
+
+	addCompTransformation(&t, &r, NULL, NULL, p->time);
 }
 
 /*Bezier evaluation function, given 3 control points and a t, returns the bezier curve point at t (B(t))*/

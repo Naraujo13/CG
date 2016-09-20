@@ -32,6 +32,11 @@ struct rotation {
 	float rotationDegrees;
 	long double time;
 };
+struct rotationAP {
+	glm::vec3 point;
+	float rotationAngle;
+	long double time;
+};
 struct shear {
 	glm::vec3 shearVec;
 	long double time;
@@ -112,14 +117,12 @@ public:
 	 void setModelMatrix(glm::mat4 transformation);
 	 void setState(int newState);
 
-	//Translations
-	void Model::addTransformation(glm::vec3 transformation, double time, char type, float rotationDegrees);
-	//Translação, rotação, escala
+
+	//Transformations
 	void Model::addCompTransformation(struct translation *t, struct rotation *r, struct scale *s, struct shear *h, long double time);
  	void Model::applyTransformation();
-
+	void Model::rotationAroundPoint(struct rotationAP *p);
 	void bezierCurve(struct bezier b);
-	void BSplineCurve(struct bspline l);
 	void Model::BSplineTest(struct bspline l);
 
 };

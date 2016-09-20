@@ -66,9 +66,12 @@ void printInstructions() {
 	std::cout << "\t\t6.1. A tecla \"T\" adiciona uma translacao com os parametros selecionados na interface." << std::endl;
 	std::cout << "\t\t6.2. A tecla \"S\" adiciona uma escala com os parametros selecionados na interface." << std::endl;
 	std::cout << "\t\t6.3. A tecla \"R\" adiciona uma rotacao com os parametros selecionados na interface." << std::endl;
-	std::cout << "\t\t6.4. A tecla \"I\" adiciona uma transformacao composta usando os parametros de rotacao e translacao, e o tempo pra realizar a animacao composta." << std::endl;
+	std::cout << "\t\t6.4. A tecla \"C\" adiciona uma transformacao composta usando os parametros de rotacao e translacao, e o tempo pra realizar a animacao composta." << std::endl;
 	std::cout << "\t\t6.5. A tecla \"H\" adiciona uma transformacao de shear com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.6. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
+	std::cout << "\t\t6.6. A tecla \"A\" adiciona uma rotação ao redor de ponto com os parametros selecionados na interface" << std::endl;
+	std::cout << "\t\t6.7. A tecla \"B\" adiciona uma curva B-Spline com os parametros selecionados na interface" << std::endl;
+	std::cout << "\t\t6.8. A tecla \"Z\" adiciona uma curva Bezier com os parametros selecionados na interface" << std::endl;
+	std::cout << "\t\t6.9. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
 	std::cout << "\t\t Todos os comandos da secao 6 serao realizados para o modelo ativo no momento." << std::endl;
 	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
 	std::cout << "----------------------------------" << std::endl;
@@ -99,6 +102,8 @@ int main(void)
 	struct shear h;
 	struct bezier b;
 	struct bspline l;
+	struct rotationAP p;
+
 	t.translationVec = glm::vec3 (0,0,0);
 	t.time = 0.0f;
 	s.scaleVec = glm::vec3(0, 0, 0);
@@ -117,6 +122,9 @@ int main(void)
 	l.controlPoints[2] = glm::vec3(0);
 	l.controlPoints[3] = glm::vec3(0);
 	l.time = 0.0f;
+	p.rotationAngle = 0.0f;
+	p.point = glm::vec3(0);
+	p.time = 0.0f;
 
 
 	// Initialise GLFW
@@ -183,12 +191,9 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Mesh", MeshTwType, &m_currentMesh, NULL);
 	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=3 step=1 label='Active model");
 
-
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
 	TwAddButton(g_pToolBar, "Translation parameters:", NULL, NULL, "");
-	//glm::vec3 translationVector(0,0,0);
-	//double translationTime=1.0;
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &t.translationVec, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.1 step=0.1 label='Time to do the translation (seconds):");
 	
@@ -196,17 +201,12 @@ int main(void)
 	//Add 'Scale' options
 	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
 	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
-	//double scaleVector = 1.0;
-	//double scaleTime = 1.0;
 	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
 	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.1 step=0.1 help='Time to do the scaling (seconds)' ");
 
 	//Add 'Rotation' options
 	TwAddSeparator(g_pToolBar, "Rotation", NULL);
 	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
-	//float rotationDegrees = 0.0f;
-	//double rotationTime = 1.0f;
-	//glm::vec3 rotationDirection(1, 0, 0);
 	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &r.rotationVec, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &r.rotationDegrees, "step=0.5 label='Rotation angle'");
 	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.1 step=0.1 label='Rotation time'");
@@ -220,24 +220,19 @@ int main(void)
 	//Add 'Rotation around point' options
 	TwAddSeparator(g_pToolBar, "Rotation around point", NULL);
 	TwAddButton(g_pToolBar, "Rotation around point parameters:", NULL, NULL, "");
-	glm::vec3 rotationAP(1, 0, 0);
-	double rotationAPTime = 1.0f;
-	TwAddVarRW(g_pToolBar, "Point to be rotated: ", TW_TYPE_DIR3F, &rotationAP, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &rotationAPTime, " min=0.1 step=0.1 label='Rotation around point time'");
+	TwAddVarRW(g_pToolBar, "Point to be rotated around: ", TW_TYPE_DIR3F, &p.point, "step=0.1");
+	TwAddVarRW(g_pToolBar, "Orbit degrees:", TW_TYPE_FLOAT, &p.rotationAngle, "step=0.5 label='Rotation angle'");
+	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &p.time, " min=0.1 step=0.1 label='Rotation around point time'");
 
 	//Add 'Shear' Options
 	TwAddSeparator(g_pToolBar, "Shear", NULL);
 	TwAddButton(g_pToolBar, "Shear:", NULL, NULL, "");
-	//glm::vec3 shearVector(0, 0, 0);
-	//double shearTime = 1.0f;
 	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &h.shearVec, "step=0.1");
 	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &h.time, " min=0.0 step=0.1 label='Shear time'");
 
 	//Add 'Bezier' Options
-	//Add 'Shear' Options
 	TwAddSeparator(g_pToolBar, "Bezier curve", NULL);
 	TwAddButton(g_pToolBar, "Bezier Curve:", NULL, NULL, "");
-	//Control points
 	TwAddButton(g_pToolBar, "P0: current position.", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "P1:", TW_TYPE_DIR3F, &b.controlPoints[1], "step=0.1");
 	TwAddVarRW(g_pToolBar, "P2:", TW_TYPE_DIR3F, &b.controlPoints[2], "step=0.1");
@@ -312,11 +307,6 @@ int main(void)
 	
 	printInstructions();
 	 
-	//TwAddButton(g_pToolBar, "Transform model 0", transformModel(NULL, manager, 0) , NULL, "label='Tranform 0' ");
-	//TwAddButton(g_pToolBar, "Transform model 0", manager.setModelTransformation(1), NULL, "label='Tranform 0' ");
-	//TwAddButton(g_pToolBar, "Transform model 0", manager.setModelTransformation(2), NULL, "label='Tranform 0' ");
-
-
 	do{
         check_gl_error();
 		// Measure speed
@@ -333,7 +323,7 @@ int main(void)
 			continuousMeshSimplification = 0;
 	
 		//Trabalho 1 - Mesh Simplification
-		if ((currentTime2 >= lastTime2 + 0.5  && (glfwGetKey(g_pWindow,GLFW_KEY_N) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
+		if ((currentTime2 >= lastTime2 + 0.5  && (glfwGetKey(g_pWindow,GLFW_KEY_F10) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
 
 			lastTime2 = glfwGetTime();
 			/* ------------ Trabalho 1 ----------------- *
@@ -357,7 +347,7 @@ int main(void)
 			//End Bind
 		
 		}
-		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
+		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_F11) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
 			lastTime2 = glfwGetTime();
 			MS.reconstruct(*(*(*manager.getModels())[0].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[0].getMesh()).getIndices(), continuousMeshSimplification);
 
@@ -412,12 +402,12 @@ int main(void)
 			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, r.time);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_P) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotation Around point (not working)
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotation Around point ('A') (not working yet)
 			lastTime3 = glfwGetTime();
-			//(*manager.getModels())[currentModelID].addCompTransformation(rotationDirection, rotationTime, 'R', rotationDegrees, translationVector, translationTime, 'T', 0);
+			(*manager.getModels())[currentModelID].rotationAroundPoint(&p);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_I) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala ('I')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Rotação + Translação + Escala ('C')
 			lastTime3 = glfwGetTime();		
 			(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, compositionTime);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
@@ -432,13 +422,13 @@ int main(void)
 			(*manager.getModels())[currentModelID].bezierCurve(b);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_L) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//B-Spline ('L')
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID != -1) {	//B-Spline ('B')
 			lastTime3 = glfwGetTime();
 			//(*manager.getModels())[currentModelID].BSplineCurve(l);
 			(*manager.getModels())[currentModelID].BSplineTest(l);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input data
 			t.translationVec = glm::vec3(0, 0, 0);
 			t.time = 0.0f;
 			s.scaleVec = glm::vec3(0, 0, 0);
@@ -457,6 +447,9 @@ int main(void)
 			l.controlPoints[2] = glm::vec3(0);
 			l.controlPoints[3] = glm::vec3(0);
 			l.time = 0.0f;
+			p.rotationAngle = 0.0f;
+			p.point = glm::vec3(0);
+			p.time = 0.0f;
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID != -1) {	//Apply all
 			lastTime3 = glfwGetTime();
