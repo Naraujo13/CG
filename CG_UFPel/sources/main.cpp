@@ -125,8 +125,8 @@ int main(void)
 	l.controlPoints[2] = glm::vec3(0);
 	l.controlPoints[3] = glm::vec3(0);
 	l.time = 1.0f;
-	p.rotationAngle = 0.0f;
-	p.point = glm::vec3(0);
+	p.rotationAngle = 360.0f;
+	p.point = glm::vec3(3,0,0);
 	p.time = 1.0f;
 	p3D.projVector = glm::vec3(0,0,2);
 	p3D.time = 0.0f;

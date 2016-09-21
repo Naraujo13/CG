@@ -8,7 +8,7 @@
 #include <glm/gtx/transform2.hpp>
 
 #define STEPS 40 //number of steps of an animations
-#define LOD 100	//Level of detail of the curve
+#define LOD 100//Level of detail of the curve
 //Constructor
 Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
 {
@@ -173,7 +173,7 @@ void Model::bezierCurve(struct bezier b) {
 
 	//std::cout << "Bezier points | vector:" << std::endl;
 
-	for (double t = 0; t < 1; t += 0.01) {
+	for (double t = 0; t < 1; t += 0.001) {
 		
 		//Calculate next position
 		newPoint = evaluateBezierCurve(b, t);
@@ -184,7 +184,7 @@ void Model::bezierCurve(struct bezier b) {
 		//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 			
 		//Puts translation into queue
-		addCompTransformation(&trans, NULL, NULL, NULL, NULL, b.time/100);
+		addCompTransformation(&trans, NULL, NULL, NULL, NULL, b.time/1000);
 
 		//Update current pos
 		currentPos += trans.translationVec;
@@ -214,49 +214,52 @@ void Model::BSplineTest(struct bspline l) {
 	l.controlPoints[0] = currentPos;
 
 	struct translation trans;
+	int lod = LOD * l.time * 1.2f / 4;
+	double intermediaryTime = l.time / 7;
 
 	for (int i = -3, j = 0; j != 5; ++j, ++i) {
+	
+		for (int k = 0; k != lod; ++k) {
+			float t = (float)k / (lod);
 
-		float t = (float)i / LOD;
+			// t complement
+			float it = 1.0f - t;
 
-		// t complement
-		float it = 1.0f - t;
+			// calculate b functions
+			float b0 = it*it*it / 6.0f;
+			float b1 = (3 * t*t*t - 6 * t*t + 4) / 6.0f;
+			float b2 = (-3 * t*t*t + 3 * t*t + 3 * t + 1) / 6.0f;
+			float b3 = t*t*t / 6.0f;
 
-		// calculate b functions
-		float b0 = it*it*it / 6.0f;
-		float b1 = (3 * t*t*t - 6 * t*t + 4) / 6.0f;
-		float b2 = (-3 * t*t*t + 3 * t*t + 3 * t + 1) / 6.0f;
-		float b3 = t*t*t / 6.0f;
+			// sum the control points mulitplied by their b
+			float x = b0 * GetPoint(i + 0, l).x +
+				b1 * GetPoint(i + 1, l).x +
+				b2 * GetPoint(i + 2, l).x +
+				b3 * GetPoint(i + 3, l).x;
 
-		// sum the control points mulitplied by their b
-		float x = b0 * GetPoint(i + 0, l).x +
-			b1 * GetPoint(i + 1, l).x +
-			b2 * GetPoint(i + 2, l).x +
-			b3 * GetPoint(i + 3, l).x;
+			float y = b0 * GetPoint(i + 0, l).y +
+				b1 * GetPoint(i + 1, l).y +
+				b2 * GetPoint(i + 2, l).y +
+				b3 * GetPoint(i + 3, l).y;
 
-		float y = b0 * GetPoint(i + 0, l).y +
-			b1 * GetPoint(i + 1, l).y +
-			b2 * GetPoint(i + 2, l).y +
-			b3 * GetPoint(i + 3, l).y;
+			float z = b0 * GetPoint(i + 0, l).z +
+				b1 * GetPoint(i + 1, l).z +
+				b2 * GetPoint(i + 2, l).z +
+				b3 * GetPoint(i + 3, l).z;
 
-		float z = b0 * GetPoint(i + 0, l).z +
-			b1 * GetPoint(i + 1, l).z +
-			b2 * GetPoint(i + 2, l).z +
-			b3 * GetPoint(i + 3, l).z;
-		
-		//std::cout << "Point: (" << x << "," << y << "," << z << ")";
+			//std::cout << "Point: (" << x << "," << y << "," << z << ")";
 
-		//Calculates vector
-		trans.translationVec = glm::vec3(x,y,z) - currentPos;
+			//Calculates vector
+			trans.translationVec = glm::vec3(x, y, z) - currentPos;
 
-		//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
+			//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 
-		//Puts translation to queue
-		addCompTransformation(&trans, NULL, NULL, NULL, NULL, l.time/5 );
+			//Puts translation to queue
+			addCompTransformation(&trans, NULL, NULL, NULL, NULL, intermediaryTime / lod);
 
-		//Update current pos
-		currentPos += trans.translationVec;
-
+			//Update current pos
+			currentPos += trans.translationVec;
+		}
 	}
 }
 
