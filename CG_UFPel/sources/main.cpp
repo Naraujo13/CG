@@ -95,6 +95,7 @@ void TW_CALL transformModel(void *, ModelManager manager, int model)
 int main(void)
 {
 	int currentModelID = 0;
+	int currentCameraID = 0;
 	int nUseMouse = 0;
 
 	//Transformation auxiliaries
@@ -182,6 +183,7 @@ int main(void)
 
 	//Número de modelos
 	int numModelos = 4;//Meshes
+	int numCameras = 1;//Cameras
 	// Create an internal enum to name the meshes
 	typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
 
@@ -201,6 +203,31 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "New Model position:", TW_TYPE_DIR3D, &newModelPos, NULL);
 	
 	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=20 step=1 label='Active model");
+
+	//Add 'Camera' Options
+	TwAddSeparator(g_pToolBar, "Camera", NULL);
+	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
+	glm::vec3 newCameraPos(0);
+	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3D, &newCameraPos, NULL);
+
+	//Add Model-Camera Switch
+		TwAddSeparator(g_pToolBar, "Model-Camera Switch:", NULL);
+		// Create an internal enum
+		typedef enum { MODEL, CAMERA} ACTIVE_TYPE;
+
+		// A variable for the current selection - will be updated by ATB
+		ACTIVE_TYPE m_currentActive = MODEL;
+
+		// Array of drop down items
+		TwEnumVal Actives[] = { { MODEL, "Model" },{ CAMERA, "Camera" } };
+
+		// ATB identifier for the array
+		TwType ActiveTwType = TwDefineEnum("ActiveType", Actives, 2);
+
+		// Link it to the tweak bar
+		TwAddVarRW(g_pToolBar, "Model-Camera Switch: ", ActiveTwType, &m_currentActive, NULL);
+
+
 
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
@@ -263,8 +290,6 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "P3: ", TW_TYPE_DIR3F, &l.controlPoints[3], "step=0.1");
 	TwAddVarRW(g_pToolBar, "B-Spline Time:", TW_TYPE_DOUBLE, &l.time, " min=0.0 step=0.1 label='B-Spline time'");
 
-
-
 	TwAddSeparator(g_pToolBar, "End", NULL);
 
 
@@ -304,7 +329,14 @@ int main(void)
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID      = glGetUniformLocation(manager.getProgramID(), "MVP");
-	GLuint ViewMatrixID  = glGetUniformLocation(manager.getProgramID(), "V");
+	//GLuint ViewMatrixID  = glGetUniformLocation(manager.getProgramID(), "V");
+
+	//Creates Camera 1
+	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
+	manager.createCamera(getViewMatrix(), getProjectionMatrix());
+
+	//Creates Camera 2
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0,0,5)), getProjectionMatrix());
 
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(manager.getProgramID());
@@ -330,6 +362,9 @@ int main(void)
 		// Measure speed
 		double currentTime2 = glfwGetTime();
 
+		//Limita cameraID ao tamanho do vetor
+		if (currentCameraID > (*manager.getCameras()).size()-1)
+			currentCameraID = (*manager.getCameras()).size()-1;
 
 
 		//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
@@ -404,8 +439,16 @@ int main(void)
 		//Translação ao pressionar T
 		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
-			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+			if (m_currentActive == MODEL) {
+				(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+				std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+			}
+			else if (m_currentActive == CAMERA) {
+				(*manager.getCameras())[currentCameraID].addCompTransformation(&t);
+				//std::cout << "Queue size:" << (*(*manager.getCamerass())[currentCameraID].getTransformationQueue()).size() << std::endl;
+			}
+				
+			
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
 			lastTime3 = glfwGetTime();
@@ -486,8 +529,14 @@ int main(void)
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
 			lastTime3 = glfwGetTime();
-			manager.setModelTransformation(currentModelID);
+			if (m_currentActive == MODEL) {
+				manager.setModelTransformation(currentModelID);
+			}
+			else if (m_currentActive == CAMERA) {
+				(*manager.getCameras())[currentCameraID].applyTransformation();
+			}
 		}
+		
 
 		//Transform models
 		manager.transformModels();
@@ -505,12 +554,13 @@ int main(void)
 		}
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix = getViewMatrix();
+		//computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
+		//glm::mat4 ProjectionMatrix = getProjectionMatrix();
+		//glm::mat4 ViewMatrix = getViewMatrix();
+		
 
 		//Draw
-		manager.drawModels(ViewMatrixID, ViewMatrix, ProjectionMatrix, g_pWindow);
+		manager.drawModels((*manager.getCameras())[currentCameraID].getViewMatrixID(), (*manager.getCameras())[currentCameraID].getViewMatrix(), (*manager.getCameras())[currentCameraID].getProjectionMatrix(), g_pWindow);
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(g_pWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS &&

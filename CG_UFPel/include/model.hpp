@@ -17,69 +17,7 @@
 using namespace glm;
 
 #include <glerror.hpp>
-
-//Transformation auxiliares
-struct translation {
-	glm::vec3 translationVec;
-	long double time;
-};
-struct scale {
-	glm::vec3 scaleVec;
-	long double time;
-};
-struct rotation {
-	glm::vec3 rotationVec;
-	float rotationDegrees;
-	long double time;
-};
-struct rotationAP {
-	glm::vec3 point;
-	float rotationAngle;
-	long double time;
-};
-struct shear {
-	glm::vec3 shearVec;
-	long double time;
-};
-struct bezier {
-	glm::vec3 controlPoints[3];
-	long double time;
-};
-struct bspline {
-	glm::vec3 controlPoints[4];
-	long double time;
-};
-struct extraProjection3D {
-	glm::vec3 projVector;
-	long double time;
-};
-
-
-
-
-//Define a transformation
-class Transformation{
-private:
-	glm::mat4 transformation;
-	double timeBtwn;
-public:
-//Constructor
-	Transformation::Transformation(glm::mat4 transformation, long double time) {
-		Transformation::transformation = transformation;
-		Transformation::timeBtwn = time;
-	}
-//Getters
-	glm::mat4 getTransformation() {
-		return transformation;
-	}
-	double getTimeBtwn() {
-		return timeBtwn;
-	}
-};
-
-
-
-
+#include "transformations.hpp"
 
 //Define a custom data type to represent a model
 class Model {

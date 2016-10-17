@@ -17,6 +17,7 @@ using namespace glm;
 
 #include <glerror.hpp>
 #include "model.hpp"
+#include "camera.hpp"
 
 //Define a custom data type to represent a model
 class ModelManager {
@@ -26,6 +27,11 @@ private:
 	std::vector<Mesh> meshes;
 	//Vector to store the meshes
 	std::vector<Model> models;
+	//Vector to store the cameras
+	std::vector<Camera> cameras;
+	//Current Camera
+	int currentCamera;
+
 
 	GLuint VertexArrayID;
 	GLuint programID;
@@ -42,9 +48,20 @@ public:
 	GLuint getProgramID();
 	GLuint getMatrixID();
 	GLuint getLightID();
+	//Camera
+	void createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix);
+	void changeCurrentCamera(int newCamera);
+	void renderCamera();
+	//Camera getters
+	std::vector<Camera> * getCameras();
+	//GLuint getCurrentViewMatrixID();
+	//glm::mat4 getCurrentViewMatrix();
+	//glm::mat4 getCurrentProjectionMatrix();
+		
+	//mesh
+	void createMesh(char *path);
 	//models
 	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);
-	void createMesh(char *path);
 	void cleanup();
 	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow);
 	void transformModels();

@@ -17,9 +17,13 @@ ModelManager::ModelManager(char *shaderPath1, char *shaderPath2)
 	programID = LoadShaders(shaderPath1, shaderPath2);
 	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 	MatrixID = glGetUniformLocation(programID, "MVP");
+	currentCamera = 0;
 }
 
 //Getters
+std::vector<Camera> * ModelManager::getCameras() {
+	return &cameras;
+}
 std::vector<Model> * ModelManager::getModels() {
 	return &models;
 }
@@ -45,9 +49,37 @@ GLuint ModelManager::getLightID() {
 void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
 	models.push_back(Model(textPath, textSampler, programID, mesh, position));
 }
+//creates a new mesh and adds to the vector
 void ModelManager::createMesh(char *path) {
 	meshes.push_back(Mesh(path));
 }
+//creates a new camera and adds to the vector
+void ModelManager::createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix) {
+	cameras.push_back(Camera(programID, ViewMatrix, ProjectionMatrix));
+}
+//Camera functions
+void ModelManager::changeCurrentCamera(int newCamera){
+	if (newCamera < cameras.size())
+		currentCamera = newCamera;
+}
+/*
+GLuint ModelManager::getCurrentViewMatrixID() {
+	if (cameras.empty())
+		return;
+	return cameras[currentCamera].getViewMatrixID();
+}
+glm::mat4 ModelManager::getCurrentViewMatrix() {
+	if (cameras.empty())
+		return;
+	return cameras[currentCamera].getViewMatrix();
+}
+glm::mat4 ModelManager::getCurrentProjectionMatrix() {
+	if (cameras.empty())
+		return;
+	return cameras[currentCamera].getProjectionMatrix();
+}
+*/
+
 
 void ModelManager::cleanup() {
 
