@@ -107,6 +107,7 @@ int main(void)
 	struct bspline l;
 	struct rotationAP p;
 	struct extraProjection3D p3D;
+	struct cameraLookAt lk;
 
 	t.translationVec = glm::vec3 (0,0,0);
 	t.time = 1.0f;
@@ -131,6 +132,9 @@ int main(void)
 	p.time = 1.0f;
 	p3D.projVector = glm::vec3(0,0,2);
 	p3D.time = 0.0f;
+	lk.eye = glm::vec3(0, 0, 5);
+	lk.center = glm::vec3(0,0,-5);
+	lk.up = glm::vec3(0, 1, 0);
 
 	// Initialise GLFW
 	if (!glfwInit())
@@ -204,12 +208,7 @@ int main(void)
 	
 	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=20 step=1 label='Active model");
 
-	//Add 'Camera' Options
-	TwAddSeparator(g_pToolBar, "Camera", NULL);
-	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
-	glm::vec3 newCameraPos(0);
-	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3D, &newCameraPos, NULL);
-
+	
 	//Add Model-Camera Switch
 		TwAddSeparator(g_pToolBar, "Model-Camera Switch:", NULL);
 		// Create an internal enum
@@ -227,20 +226,25 @@ int main(void)
 		// Link it to the tweak bar
 		TwAddVarRW(g_pToolBar, "Model-Camera Switch: ", ActiveTwType, &m_currentActive, NULL);
 
+	//Add 'Camera' Options
+	TwAddSeparator(g_pToolBar, "Camera", NULL);
+	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
+	glm::vec3 newCamPos(0,0,0);
+	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3F, &newCamPos, NULL);
 
-
+	
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
 	TwAddButton(g_pToolBar, "Translation parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &t.translationVec, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.0 step=0.1 label='Time to do the translation (seconds):");
 	
-
-	//Add 'Scale' options
-	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
-	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
-	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.0 step=0.1 help='Time to do the scaling (seconds)' ");
+	//Add 'LookAt' options
+	TwAddSeparator(g_pToolBar, "Look At: ", NULL);
+	TwAddVarRW(g_pToolBar, "Eye: ", TW_TYPE_DIR3F, &lk.eye, " label='eye position");
+	TwAddVarRW(g_pToolBar, "Center: ", TW_TYPE_DIR3F, &lk.center, " label='point to look:");
+	TwAddVarRW(g_pToolBar, "Up: ", TW_TYPE_DIR3F, &lk.up, " label='up vector:");
+	TwAddVarRW(g_pToolBar, "Look At Time:", TW_TYPE_DOUBLE, &lk.time, " min=0.0 step=0.1 label='animation time'");
 
 	//Add 'Rotation' options
 	TwAddSeparator(g_pToolBar, "Rotation", NULL);
@@ -248,7 +252,13 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &r.rotationVec, " label='Translation to put to queue:");
 	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &r.rotationDegrees, "step=0.5 label='Rotation angle'");
 	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.0 step=0.1 label='Rotation time'");
-	
+
+	//Add 'Scale' options
+	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
+	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
+	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
+	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.0 step=0.1 help='Time to do the scaling (seconds)' ");
+
 	//Add 'Composition animation' options
 	double compositionTime = 0.0f;
 	TwAddSeparator(g_pToolBar, "Composition", NULL);
@@ -365,7 +375,9 @@ int main(void)
 		//Limita cameraID ao tamanho do vetor
 		if (currentCameraID > (*manager.getCameras()).size()-1)
 			currentCameraID = (*manager.getCameras()).size()-1;
-
+		//Limita ModelID ao tamanho do vetor
+		if (currentModelID > (*manager.getModels()).size() - 1)
+			currentModelID = (*manager.getModels()).size() - 1;
 
 		//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
 		if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
@@ -388,10 +400,10 @@ int main(void)
 			* ----------------------------------------- */
 
 			//Calls function to reduce the mesh
-			MS.reduce(*(*(*manager.getModels())[0].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[0].getMesh()).getIndices(), *(*(*manager.getModels())[0].getMesh()).getIndexedNormals(), continuousMeshSimplification);
+			MS.reduce(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndexedNormals(), continuousMeshSimplification);
 
 			//Bind
-			(*(*manager.getModels())[0].getMesh()).rebind();
+			(*(*manager.getModels())[currentModelID].getMesh()).rebind();
 
 			// Get a handle for our "LightPosition" uniform
 			glUseProgram(manager.getProgramID());
@@ -402,10 +414,10 @@ int main(void)
 		}
 		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_F11) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
 			lastTime2 = glfwGetTime();
-			MS.reconstruct(*(*(*manager.getModels())[0].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[0].getMesh()).getIndices(), continuousMeshSimplification);
+			MS.reconstruct(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), continuousMeshSimplification);
 
 			//Bind
-			(*(*manager.getModels())[0].getMesh()).rebind();
+			(*(*manager.getModels())[currentModelID].getMesh()).rebind();
 
 		}
 
@@ -444,11 +456,9 @@ int main(void)
 				std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 			}
 			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].addCompTransformation(&t);
-				//std::cout << "Queue size:" << (*(*manager.getCamerass())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-				
-			
+				(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
+				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+			}		
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
 			lastTime3 = glfwGetTime();
@@ -457,8 +467,14 @@ int main(void)
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Rotation ('R')
 			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+			if (m_currentActive == MODEL) {
+				(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
+				std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+			}
+			else if (m_currentActive == CAMERA) {
+				(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, &r, NULL);
+				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+			}
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotation Around point ('A') (not working yet)
 			lastTime3 = glfwGetTime();
@@ -490,16 +506,28 @@ int main(void)
 			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, NULL, &p3D, 0);
 			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_K) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {					//Look At (K) - Camera only
+			lastTime3 = glfwGetTime();
+			if (m_currentActive == CAMERA) {
+				(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, NULL, &lk);
+				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+			}
+		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
 			lastTime3 = glfwGetTime();
-
-			if (m_currentMesh == SUZANNE)
-				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
-			else if(m_currentMesh == GOOSE)
-				manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
-			else if(m_currentMesh == CUBE)
-				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
-			numModelos++;
+			if (m_currentActive == MODEL) {
+				if (m_currentMesh == SUZANNE)
+					manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
+				else if (m_currentMesh == GOOSE)
+					manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
+				else if (m_currentMesh == CUBE)
+					manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
+				numModelos++;
+			}
+			else if (m_currentActive == CAMERA) {
+				manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
+				numCameras++;
+			}
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input data
 			t.translationVec = glm::vec3(0, 0, 0);
@@ -526,6 +554,7 @@ int main(void)
 			p3D.projVector = glm::vec3(0,0,2);
 			p3D.time = 1.0f;
 			newModelPos = glm::vec3(0);
+			newCamPos = glm::vec3(0);
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
 			lastTime3 = glfwGetTime();
@@ -533,13 +562,17 @@ int main(void)
 				manager.setModelTransformation(currentModelID);
 			}
 			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].applyTransformation();
+				manager.setCamerasTransformation(currentCameraID);
+				//(*manager.getCameras())[currentCameraID].applyTransformation();
 			}
 		}
 		
 
+		//Transform cameras
+		manager.transformCameras();
 		//Transform models
 		manager.transformModels();
+
 		
 		// Measure speed
 		currentTime = glfwGetTime();

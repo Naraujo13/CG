@@ -53,7 +53,12 @@ struct extraProjection3D {
 	glm::vec3 projVector;
 	long double time;
 };
-
+struct cameraLookAt {
+	glm::vec3 eye;
+	glm::vec3 center;
+	glm::vec3 up;
+	long double time;
+};
 
 
 
@@ -62,6 +67,7 @@ class Transformation{
 private:
 	glm::mat4 transformation;
 	double timeBtwn;
+
 public:
 //Constructor
 	Transformation::Transformation(glm::mat4 transformation, long double time) {

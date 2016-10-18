@@ -44,6 +44,13 @@ std::vector<Transformation> * Model::getTransformationQueue() {
 int Model::getState() {
 	return state;
 }
+long double Model::getLastTransformed() {
+	return lastTransformed;
+}
+
+long double Model::getTimeBtwn() {
+	return timeBtwn;
+}
 
 //Setter
 void Model::setModelMatrix(glm::mat4 matrix) {
@@ -52,13 +59,7 @@ void Model::setModelMatrix(glm::mat4 matrix) {
 void Model::setState(int newState) {
 	Model::state = newState;
 }
-long double Model::getLastTransformed() {
-	return lastTransformed;
-}
 
-long double Model::getTimeBtwn() {
-	return timeBtwn;
-}
 //Others
 
 

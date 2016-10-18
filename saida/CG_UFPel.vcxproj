@@ -304,10 +304,12 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CG_UFPel\include\camera.hpp" />
     <ClInclude Include="..\CG_UFPel\include\mesh.hpp" />
     <ClInclude Include="..\CG_UFPel\include\meshsimplification.hpp" />
     <ClInclude Include="..\CG_UFPel\include\model.hpp" />
     <ClInclude Include="..\CG_UFPel\include\modelManager.hpp" />
+    <ClInclude Include="..\CG_UFPel\include\transformations.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\controls.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\objloader.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\quaternion_utils.hpp" />
@@ -317,6 +319,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\texture.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\vboindexer.hpp" />
     <ClInclude Include="F:\Downloads\Aula\CG\CG_UFPel\include\glerror.hpp" />
+    <ClCompile Include="..\CG_UFPel\sources\camera.cpp" />
     <ClCompile Include="..\CG_UFPel\sources\mesh.cpp" />
     <ClCompile Include="..\CG_UFPel\sources\meshsimplification.cpp" />
     <ClCompile Include="..\CG_UFPel\sources\model.cpp" />

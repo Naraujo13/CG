@@ -42,24 +42,23 @@ public:
 	//Constructor
 	ModelManager::ModelManager(char *shaderPath1, char *shaderPath2);
 	//Getters
+	std::vector<Camera> * getCameras();
 	std::vector<Model> * getModels();
 	std::vector<Mesh> * getMeshes();
 	GLuint getVertexArrayID();
 	GLuint getProgramID();
 	GLuint getMatrixID();
 	GLuint getLightID();
+	
 	//Camera
 	void createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix);
 	void changeCurrentCamera(int newCamera);
-	void renderCamera();
-	//Camera getters
-	std::vector<Camera> * getCameras();
-	//GLuint getCurrentViewMatrixID();
-	//glm::mat4 getCurrentViewMatrix();
-	//glm::mat4 getCurrentProjectionMatrix();
-		
+	void transformCameras();
+	void ModelManager::setCamerasTransformation(int cameraID);
+	
 	//mesh
 	void createMesh(char *path);
+
 	//models
 	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);
 	void cleanup();

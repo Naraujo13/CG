@@ -62,23 +62,6 @@ void ModelManager::changeCurrentCamera(int newCamera){
 	if (newCamera < cameras.size())
 		currentCamera = newCamera;
 }
-/*
-GLuint ModelManager::getCurrentViewMatrixID() {
-	if (cameras.empty())
-		return;
-	return cameras[currentCamera].getViewMatrixID();
-}
-glm::mat4 ModelManager::getCurrentViewMatrix() {
-	if (cameras.empty())
-		return;
-	return cameras[currentCamera].getViewMatrix();
-}
-glm::mat4 ModelManager::getCurrentProjectionMatrix() {
-	if (cameras.empty())
-		return;
-	return cameras[currentCamera].getProjectionMatrix();
-}
-*/
 
 
 void ModelManager::cleanup() {
@@ -157,10 +140,26 @@ void ModelManager::transformModels() {
 	}
 }
 
+void ModelManager::transformCameras() {
+	int i = 0;
+	for (auto it = ModelManager::cameras.begin(); it != ModelManager::cameras.end(); ++it, i++) {
+		if (it->getState()) {
+			it->applyTransformation();
+		}
+	}
+}
+
 void ModelManager::setModelTransformation(int modelID) {
 	if (models.size() >= modelID) {
 		models.at(modelID).setState(1);
 		std::cout << "State of model " << modelID << " is now "<< models.at(modelID).getState() << ". Model is tranforming." << std::endl;
+	}
+}
+
+void ModelManager::setCamerasTransformation(int cameraID) {
+	if (cameras.size() >= cameraID) {
+		cameras.at(cameraID).setState(1);
+		std::cout << "State of model " << cameraID << " is now " << cameras.at(cameraID).getState() << ". Model is tranforming." << std::endl;
 	}
 }
 
