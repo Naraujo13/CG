@@ -6,6 +6,7 @@
 #include <AntTweakBar.h>
 #include <iostream>
 #include <glm/gtx/transform2.hpp>
+#include <random>
 
 #include <camera.hpp>
 #include <modelManager.hpp>
@@ -66,6 +67,7 @@ void Camera::setState(int newState) {
 
 //Transformations
 
+
 void Camera::addCompTransformation(struct translation *t, struct rotation *r, struct cameraLookAt *lk){
 
 	//Split and push all the transformations to queue with the time between them	
@@ -76,6 +78,7 @@ void Camera::addCompTransformation(struct translation *t, struct rotation *r, st
 
 	//Translation
 	if (t != NULL) {
+
 		//Animation time control
 		int steps = ceil(t->time * STEPS);
 		if (steps <= 0)
@@ -85,6 +88,7 @@ void Camera::addCompTransformation(struct translation *t, struct rotation *r, st
 		stepTransformation = glm::translate(stepTransformation, t->translationVec / glm::vec3(steps, steps, steps) * glm::vec3(-1));
 		// Push all transformations
 		for (int i = 0; i < steps; i++) {
+
 			if (firstFlag != 0) {
 				transformationQueue.push_back(Transformation(stepTransformation, 0));
 				firstFlag = 0;

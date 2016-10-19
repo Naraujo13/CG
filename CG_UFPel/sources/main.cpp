@@ -365,6 +365,12 @@ int main(void)
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
 	
+	//Noise
+	double noiseInterval, lastNoise;
+	int noiseSteps = 40, noiseCount = 0;
+	glm::vec3 noise;
+	glm::mat4 noiseMatrix;
+
 	printInstructions();
 	 
 	do{
@@ -566,6 +572,32 @@ int main(void)
 				//(*manager.getCameras())[currentCameraID].applyTransformation();
 			}
 		}
+
+		//Camera Shake
+		//Noise
+		if (currentTime > lastNoise + noiseInterval && (*manager.getCameras())[currentCameraID].getState()) {
+			if (noiseSteps == noiseCount) {
+				//Se já fez 10 passos deste noise, recalcula novo noise
+				//Gera Pontos Aleatórios
+				noise.x = 1 * sin((float)(rand() % 360))/15;
+				noise.y = 1 * sin((float)(rand() % 360))/15;
+				noise.z = 1 * sin((float)(rand() % 360))/15;
+				//noise.z = 0;
+
+				noiseMatrix = glm::translate(glm::mat4(1.0f), noise/glm::vec3(noiseSteps));
+
+				noiseInterval = 1/noiseSteps;
+				noiseCount = 0;
+			}
+
+			//Translada fazendo noise
+			(*manager.getCameras())[currentCameraID].setViewMatrix((*manager.getCameras())[currentCameraID].getViewMatrix()*noiseMatrix);
+			
+			//Atualiza controle
+			noiseCount++;
+			lastNoise = glfwGetTime();
+		}
+		
 		
 
 		//Transform cameras
