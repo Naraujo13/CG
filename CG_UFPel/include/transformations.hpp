@@ -35,6 +35,7 @@ struct rotation {
 struct rotationAP {
 	glm::vec3 point;
 	float rotationAngle;
+	glm::vec3 rotationAxis;
 	long double time;
 };
 struct shear {
@@ -67,12 +68,14 @@ class Transformation{
 private:
 	glm::mat4 transformation;
 	double timeBtwn;
+	bool lookAtFlag;
 
 public:
 //Constructor
 	Transformation::Transformation(glm::mat4 transformation, long double time) {
 		Transformation::transformation = transformation;
 		Transformation::timeBtwn = time;
+		lookAtFlag = false;
 	}
 //Getters
 	glm::mat4 getTransformation() {
@@ -80,6 +83,13 @@ public:
 	}
 	double getTimeBtwn() {
 		return timeBtwn;
+	}
+	bool getLookAtFlag() {
+		return lookAtFlag;
+	}
+//Setters
+	void setLookAtFlag(bool b) {
+		lookAtFlag = b;
 	}
 };
 

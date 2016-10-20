@@ -59,7 +59,15 @@ public:
 
 	//Transformation
 	void Camera::addCompTransformation(struct translation *t, struct rotation *r, struct cameraLookAt *l);
+	void Camera::aroundPoint(struct rotationAP *cp);
+	void BSpline(struct bspline bs); //Uses default glm, errors detected, not accurate
 	void Camera::applyTransformation();
+
+	void Camera::BSplineTest(struct bspline l);		//More accurate than glm default
+	glm::vec3 Camera::GetPoint(int i, struct bspline l);
+	glm::vec3 Camera::evaluateBezierCurve(struct bezier b, double t);
+	void Camera::bezierCurve(struct bezier b);
+
 };
 
 #endif
