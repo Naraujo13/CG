@@ -52,6 +52,7 @@ public:
 	
 	//Camera
 	void createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix);
+	void createCamera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection);
 	void changeCurrentCamera(int newCamera);
 	void transformCameras();
 	void ModelManager::setCamerasTransformation(int cameraID);

@@ -57,6 +57,11 @@ void ModelManager::createMesh(char *path) {
 void ModelManager::createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix) {
 	cameras.push_back(Camera(programID, ViewMatrix, ProjectionMatrix));
 }
+void ModelManager::createCamera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection)
+{
+	cameras.push_back(Camera( fieldOfView, aspectRatio, near, far, cameraPosition, upVector, sightDirection, programID));
+}
+
 //Camera functions
 void ModelManager::changeCurrentCamera(int newCamera){
 	if (newCamera < cameras.size())

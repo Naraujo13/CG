@@ -16,7 +16,7 @@
 #define STEPS 40 //number of steps of an animations
 #define LOD 40//Level of detail of the curve
 
-//Construtor
+//Construtores
 Camera::Camera(GLuint programID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix)
 {
 	ViewMatrixID = glGetUniformLocation(programID, "V");
@@ -26,6 +26,12 @@ Camera::Camera(GLuint programID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatri
 	Camera::lastTransformed = 0;
 	Camera::state = 0;
 }
+Camera::Camera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection, GLuint programID) {
+	ProjectionMatrix = glm::perspective(fieldOfView, aspectRatio, near, far);
+	ViewMatrix = glm::lookAt(cameraPosition, cameraPosition + sightDirection, upVector);
+	ViewMatrixID = glGetUniformLocation(programID, "V");
+}
+
 
 //Getters
 glm::mat4 Camera::getProjectionMatrix() {
@@ -84,7 +90,7 @@ void Camera::aroundPoint(struct rotationAP *cp) {
 		glm::mat4 fromPointMatrix(1.0f);
 
 		glm::vec3 currentPos = glm::vec3(ViewMatrix[3][0], ViewMatrix[3][1], ViewMatrix[3][2]);
-		glm::vec3 aux = (cp->point - (currentPos*glm::vec3(-1))) ;
+		glm::vec3 aux = (cp->point - (currentPos*glm::vec3(-1)));
 
 		toPointMatrix = glm::translate(toPointMatrix, aux);
 		rotationMatrix = glm::rotate(rotationMatrix, (float)cp->rotationAngle / steps, cp->rotationAxis);
@@ -106,6 +112,7 @@ void Camera::aroundPoint(struct rotationAP *cp) {
 		}
 	}
 }
+
 
 void Camera::BSpline(struct bspline bs)
 {

@@ -42,6 +42,7 @@ private:
 public:
 	//Construtor
 	Camera::Camera(GLuint programID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix);
+	Camera::Camera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection, GLuint programID);
 
 	//Getters
 	glm::mat4 getViewMatrix();

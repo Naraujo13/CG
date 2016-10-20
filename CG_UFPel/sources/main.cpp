@@ -131,6 +131,7 @@ int main(void)
 	p.point = glm::vec3(3,0,0);
 	p.time = 1.0f;
 	cp.rotationAngle = 360.0f;
+	cp.rotationAxis = glm::vec3(1, 0, 0);
 	cp.point = glm::vec3(3, 0, 0);
 	cp.time = 1.0f;
 	p3D.projVector = glm::vec3(0,0,2);
@@ -233,9 +234,23 @@ int main(void)
 	TwAddSeparator(g_pToolBar, "Camera", NULL);
 	TwAddButton(g_pToolBar, "Camera options:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
-	glm::vec3 newCamPos(0,0,0);
+	glm::vec3 newCamPos(0,0,5), newCamUp(0,1,0), newCamSight(0,0,-1);
+	float fieldOfView = 60.0f, aspectRatio = 0.0f,  near = 5.0f, far = 10.0;
+	int hAux = 4.0f, vAux = 3.0f;
+	
+	TwAddButton(g_pToolBar, "New Camera parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3F, &newCamPos, NULL);
+	TwAddVarRW(g_pToolBar, "New Camera Up: ", TW_TYPE_DIR3F, &newCamUp, NULL);
+	TwAddVarRW(g_pToolBar, "New Camera Sight: ", TW_TYPE_DIR3F, &newCamSight, NULL);
 
+	TwAddVarRW(g_pToolBar, "Field Of View:", TW_TYPE_FLOAT, &fieldOfView, " min=0.0 step=0.1 label=''");
+	TwAddVarRW(g_pToolBar, "Aspect Ratio Horizontal:", TW_TYPE_INT8, &hAux, " min=0.0 step=1 label=''");
+	TwAddVarRW(g_pToolBar, "Aspect Ratio Vertical:", TW_TYPE_INT8, &vAux, " min=0.0 step=1 label=''");
+	TwAddVarRW(g_pToolBar, "Near Plane:", TW_TYPE_FLOAT, &near, " min=0.0 step=0.1 label=''");
+	TwAddVarRW(g_pToolBar, "Far Plane:", TW_TYPE_FLOAT, &far, " min=0.0 step=0.1 label=''");
+
+
+	
 	
 	//Add 'Translation' options
 	TwAddSeparator(g_pToolBar, "Translation", NULL);
@@ -581,7 +596,8 @@ int main(void)
 				numModelos++;
 			}
 			else if (m_currentActive == CAMERA) {
-				manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
+				//manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
+				manager.createCamera(fieldOfView, hAux/vAux, near, far, newCamPos, newCamUp, newCamSight);
 				numCameras++;
 			}
 		}
@@ -693,11 +709,6 @@ int main(void)
 			nbFrames = 0;
 			lastTime += 1.0;
 		}
-
-		// Compute the MVP matrix from keyboard and mouse input
-		//computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-		//glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		//glm::mat4 ViewMatrix = getViewMatrix();
 		
 
 		//Draw
