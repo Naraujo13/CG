@@ -10,11 +10,11 @@
 
 
 //Constructor
-ModelManager::ModelManager(char *shaderPath1, char *shaderPath2)
+ModelManager::ModelManager(char *vertexShader, char *fragmentShader, char *geometryShader)
 {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
-	programID = LoadShaders(shaderPath1, shaderPath2);
+	programID = LoadShaders(vertexShader, fragmentShader, geometryShader);
 	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
 	MatrixID = glGetUniformLocation(programID, "MVP");
 	currentCamera = 0;

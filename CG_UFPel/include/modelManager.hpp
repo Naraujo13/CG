@@ -40,7 +40,7 @@ private:
 
 public:
 	//Constructor
-	ModelManager::ModelManager(char *shaderPath1, char *shaderPath2);
+	ModelManager::ModelManager(char *shaderPath1, char *shaderPath2, char *geometryShader);
 	//Getters
 	std::vector<Camera> * getCameras();
 	std::vector<Model> * getModels();

@@ -364,7 +364,7 @@ int main(void)
 	// Create and compile our GLSL program from the shaders
 
 	//Model Manager
-	ModelManager manager("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader");
+	ModelManager manager("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
 
