@@ -102,7 +102,12 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glUniformMatrix4fv(glGetUniformLocation(programID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(programID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(programID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
-		glUniform1f(glGetUniformLocation(programID, "time"), glfwGetTime());
+		if (it->getGeometry()) {			
+			glUniform1f(glGetUniformLocation(programID, "time"), glfwGetTime());
+		}
+		else {
+			glUniform1f(glGetUniformLocation(programID, "time"), 5.0f);
+		}
 
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform

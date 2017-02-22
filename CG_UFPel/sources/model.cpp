@@ -51,6 +51,9 @@ long double Model::getLastTransformed() {
 long double Model::getTimeBtwn() {
 	return timeBtwn;
 }
+bool Model::getGeometry() {
+	return geometry;
+}
 
 //Setter
 void Model::setModelMatrix(glm::mat4 matrix) {
@@ -58,6 +61,9 @@ void Model::setModelMatrix(glm::mat4 matrix) {
 }
 void Model::setState(int newState) {
 	Model::state = newState;
+}
+void Model::setGeometry(bool newState) {
+	Model::geometry = newState;
 }
 
 //Others

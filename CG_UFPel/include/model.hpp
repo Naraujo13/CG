@@ -33,6 +33,9 @@ private:
 	long double lastTransformed;
 	long double timeBtwn;
 
+	//Geometry
+	bool geometry;
+
 	//Texture info
 	GLuint texture;
 	GLuint textureID;
@@ -53,10 +56,12 @@ public:
 	int getState();
 	long double getLastTransformed();
 	long double getTimeBtwn();
+	bool getGeometry();
 
 	//Set
 	 void setModelMatrix(glm::mat4 transformation);
 	 void setState(int newState);
+	 void setGeometry(bool newState);
 
 
 	//Transformations

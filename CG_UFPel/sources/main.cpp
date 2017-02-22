@@ -385,10 +385,10 @@ int main(void)
 
 	//Creates Camera 1
 	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix(), getProjectionMatrix());
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 10)), getProjectionMatrix());
 
 	//Creates Camera 2
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0,0,5)), getProjectionMatrix());
+	manager.createCamera(getViewMatrix(), getProjectionMatrix());
 
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(manager.getProgramID());
@@ -501,8 +501,17 @@ int main(void)
 			currentModelID = 3;
 
 
+		//Explosion Geometry Shader
+		if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
+			if (m_currentActive == MODEL)
+				(*manager.getModels())[currentModelID].setGeometry(true);					
+		}
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
+			if (m_currentActive == MODEL)
+				(*manager.getModels())[currentModelID].setGeometry(false);
+		}
 		//Translação ao pressionar T
-		if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
 			lastTime3 = glfwGetTime();
 			if (m_currentActive == MODEL) {
 				(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
@@ -691,8 +700,6 @@ int main(void)
 			noiseCount++;
 			lastNoise = glfwGetTime();
 		}
-		
-		
 
 		//Transform cameras
 		manager.transformCameras();
