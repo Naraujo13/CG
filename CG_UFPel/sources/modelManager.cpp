@@ -11,17 +11,17 @@
 
 
 //Constructor
-ModelManager::ModelManager(char *vertexShader, char *fragmentShader, char *geometryShader)
+ModelManager::ModelManager()
 {
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
-	programID = LoadShaders(vertexShader, fragmentShader, geometryShader);
-	LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
-	MatrixID = glGetUniformLocation(programID, "MVP");
 	currentCamera = 0;
 }
 
 //Getters
+std::vector<Shader> * ModelManager::getShaders() {
+	return &shaders;
+}
 std::vector<Camera> * ModelManager::getCameras() {
 	return &cameras;
 }
@@ -32,7 +32,7 @@ std::vector<Mesh> * ModelManager::getMeshes() {
 	return &meshes;
 }
 GLuint ModelManager::getProgramID() {
-	return programID;
+	return currentShaderProgramID;
 }
 GLuint ModelManager::getVertexArrayID() {
 	return VertexArrayID;
@@ -45,10 +45,17 @@ GLuint ModelManager::getLightID() {
 }
 
 
-
+//creates a new shader (without geometry) and adds to the vector
+void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fragment_file_path) {
+	shaders.push_back(Shader(vertex_file_path, fragment_file_path));
+}
+//creates a new shader (with geometry) and adds to the vector
+void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fragment_file_path, const GLchar* geometry_file_path) {
+	shaders.push_back(Shader(vertex_file_path, fragment_file_path, geometry_file_path));
+}
 //creates a new model and adds to the vector
 void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
-	models.push_back(Model(textPath, textSampler, programID, mesh, position));
+	models.push_back(Model(textPath, textSampler, currentShaderProgramID, mesh, position));
 }
 //creates a new mesh and adds to the vector
 void ModelManager::createMesh(char *path) {
@@ -56,11 +63,26 @@ void ModelManager::createMesh(char *path) {
 }
 //creates a new camera and adds to the vector
 void ModelManager::createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix) {
-	cameras.push_back(Camera(programID, ViewMatrix, ProjectionMatrix));
+	cameras.push_back(Camera(currentShaderProgramID, ViewMatrix, ProjectionMatrix));
 }
 void ModelManager::createCamera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection)
 {
-	cameras.push_back(Camera( fieldOfView, aspectRatio, near, far, cameraPosition, upVector, sightDirection, programID));
+	cameras.push_back(Camera( fieldOfView, aspectRatio, near, far, cameraPosition, upVector, sightDirection, currentShaderProgramID));
+}
+
+//Shader functions
+bool ModelManager::useShader(int index) {
+	if (index >= 0 && index < shaders.size()) {
+		currentShaderProgramID = shaders[index].programID;
+		shaders[index].use();
+		LightID = glGetUniformLocation(currentShaderProgramID, "LightPosition_worldspace");
+		MatrixID = glGetUniformLocation(currentShaderProgramID, "MVP");
+		return true;
+	}
+	else {
+		std::cout << "ERROR::INVALID SHADER INDEX::MAX_INDEX==" << shaders.size() << "::DESIRED_INDEX==" << index << "::ERROR" << std::endl;
+		return false;
+	}
 }
 
 //Camera functions
@@ -80,7 +102,7 @@ void ModelManager::cleanup() {
 		//Delete Texture
 		glDeleteTextures(1, (*it).getTexture());
 	}
-	glDeleteProgram(programID);
+	glDeleteProgram(currentShaderProgramID);
 	glDeleteVertexArrays(1, &VertexArrayID);
 
 }
@@ -91,7 +113,7 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Use our shader
-	glUseProgram(programID);
+	glUseProgram(currentShaderProgramID);
 
 	//For each model in the manager 
 	for (auto it = models.begin(); it != models.end(); ++it) {
@@ -99,14 +121,16 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
 
 		//Geometry Shader Data
-		glUniformMatrix4fv(glGetUniformLocation(programID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(programID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(programID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
 		if (it->getGeometry()) {			
-			glUniform1f(glGetUniformLocation(programID, "time"), glfwGetTime());
+			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()))/2;
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+			it->setLastUsedGeometry(time);
 		}
 		else {
-			glUniform1f(glGetUniformLocation(programID, "time"), 5.0f);
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
 		}
 
 		// Send our transformation to the currently bound shader,

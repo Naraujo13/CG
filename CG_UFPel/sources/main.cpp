@@ -94,6 +94,7 @@ void TW_CALL transformModel(void *, ModelManager manager, int model)
 
 int main(void)
 {
+	int currentShaderProgramID = 0;
 	int currentModelID = 0;
 	int currentCameraID = 0;
 	int nUseMouse = 0;
@@ -230,6 +231,11 @@ int main(void)
 		// Link it to the tweak bar
 		TwAddVarRW(g_pToolBar, "Model-Camera Switch: ", ActiveTwType, &m_currentActive, NULL);
 
+	//Add 'Shader' Options
+	TwAddSeparator(g_pToolBar, "Shader Program", NULL);
+	TwAddButton(g_pToolBar, "Shader options:", NULL, NULL, "");
+	TwAddVarRW(g_pToolBar, "Active Shader Program: ", TW_TYPE_INT8, &currentShaderProgramID, "min=0 step = 1 label='Active Shader Program'");
+
 	//Add 'Camera' Options
 	TwAddSeparator(g_pToolBar, "Camera", NULL);
 	TwAddButton(g_pToolBar, "Camera options:", NULL, NULL, "");
@@ -360,11 +366,11 @@ int main(void)
 	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 
-
-	// Create and compile our GLSL program from the shaders
-
 	//Model Manager
-	ModelManager manager("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
+	ModelManager manager = ModelManager();
+	manager.createShader("shaders/WithGeometryShading.vertexshader", "shaders/WithGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
+	manager.createShader("shaders/WithGeometryShading.vertexshader", "shaders/WithGeometryShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
+	manager.useShader(0);
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
 
@@ -422,6 +428,9 @@ int main(void)
 		// Measure speed
 		double currentTime2 = glfwGetTime();
 
+		//Limita ShaderID ao tamanho do vetor
+		if (currentShaderProgramID > (*manager.getShaders()).size()-1)
+			currentShaderProgramID = (*manager.getShaders()).size() - 1;
 		//Limita cameraID ao tamanho do vetor
 		if (currentCameraID > (*manager.getCameras()).size()-1)
 			currentCameraID = (*manager.getCameras()).size()-1;
@@ -431,6 +440,10 @@ int main(void)
 		//Numero de pontos automatico
 		if (numLinearPoints != linearPoints.size()+1)
 			numLinearPoints = linearPoints.size()+1;
+
+		//Changes shader
+		if (glfwGetKey(g_pWindow, GLFW_KEY_F12) == GLFW_PRESS)
+			manager.useShader(currentShaderProgramID);
 		
 		//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
 		if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
@@ -503,8 +516,9 @@ int main(void)
 
 		//Explosion Geometry Shader
 		if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
-			if (m_currentActive == MODEL)
-				(*manager.getModels())[currentModelID].setGeometry(true);					
+			if (m_currentActive == MODEL){
+				(*manager.getModels())[currentModelID].setGeometry(true);
+			}
 		}
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
 			if (m_currentActive == MODEL)

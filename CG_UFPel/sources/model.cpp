@@ -20,6 +20,9 @@ Model::Model(const char *textPath, const char *textSampler, GLuint programID, Me
 	state = 0;
 	timeBtwn = 0;
 	lastTransformed = glfwGetTime();
+	geometry = false;
+	lastUsedGeometry = 0.0f;
+	geometryStart = 0.0f;
 }
 
 //Getters
@@ -54,6 +57,12 @@ long double Model::getTimeBtwn() {
 bool Model::getGeometry() {
 	return geometry;
 }
+long double Model::getGeometryStart() {
+	return geometryStart;
+}
+long double Model::getLastUsedGeometry() {
+	return lastUsedGeometry;
+}
 
 //Setter
 void Model::setModelMatrix(glm::mat4 matrix) {
@@ -64,6 +73,12 @@ void Model::setState(int newState) {
 }
 void Model::setGeometry(bool newState) {
 	Model::geometry = newState;
+	if (Model::geometry)
+		Model::geometryStart = glfwGetTime();
+}
+
+void Model::setLastUsedGeometry(long double time) {
+	lastUsedGeometry = time;
 }
 
 //Others
