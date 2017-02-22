@@ -415,8 +415,10 @@ int main(void)
 
 	printInstructions();
 	 
+	
+
 	do{
-        check_gl_error();
+        //check_gl_error();
 		// Measure speed
 		double currentTime2 = glfwGetTime();
 

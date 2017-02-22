@@ -1,3 +1,4 @@
 ﻿  Building Custom Rule F:/Downloads/Aula/CG/CG_UFPel/external/CMakeLists.txt
   CMake does not need to re-run because F:\Downloads\Aula\CG\saida\external\CMakeFiles\generate.stamp is up-to-date.
+  glew.c
   GLEW_190.vcxproj -> F:\Downloads\Aula\CG\saida\external\Debug\GLEW_190.lib

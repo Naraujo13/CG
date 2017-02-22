@@ -6,6 +6,7 @@
 #include <AntTweakBar.h>
 #include <iostream>
 #include <shader.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "controls.hpp"
 
 
@@ -96,6 +97,12 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 	for (auto it = models.begin(); it != models.end(); ++it) {
 		//Calculate MVP matrix
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
+
+		//Geometry Shader Data
+		glUniformMatrix4fv(glGetUniformLocation(programID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(programID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(programID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
+		glUniform1f(glGetUniformLocation(programID, "time"), glfwGetTime());
 
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform
