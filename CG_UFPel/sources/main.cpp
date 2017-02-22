@@ -369,7 +369,7 @@ int main(void)
 	//Model Manager
 	ModelManager manager = ModelManager();
 	manager.createShader("shaders/WithGeometryShading.vertexshader", "shaders/WithGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
-	manager.createShader("shaders/WithGeometryShading.vertexshader", "shaders/WithGeometryShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
+	manager.createShader("shaders/StandartShading.vertexshader", "shaders/StandartShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
 	manager.useShader(0);
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
