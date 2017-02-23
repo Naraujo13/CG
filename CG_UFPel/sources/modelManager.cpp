@@ -113,6 +113,9 @@ void ModelManager::clearScreen() {
 }
 
 void ModelManager::swapBuffers(GLFWwindow* g_pWindow) {
+	// Get a handle for our "LightPosition" uniform
+	glUseProgram(currentShaderProgramID);
+	LightID = glGetUniformLocation(currentShaderProgramID, "LightPosition_worldspace");
 	// Swap buffers			
 	glfwSwapBuffers(g_pWindow);
 	glfwPollEvents();
@@ -190,6 +193,37 @@ void ModelManager::transformCameras() {
 		if (it->getState()) {
 			it->applyTransformation();
 		}
+	}
+}
+
+void ModelManager::cameraNoise() {
+	noiseSteps = 40;
+	noiseCount = 0;
+	glm::vec3 noise;
+	glm::mat4 noiseMatrix;
+	//Camera Shake
+	//Noise
+	if (glfwGetTime() > lastNoise + noiseInterval && (cameras[currentCamera].getState())) {
+		if (noiseSteps == noiseCount) {
+			//Se já fez 10 passos deste noise, recalcula novo noise
+			//Gera Pontos Aleatórios
+			noise.x = 1 * sin((float)(rand() % 360)) / 15;
+			noise.y = 1 * sin((float)(rand() % 360)) / 15;
+			noise.z = 1 * sin((float)(rand() % 360)) / 15;
+			//noise.z = 0;
+
+			noiseMatrix = glm::translate(glm::mat4(1.0f), noise / glm::vec3(noiseSteps));
+
+			noiseInterval = 1 / noiseSteps;
+			noiseCount = 0;
+		}
+
+		//Translada fazendo noise
+		cameras[currentCamera].setViewMatrix(cameras[currentCamera].getViewMatrix()*noiseMatrix);
+
+		//Atualiza controle
+		noiseCount++;
+		lastNoise = glfwGetTime();
 	}
 }
 

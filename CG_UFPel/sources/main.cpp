@@ -41,6 +41,50 @@ using namespace glm;
 #include <vboindexer.hpp>
 #include <glerror.hpp>
 
+// Create an internal enum
+typedef enum { MODEL, CAMERA } ACTIVE_TYPE;
+// A variable for the current selection - will be updated by ATB
+ACTIVE_TYPE m_currentActive = MODEL;
+
+// Create an internal enum to name the meshes
+typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
+// A variable for the current selection - will be updated by ATB
+MESH_TYPE m_currentMesh = SUZANNE;
+
+//Input variables
+//Transformation auxiliaries
+struct translation t;
+struct rotation r;
+struct scale s;
+struct shear h;
+struct bezier b;
+struct bspline l;
+struct rotationAP p, cp;
+struct extraProjection3D p3D;
+struct cameraLookAt lk;
+glm::vec3 newModelPos(0);
+//Cam var
+glm::vec3 newCamPos(0, 0, 5), newCamUp(0, 1, 0), newCamSight(0, 0, -1);
+float fieldOfView = 60.0f, aspectRatio = 0.0f, near = 5.0f, far = 10.0;
+int hAux = 4.0f, vAux = 3.0f;
+//Linear path var
+glm::vec3 linearPoint(0);
+std::vector<glm::vec3>linearPoints;
+double linearTime = 0.0f;
+int numLinearPoints = 1;
+//Composition var
+double compositionTime = 0.0f;
+//Número de elementos
+int numModelos = 4;//Meshes
+int numCameras = 1;//Cameras
+
+//Control variables
+int currentShaderProgramID = 0;
+int currentModelID = 0;
+int currentCameraID = 0;
+int nUseMouse = 0;
+
+
 void printInstructions() {
 	/* ---- Instructions to user ---- */
 	std::cout << "-----------------------------------" << std::endl;
@@ -79,6 +123,294 @@ void printInstructions() {
 	std::cout << "----------------------------------" << std::endl;
 }
 
+void controlCounterVariables(ModelManager& manager) 
+{
+	//Limita ShaderID ao tamanho do vetor
+	if (currentShaderProgramID > (*manager.getShaders()).size() - 1)
+		currentShaderProgramID = (*manager.getShaders()).size() - 1;
+	//Limita cameraID ao tamanho do vetor
+	if (currentCameraID > (*manager.getCameras()).size() - 1)
+		currentCameraID = (*manager.getCameras()).size() - 1;
+	//Limita ModelID ao tamanho do vetor
+	if (currentModelID > (*manager.getModels()).size() - 1)
+		currentModelID = (*manager.getModels()).size() - 1;
+	//Numero de pontos automatico
+	if (numLinearPoints != linearPoints.size() + 1)
+		numLinearPoints = linearPoints.size() + 1;
+}
+
+void initialiseTransformationVariables() {
+	t.translationVec = glm::vec3(0, 0, 0);
+	t.time = 1.0f;
+	s.scaleVec = glm::vec3(1);
+	s.time = 1.0f;
+	r.rotationVec = glm::vec3(1, 0, 0);
+	r.rotationDegrees = 0.0f;
+	r.time = 1.0f;
+	h.shearVec = glm::vec3(0, 0, 0);
+	h.time = 1.0f;
+	b.controlPoints[0] = glm::vec3(0);
+	b.controlPoints[1] = glm::vec3(0);
+	b.controlPoints[2] = glm::vec3(0);
+	b.time = 1.0f;
+	l.controlPoints[0] = glm::vec3(-3, 3, 10);
+	l.controlPoints[1] = glm::vec3(-3, -3, 10);
+	l.controlPoints[2] = glm::vec3(3, -3, 10);
+	l.controlPoints[3] = glm::vec3(3, 3, 10);
+	l.time = 1.0f;
+	p.rotationAngle = 360.0f;
+	p.point = glm::vec3(3, 0, 0);
+	p.time = 1.0f;
+	cp.rotationAngle = 360.0f;
+	cp.rotationAxis = glm::vec3(1, 0, 0);
+	cp.point = glm::vec3(3, 0, 0);
+	cp.time = 1.0f;
+	p3D.projVector = glm::vec3(0, 0, 2);
+	p3D.time = 0.0f;
+	lk.eye = glm::vec3(0, 0, 5);
+	lk.center = glm::vec3(0, 0, -5);
+	lk.up = glm::vec3(0, 1, 0);
+}
+
+void meshSimplificationInput(
+	int& continuousMeshSimplification,
+	long double& currentTime2,
+	long double& lastTime2,
+	MeshSimplification& MS,
+	int& currentModelID,
+	ModelManager& manager) {
+	//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
+	if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
+		continuousMeshSimplification = 1;
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_EQUAL) == GLFW_PRESS)
+		continuousMeshSimplification = -1;
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
+		continuousMeshSimplification = 0;
+
+	//Trabalho 1 - Mesh Simplification
+	if ((currentTime2 >= lastTime2 + 0.5 && (glfwGetKey(g_pWindow, GLFW_KEY_F10) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
+
+		lastTime2 = glfwGetTime();
+		/* ------------ Trabalho 1 ----------------- *
+		* -- Algoritmo de simplificação de Mesh --- *
+		* - Parte 1: Cálculo inicial de vizinhos ---*
+		* - Parte 2: Remoção do Vértice ----------- *
+		* - Parte 3: Collapse --------------------- *
+		* - Parte 4: Cálculo dos vizinhos alterados *
+		* ----------------------------------------- */
+
+		//Calls function to reduce the mesh
+		MS.reduce(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndexedNormals(), continuousMeshSimplification);
+
+		//Bind
+		(*(*manager.getModels())[currentModelID].getMesh()).rebind();
+		//End Bind
+
+	}
+	else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_F11) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1) {
+		lastTime2 = glfwGetTime();
+		MS.reconstruct(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), continuousMeshSimplification);
+
+		//Bind
+		(*(*manager.getModels())[currentModelID].getMesh()).rebind();
+
+	}
+}
+
+void drawModeInput() {
+	//Set the draw mode. L to lines, P to points and F to fill.
+	if (glfwGetKey(g_pWindow, GLFW_KEY_L) == GLFW_PRESS)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else if ((glfwGetKey(g_pWindow, GLFW_KEY_P) == GLFW_PRESS))
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	else if ((glfwGetKey(g_pWindow, GLFW_KEY_F) == GLFW_PRESS))
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void transformationInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
+	//Translação ao pressionar T
+	if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (m_currentActive == CAMERA) {
+			(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
+			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
+		lastTime3 = glfwGetTime();
+		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, NULL, s.time);
+		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Rotation ('R') - both
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (m_currentActive == CAMERA) {
+			(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, &r, NULL);
+			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotation Around point ('A') - both - buggy
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].rotationAroundPoint(&p);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (m_currentActive == CAMERA) {
+			(*manager.getCameras())[currentCameraID].aroundPoint(&cp);
+			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotação + Translação + Escala ('C')
+		lastTime3 = glfwGetTime();
+		(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, NULL, compositionTime);
+		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Shear ('H')
+		lastTime3 = glfwGetTime();
+		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, NULL, h.time);
+		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Bezier ('Z') - both
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].bezierCurve(b);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (m_currentActive == CAMERA) {
+			(*manager.getCameras())[currentCameraID].bezierCurve(b);
+			std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//B-Spline ('B') - both
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].BSplineTest(l);
+			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+		}
+		else if (m_currentActive == CAMERA) {
+			//(*manager.getCameras())[currentCameraID].BSpline(l);
+			(*manager.getCameras())[currentCameraID].BSplineTest(l);
+			std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Projection 3D ('D')
+		lastTime3 = glfwGetTime();
+		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, NULL, &p3D, 0);
+		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_K) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {					//Look At (K) - Camera only
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == CAMERA) {
+			(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, NULL, &lk);
+			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			if (m_currentMesh == SUZANNE)
+				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
+			else if (m_currentMesh == GOOSE)
+				manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
+			else if (m_currentMesh == CUBE)
+				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
+			numModelos++;
+		}
+		else if (m_currentActive == CAMERA) {
+			//manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
+			manager.createCamera(fieldOfView, hAux / vAux, near, far, newCamPos, newCamUp, newCamSight);
+			numCameras++;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_F1) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insert point to Linear Path (F1) - Camera only
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == CAMERA) {
+			linearPoints.push_back(linearPoint);
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_F2) == GLFW_PRESS && (currentTime > lastTime3 + 0.3 && linearPoints.size()>0)) {	//Put current Linear Path (F2) - Camera only
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == CAMERA) {
+			glm::vec3 previous, current;
+			struct translation t;
+			t.time = linearTime / linearPoints.size();
+			previous = glm::vec3((*manager.getCameras())[currentCameraID].getViewMatrix()[3][0],
+				(*manager.getCameras())[currentCameraID].getViewMatrix()[3][1],
+				(*manager.getCameras())[currentCameraID].getViewMatrix()[3][2]);
+			for (int i = 0; i < linearPoints.size(); i++) {
+				current = linearPoints[i];
+				t.translationVec = current - previous;
+
+				(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
+
+				previous = current;
+			}
+			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS) {	//Resets all  input data
+		t.translationVec = glm::vec3(0, 0, 0);
+		t.time = 1.0f;
+		s.scaleVec = glm::vec3(1);
+		s.time = 1.0f;
+		r.rotationVec = glm::vec3(1, 0, 0);
+		r.rotationDegrees = 0.0f;
+		r.time = 1.0f;
+		h.shearVec = glm::vec3(0, 0, 0);
+		h.time = 1.0f;
+		b.controlPoints[0] = glm::vec3(0);
+		b.controlPoints[1] = glm::vec3(0);
+		b.controlPoints[2] = glm::vec3(0);
+		b.time = 1.0f;
+		l.controlPoints[0] = glm::vec3(0);
+		l.controlPoints[1] = glm::vec3(0);
+		l.controlPoints[2] = glm::vec3(0);
+		l.controlPoints[3] = glm::vec3(0);
+		l.time = 1.0f;
+		p.rotationAngle = 0.0f;
+		p.point = glm::vec3(0);
+		p.time = 1.0f;
+		p3D.projVector = glm::vec3(0, 0, 2);
+		p3D.time = 1.0f;
+		newModelPos = glm::vec3(0);
+		newCamPos = glm::vec3(0);
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
+		lastTime3 = glfwGetTime();
+		if (m_currentActive == MODEL) {
+			manager.setModelTransformation(currentModelID);
+		}
+		else if (m_currentActive == CAMERA) {
+			manager.setCamerasTransformation(currentCameraID);
+			//(*manager.getCameras())[currentCameraID].applyTransformation();
+		}
+	}
+}
+
+void shaderInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
+	//Explosion Geometry Shader
+	if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
+		if (m_currentActive == MODEL) {
+			(*manager.getModels())[currentModelID].setGeometry(true);
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
+		if (m_currentActive == MODEL)
+			(*manager.getModels())[currentModelID].setGeometry(false);
+	}
+	else if (currentShaderProgramID != 1)
+		(*manager.getModels())[currentModelID].setGeometry(false);
+}
+
+
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
 	g_nWidth = nWidth;
@@ -94,52 +426,8 @@ void TW_CALL transformModel(void *, ModelManager manager, int model)
 
 int main(void)
 {
-	int currentShaderProgramID = 0;
-	int currentModelID = 0;
-	int currentCameraID = 0;
-	int nUseMouse = 0;
 
-	//Transformation auxiliaries
-	struct translation t;
-	struct rotation r;
-	struct scale s;
-	struct shear h;
-	struct bezier b;
-	struct bspline l;
-	struct rotationAP p,cp;
-	struct extraProjection3D p3D;
-	struct cameraLookAt lk;
-
-	t.translationVec = glm::vec3 (0,0,0);
-	t.time = 1.0f;
-	s.scaleVec = glm::vec3(1);
-	s.time = 1.0f;
-	r.rotationVec = glm::vec3(1, 0, 0);
-	r.rotationDegrees = 0.0f;
-	r.time = 1.0f;
-	h.shearVec = glm::vec3(0, 0, 0);
-	h.time = 1.0f;
-	b.controlPoints[0] = glm::vec3(0);
-	b.controlPoints[1] = glm::vec3(0);
-	b.controlPoints[2] = glm::vec3(0);
-	b.time = 1.0f;
-	l.controlPoints[0] = glm::vec3(-3,3,10);
-	l.controlPoints[1] = glm::vec3(-3,-3,10);
-	l.controlPoints[2] = glm::vec3(3,-3,10);
-	l.controlPoints[3] = glm::vec3(3,3,10);
-	l.time = 1.0f;
-	p.rotationAngle = 360.0f;
-	p.point = glm::vec3(3,0,0);
-	p.time = 1.0f;
-	cp.rotationAngle = 360.0f;
-	cp.rotationAxis = glm::vec3(1, 0, 0);
-	cp.point = glm::vec3(3, 0, 0);
-	cp.time = 1.0f;
-	p3D.projVector = glm::vec3(0,0,2);
-	p3D.time = 0.0f;
-	lk.eye = glm::vec3(0, 0, 5);
-	lk.center = glm::vec3(0,0,-5);
-	lk.up = glm::vec3(0, 1, 0);
+	initialiseTransformationVariables();
 
 	// Initialise GLFW
 	if (!glfwInit())
@@ -189,16 +477,6 @@ int main(void)
 	TwAddSeparator(g_pToolBar, "Mesh", NULL);
 	TwAddButton(g_pToolBar, "Mesh options", NULL, NULL, "");
 	
-
-	//Número de modelos
-	int numModelos = 4;//Meshes
-	int numCameras = 1;//Cameras
-	// Create an internal enum to name the meshes
-	typedef enum { SUZANNE, CUBE, GOOSE } MESH_TYPE;
-
-	// A variable for the current selection - will be updated by ATB
-	MESH_TYPE m_currentMesh = SUZANNE;
-
 	// Array of drop down items
 	TwEnumVal Meshes[] = { { SUZANNE, "Suzanne" },{ CUBE, "Cube" },{ GOOSE, "Goose" } };
 
@@ -208,7 +486,7 @@ int main(void)
 	// Link it to the tweak bar
 	TwAddVarRW(g_pToolBar, "Mesh: ", MeshTwType, &m_currentMesh, NULL);
 	//New Model position
-	glm::vec3 newModelPos(0);
+	
 	TwAddVarRW(g_pToolBar, "New Model position:", TW_TYPE_DIR3D, &newModelPos, NULL);
 	
 	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=20 step=1 label='Active model");
@@ -216,11 +494,6 @@ int main(void)
 	
 	//Add Model-Camera Switch
 		TwAddSeparator(g_pToolBar, "Model-Camera Switch:", NULL);
-		// Create an internal enum
-		typedef enum { MODEL, CAMERA} ACTIVE_TYPE;
-
-		// A variable for the current selection - will be updated by ATB
-		ACTIVE_TYPE m_currentActive = MODEL;
 
 		// Array of drop down items
 		TwEnumVal Actives[] = { { MODEL, "Model" },{ CAMERA, "Camera" } };
@@ -240,9 +513,6 @@ int main(void)
 	TwAddSeparator(g_pToolBar, "Camera", NULL);
 	TwAddButton(g_pToolBar, "Camera options:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
-	glm::vec3 newCamPos(0,0,5), newCamUp(0,1,0), newCamSight(0,0,-1);
-	float fieldOfView = 60.0f, aspectRatio = 0.0f,  near = 5.0f, far = 10.0;
-	int hAux = 4.0f, vAux = 3.0f;
 	
 	TwAddButton(g_pToolBar, "New Camera parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3F, &newCamPos, NULL);
@@ -288,11 +558,6 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Rotation around point time:  ", TW_TYPE_DOUBLE, &cp.time, " min=0.0 step=0.1 label='Rotation around point time'");
 
 	//Linear Path Options
-	glm::vec3 linearPoint(0);
-	std::vector<glm::vec3>linearPoints;
-	double linearTime = 0.0f;
-	int numLinearPoints = 1;
-
 	TwAddSeparator(g_pToolBar, "Linear Path Options", NULL);
 	TwAddButton(g_pToolBar, "Linear Path: (P0 is current position)", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Number of points (automatic):  ", TW_TYPE_INT32, &numLinearPoints, " min=1.0 label=''");
@@ -307,7 +572,7 @@ int main(void)
 	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.0 step=0.1 help='Time to do the scaling (seconds)' ");
 
 	//Add 'Composition animation' options
-	double compositionTime = 0.0f;
+	
 	TwAddSeparator(g_pToolBar, "Composition", NULL);
 	TwAddButton(g_pToolBar, "Compasition parameters:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Composition Time:", TW_TYPE_DOUBLE, &compositionTime, " min=0.0 step=0.1 label='Composition time'");
@@ -374,348 +639,90 @@ int main(void)
 	manager.useShader(0);
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
-
-	// Read our .obj file and creates meshes
-	manager.createMesh("mesh/suzanne.obj");
-	manager.createMesh("mesh/goose.obj");
-	manager.createMesh("mesh/cube.obj");
-	
-	//Creates models
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,3,0));
-	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3,3,0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3,-3,0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3,-3,0));
-
+		
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID      = glGetUniformLocation(manager.getProgramID(), "MVP");
 	//GLuint ViewMatrixID  = glGetUniformLocation(manager.getProgramID(), "V");
-
-	//Creates Camera 1
-	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 10)), getProjectionMatrix());
-
-	//Creates Camera 2
-	manager.createCamera(getViewMatrix(), getProjectionMatrix());
 
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(manager.getProgramID());
 	GLuint LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 
-	// For speed computation
-	double lastTime = glfwGetTime(), lastTime2 = glfwGetTime();
+	//Speed/Times Auxiliaries
+	long double lastTime = glfwGetTime(), lastTime2 = glfwGetTime();
 	int nbFrames = 0;
 	int simplify = 1;
-	double lastTime3 = glfwGetTime();
+	long double lastTime3 = glfwGetTime();
 	
 
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(manager.getProgramID());
 	LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
+
+	//Print Instructions
+	printInstructions();
+
+	//----- Trabalho 1: Mesh Simplification
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
-	
-	//Noise
-	double noiseInterval, lastNoise;
-	int noiseSteps = 40, noiseCount = 0;
-	glm::vec3 noise;
-	glm::mat4 noiseMatrix;
+	// Read our .obj file and creates meshes
+	manager.createMesh("mesh/suzanne.obj");
+	manager.createMesh("mesh/goose.obj");
+	manager.createMesh("mesh/cube.obj");
 
-	printInstructions();
+	//----- Trabalho 2: Model Transformation
+	//Creates models
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
+	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3, 3, 0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, -3, 0));
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3, -3, 0));
+	
+	//----- Trabalho 3: Câmeras
+	//Creates Camera 1
+	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 10)), getProjectionMatrix());
+	//Creates Camera 2
+	manager.createCamera(getViewMatrix(), getProjectionMatrix());
 	 
-	//Shaders
+	//Trabalho 4: Shaders
 	bool drawNormals = false;
 	
-
+	//Draw Loop
 	do{
-        //check_gl_error();
+        check_gl_error();
 		// Measure speed
-		double currentTime2 = glfwGetTime();
-
-		//Limita ShaderID ao tamanho do vetor
-		if (currentShaderProgramID > (*manager.getShaders()).size()-1)
-			currentShaderProgramID = (*manager.getShaders()).size() - 1;
-		//Limita cameraID ao tamanho do vetor
-		if (currentCameraID > (*manager.getCameras()).size()-1)
-			currentCameraID = (*manager.getCameras()).size()-1;
-		//Limita ModelID ao tamanho do vetor
-		if (currentModelID > (*manager.getModels()).size() - 1)
-			currentModelID = (*manager.getModels()).size() - 1;
-		//Numero de pontos automatico
-		if (numLinearPoints != linearPoints.size()+1)
-			numLinearPoints = linearPoints.size()+1;
+		long double currentTime2 = glfwGetTime();
 		
-		//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
-		if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
-			continuousMeshSimplification = 1;
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_EQUAL) == GLFW_PRESS)
-			continuousMeshSimplification = -1;
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-			continuousMeshSimplification = 0;
-	
-		//Trabalho 1 - Mesh Simplification
-		if ((currentTime2 >= lastTime2 + 0.5  && (glfwGetKey(g_pWindow,GLFW_KEY_F10) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
+		//Control counter's limits
+		controlCounterVariables(manager);
 
-			lastTime2 = glfwGetTime();
-			/* ------------ Trabalho 1 ----------------- *
-			* -- Algoritmo de simplificação de Mesh --- *
-			* - Parte 1: Cálculo inicial de vizinhos ---*
-			* - Parte 2: Remoção do Vértice ----------- *
-			* - Parte 3: Collapse --------------------- *
-			* - Parte 4: Cálculo dos vizinhos alterados *
-			* ----------------------------------------- */
+		//Draw Mode Input
+		drawModeInput();
 
-			//Calls function to reduce the mesh
-			MS.reduce(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndexedNormals(), continuousMeshSimplification);
-
-			//Bind
-			(*(*manager.getModels())[currentModelID].getMesh()).rebind();
-
-			// Get a handle for our "LightPosition" uniform
-			glUseProgram(manager.getProgramID());
-			LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
-
-			//End Bind
-		
-		}
-		else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_F11) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1 ) {
-			lastTime2 = glfwGetTime();
-			MS.reconstruct(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), continuousMeshSimplification);
-
-			//Bind
-			(*(*manager.getModels())[currentModelID].getMesh()).rebind();
-
-		}
-
-		//Set the draw mode. L to lines, P to points and F to fill.
-		if(glfwGetKey(g_pWindow, GLFW_KEY_L) == GLFW_PRESS)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		else if ((glfwGetKey(g_pWindow, GLFW_KEY_P) == GLFW_PRESS))
-			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-		else if ((glfwGetKey(g_pWindow, GLFW_KEY_F) == GLFW_PRESS))
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		/* ----- Trabalho 1: Mesh Simplification ----- */
+		meshSimplificationInput(
+			continuousMeshSimplification,
+			currentTime2,
+			lastTime2,
+			MS,
+			currentModelID,
+			manager);
 
         //use the control key to free the mouse
 		if (glfwGetKey(g_pWindow, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
 			nUseMouse = 0;
 		else
 			nUseMouse = 1;
-		double currentTime = glfwGetTime();
+		long double currentTime = glfwGetTime();
+
+		/* --- Trabalho 4 --- */
+		shaderInput(currentTime, lastTime3, manager);
 
 		/* --- Trabalho 2 --- */
-		//Modelo atual
-		if (glfwGetKey(g_pWindow, GLFW_KEY_0) == GLFW_PRESS)
-			currentModelID = 0;
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_1) == GLFW_PRESS)
-			currentModelID = 1;
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_2) == GLFW_PRESS)
-			currentModelID = 2;
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_3) == GLFW_PRESS)
-			currentModelID = 3;
+		transformationInput(currentTime, lastTime3, manager);
 
-
-		//Explosion Geometry Shader
-		if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
-			if (m_currentActive == MODEL){
-				(*manager.getModels())[currentModelID].setGeometry(true);
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
-			if (m_currentActive == MODEL)
-				(*manager.getModels())[currentModelID].setGeometry(false);
-		}
-		else if (currentShaderProgramID != 1)
-			(*manager.getModels())[currentModelID].setGeometry(false);
-		//Translação ao pressionar T
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
-				std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-			}
-			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
-				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}		
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
-			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, NULL, s.time);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Rotation ('R') - both
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
-				std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-			}
-			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, &r, NULL);
-				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotation Around point ('A') - both - buggy
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				(*manager.getModels())[currentModelID].rotationAroundPoint(&p);
-				std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-			}
-			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].aroundPoint(&cp);
-				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotação + Translação + Escala ('C')
-			lastTime3 = glfwGetTime();		
-			(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, NULL, compositionTime);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Shear ('H')
-			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, NULL, h.time);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Bezier ('Z') - both
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				(*manager.getModels())[currentModelID].bezierCurve(b);
-				std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-			}
-			else if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].bezierCurve(b);
-				std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//B-Spline ('B') - both
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				(*manager.getModels())[currentModelID].BSplineTest(l);
-				std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-			}
-			else if (m_currentActive == CAMERA) {
-				//(*manager.getCameras())[currentCameraID].BSpline(l);
-				(*manager.getCameras())[currentCameraID].BSplineTest(l);
-				std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos){	//Projection 3D ('D')
-			lastTime3 = glfwGetTime();
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, NULL, &p3D, 0);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_K) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {					//Look At (K) - Camera only
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == CAMERA) {
-				(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, NULL, &lk);
-				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				if (m_currentMesh == SUZANNE)
-					manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
-				else if (m_currentMesh == GOOSE)
-					manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
-				else if (m_currentMesh == CUBE)
-					manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
-				numModelos++;
-			}
-			else if (m_currentActive == CAMERA) {
-				//manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
-				manager.createCamera(fieldOfView, hAux/vAux, near, far, newCamPos, newCamUp, newCamSight);
-				numCameras++;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_F1) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insert point to Linear Path (F1) - Camera only
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == CAMERA) {
-				linearPoints.push_back(linearPoint);
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_F2) == GLFW_PRESS && (currentTime > lastTime3 + 0.3 && linearPoints.size()>0)){	//Put current Linear Path (F2) - Camera only
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == CAMERA) {
-				glm::vec3 previous, current;
-				struct translation t;
-				t.time = linearTime / linearPoints.size();
-				previous = glm::vec3((*manager.getCameras())[currentCameraID].getViewMatrix()[3][0],
-									(*manager.getCameras())[currentCameraID].getViewMatrix()[3][1],
-									(*manager.getCameras())[currentCameraID].getViewMatrix()[3][2]);
-				for (int i = 0; i < linearPoints.size(); i++) {
-					current = linearPoints[i];
-					t.translationVec = current - previous;
-
-					(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
-
-					previous = current;
-				}
-				std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-			}
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS){	//Resets all  input data
-			t.translationVec = glm::vec3(0, 0, 0);
-			t.time = 1.0f;
-			s.scaleVec = glm::vec3(1);
-			s.time = 1.0f;
-			r.rotationVec = glm::vec3(1, 0, 0);
-			r.rotationDegrees = 0.0f;
-			r.time = 1.0f;
-			h.shearVec = glm::vec3(0, 0, 0);
-			h.time = 1.0f;
-			b.controlPoints[0] = glm::vec3(0);
-			b.controlPoints[1] = glm::vec3(0);
-			b.controlPoints[2] = glm::vec3(0);
-			b.time = 1.0f;
-			l.controlPoints[0] = glm::vec3(0);
-			l.controlPoints[1] = glm::vec3(0);
-			l.controlPoints[2] = glm::vec3(0);
-			l.controlPoints[3] = glm::vec3(0);
-			l.time = 1.0f;
-			p.rotationAngle = 0.0f;
-			p.point = glm::vec3(0);
-			p.time = 1.0f;
-			p3D.projVector = glm::vec3(0,0,2);
-			p3D.time = 1.0f;
-			newModelPos = glm::vec3(0);
-			newCamPos = glm::vec3(0);
-		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
-			lastTime3 = glfwGetTime();
-			if (m_currentActive == MODEL) {
-				manager.setModelTransformation(currentModelID);
-			}
-			else if (m_currentActive == CAMERA) {
-				manager.setCamerasTransformation(currentCameraID);
-				//(*manager.getCameras())[currentCameraID].applyTransformation();
-			}
-		}
-
-		//Camera Shake
-		//Noise
-		if (currentTime > lastNoise + noiseInterval && (*manager.getCameras())[currentCameraID].getState()) {
-			if (noiseSteps == noiseCount) {
-				//Se já fez 10 passos deste noise, recalcula novo noise
-				//Gera Pontos Aleatórios
-				noise.x = 1 * sin((float)(rand() % 360))/15;
-				noise.y = 1 * sin((float)(rand() % 360))/15;
-				noise.z = 1 * sin((float)(rand() % 360))/15;
-				//noise.z = 0;
-
-				noiseMatrix = glm::translate(glm::mat4(1.0f), noise/glm::vec3(noiseSteps));
-
-				noiseInterval = 1/noiseSteps;
-				noiseCount = 0;
-			}
-
-			//Translada fazendo noise
-			(*manager.getCameras())[currentCameraID].setViewMatrix((*manager.getCameras())[currentCameraID].getViewMatrix()*noiseMatrix);
-			
-			//Atualiza controle
-			noiseCount++;
-			lastNoise = glfwGetTime();
-		}
-
+		//Camera Noise
+		manager.cameraNoise();
 		//Transform cameras
 		manager.transformCameras();
 		//Transform models
@@ -749,6 +756,7 @@ int main(void)
 
 		manager.clearScreen();
 
+		//Is Normal Shader Active?
 		if (drawNormals == true) {
 			manager.useShader(0);
 			//Draw
@@ -756,7 +764,6 @@ int main(void)
 			manager.useShader(2);
 		}
 		
-
 		//Draw
 		manager.drawModels((*manager.getCameras())[currentCameraID].getViewMatrixID(), (*manager.getCameras())[currentCameraID].getViewMatrix(), (*manager.getCameras())[currentCameraID].getProjectionMatrix(), g_pWindow);
 		manager.swapBuffers(g_pWindow);

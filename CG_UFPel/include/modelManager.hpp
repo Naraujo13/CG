@@ -35,6 +35,12 @@ private:
 	//Current Camera
 	int currentCamera;
 
+	//Noise control
+	long double lastNoise = 0;
+	long double noiseInterval = 0.25;
+	int noiseSteps = 40;
+	int noiseCount = 0;
+
 
 	GLuint VertexArrayID;
 	GLuint currentShaderProgramID;
@@ -64,7 +70,8 @@ public:
 	void createCamera(float fieldOfView, float aspectRatio, float near, float far, glm::vec3 cameraPosition, glm::vec3 upVector, glm::vec3 sightDirection);
 	void changeCurrentCamera(int newCamera);
 	void transformCameras();
-	void ModelManager::setCamerasTransformation(int cameraID);
+	void cameraNoise();
+	void setCamerasTransformation(int cameraID);
 	
 	//mesh
 	void createMesh(char *path);
