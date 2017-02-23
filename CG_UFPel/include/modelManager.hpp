@@ -72,6 +72,8 @@ public:
 	//models
 	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);
 	void cleanup();
+	void clearScreen();
+	void swapBuffers(GLFWwindow* g_pWindow);
 	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow);
 	void transformModels();
 	void setModelTransformation(int modelID);

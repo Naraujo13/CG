@@ -107,11 +107,19 @@ void ModelManager::cleanup() {
 
 }
 
-void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow) {
-	
+void ModelManager::clearScreen() {
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
+void ModelManager::swapBuffers(GLFWwindow* g_pWindow) {
+	// Swap buffers			
+	glfwSwapBuffers(g_pWindow);
+	glfwPollEvents();
+}
+
+void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow) {
+	
 	// Use our shader
 	glUseProgram(currentShaderProgramID);
 
@@ -165,11 +173,6 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		// Draw tweak bars
 		TwDraw();
 	}
-	// Swap buffers			
-	glfwSwapBuffers(g_pWindow);
-	glfwPollEvents();
-
-
 }
 
 void ModelManager::transformModels() {

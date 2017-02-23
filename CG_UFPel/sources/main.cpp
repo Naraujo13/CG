@@ -368,8 +368,9 @@ int main(void)
 
 	//Model Manager
 	ModelManager manager = ModelManager();
-	manager.createShader("shaders/WithGeometryShading.vertexshader", "shaders/WithGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
-	manager.createShader("shaders/StandartShading.vertexshader", "shaders/StandartShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
+	manager.createShader("shaders/PassThroughShading.vertexshader", "shaders/PassThroughShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
+	manager.createShader("shaders/ExplosionGeometryShading.vertexshader", "shaders/ExplosionGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
+	manager.createShader("shaders/VisualizeNormalsShading.vertexshader", "shaders/VisualizeNormalsShading.fragmentshader", "shaders/VisualizeNormalsGeometryShader.gs");
 	manager.useShader(0);
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
@@ -421,6 +422,8 @@ int main(void)
 
 	printInstructions();
 	 
+	//Shaders
+	bool drawNormals = false;
 	
 
 	do{
@@ -440,10 +443,6 @@ int main(void)
 		//Numero de pontos automatico
 		if (numLinearPoints != linearPoints.size()+1)
 			numLinearPoints = linearPoints.size()+1;
-
-		//Changes shader
-		if (glfwGetKey(g_pWindow, GLFW_KEY_F12) == GLFW_PRESS)
-			manager.useShader(currentShaderProgramID);
 		
 		//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
 		if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
@@ -515,15 +514,17 @@ int main(void)
 
 
 		//Explosion Geometry Shader
-		if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
+		if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
 			if (m_currentActive == MODEL){
 				(*manager.getModels())[currentModelID].setGeometry(true);
 			}
 		}
-		else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {
+		else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
 			if (m_currentActive == MODEL)
 				(*manager.getModels())[currentModelID].setGeometry(false);
 		}
+		else if (currentShaderProgramID != 1)
+			(*manager.getModels())[currentModelID].setGeometry(false);
 		//Translação ao pressionar T
 		else if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
 			lastTime3 = glfwGetTime();
@@ -733,9 +734,32 @@ int main(void)
 			lastTime += 1.0;
 		}
 		
+		//Changes shader
+		if (glfwGetKey(g_pWindow, GLFW_KEY_F12) == GLFW_PRESS) {
+			manager.useShader(currentShaderProgramID);
+			if (currentShaderProgramID == 2) {
+				drawNormals = true;
+				std::cout << "DEBUG::DRAWNORMALS==TRUE::DEBUG" << std::endl;
+			}
+			else {
+				drawNormals = false;
+				std::cout << "DEBUG::DRAWNORMALS==FALSE::DEBUG" << std::endl;
+			}
+		}
+
+		manager.clearScreen();
+
+		if (drawNormals == true) {
+			manager.useShader(0);
+			//Draw
+			manager.drawModels((*manager.getCameras())[currentCameraID].getViewMatrixID(), (*manager.getCameras())[currentCameraID].getViewMatrix(), (*manager.getCameras())[currentCameraID].getProjectionMatrix(), g_pWindow);
+			manager.useShader(2);
+		}
+		
 
 		//Draw
 		manager.drawModels((*manager.getCameras())[currentCameraID].getViewMatrixID(), (*manager.getCameras())[currentCameraID].getViewMatrix(), (*manager.getCameras())[currentCameraID].getProjectionMatrix(), g_pWindow);
+		manager.swapBuffers(g_pWindow);
 
 	} // Check if the ESC key was pressed or the window was closed
 	while (glfwGetKey(g_pWindow, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
