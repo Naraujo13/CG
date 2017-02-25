@@ -3,14 +3,18 @@
 #include <vboindexer.hpp>
 #include <GL/glew.h>
 
-//Constructor
-Mesh::Mesh(char * path)
-{
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals;
+//Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-	loadOBJ(path, vertices, uvs, normals);
+//Constructor
+Mesh::Mesh(
+	std::vector<unsigned short> indices, 
+	std::vector<glm::vec3> vertices, 
+	std::vector<glm::vec2> uvs, 
+	std::vector<glm::vec3> normals)
+{
 	indexVBO(vertices, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
 
 	glGenBuffers(1, &vertexbuffer);

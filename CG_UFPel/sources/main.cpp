@@ -666,16 +666,20 @@ int main(void)
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
 	// Read our .obj file and creates meshes
-	manager.createMesh("mesh/suzanne.obj");
-	manager.createMesh("mesh/goose.obj");
-	manager.createMesh("mesh/cube.obj");
+	//manager.createMesh("mesh/suzanne.obj");
+	//manager.createMesh("mesh/goose.obj");
+	//manager.createMesh("mesh/cube.obj");
+	//manager.createMesh("mesh/nanosuit.obj");
+	
+	manager.loadMeshes("mesh/nanosuit.obj");
 
 	//----- Trabalho 2: Model Transformation
 	//Creates models
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
-	manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3, 3, 0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, -3, 0));
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(-3, -3, 0));
+	if ((*manager.getMeshes()).size() > 0)
+		manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
+	//manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3, 3, 0));
+	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(3, -3, 0));
+	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(3), glm::vec3(-3, -3, 0));
 	
 	//----- Trabalho 3: Câmeras
 	//Creates Camera 1

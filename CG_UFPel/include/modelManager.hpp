@@ -74,7 +74,7 @@ public:
 	void setCamerasTransformation(int cameraID);
 	
 	//mesh
-	void createMesh(char *path);
+	void loadMeshes(std::string path);
 
 	//models
 	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);

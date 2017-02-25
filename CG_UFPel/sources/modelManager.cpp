@@ -8,6 +8,7 @@
 #include <shader.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "controls.hpp"
+#include "objloader.hpp"
 
 
 //Constructor
@@ -57,10 +58,17 @@ void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fr
 void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
 	models.push_back(Model(textPath, textSampler, currentShaderProgramID, mesh, position));
 }
-//creates a new mesh and adds to the vector
-void ModelManager::createMesh(char *path) {
-	meshes.push_back(Mesh(path));
+
+void ModelManager::loadMeshes(std::string path) {
+	std::vector <Mesh> meshes;
+	loadAssImp(path, meshes);
+	printf("Returned from assimp loader: %d meshes\n", meshes.size());
+	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
+		this->meshes.push_back(*it);
+	}
+	printf("Number of meshes at manager: %d meshes\n", this->meshes.size());
 }
+
 //creates a new camera and adds to the vector
 void ModelManager::createCamera(glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix) {
 	cameras.push_back(Camera(currentShaderProgramID, ViewMatrix, ProjectionMatrix));
