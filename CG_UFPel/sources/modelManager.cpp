@@ -61,7 +61,7 @@ void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, gl
 
 void ModelManager::loadMeshes(std::string path) {
 	std::vector <Mesh> meshes;
-	loadAssImp(path, meshes);
+	meshes = *loadAssImp(path);
 	printf("Returned from assimp loader: %d meshes\n", meshes.size());
 	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
 		this->meshes.push_back(*it);

@@ -12,6 +12,6 @@ bool loadOBJ(
 
 
 
-void loadAssImp(std::string path, std::vector <Mesh>& meshes);
+std::vector <Mesh> * loadAssImp(std::string path);
 
 #endif

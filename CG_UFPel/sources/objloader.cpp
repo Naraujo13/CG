@@ -120,9 +120,78 @@ bool loadOBJ(
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
+Mesh* processMesh(aiMesh* mesh2, const aiScene* scene, int i) {
+	printf("Loading mesh %d of current node\n", i);
+	std::vector<unsigned short> indices;
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec2> uvs;
+	std::vector<glm::vec3> normals;
 
-void loadAssImp(std::string path, std::vector <Mesh>& meshes)
+	const aiMesh* mesh = mesh2;
+	
+	printf("\tLoading vertices positions...\n");
+	// Fill vertices positions
+	vertices.reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
+		aiVector3D pos = mesh->mVertices[i];
+		vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
+	}
+
+	printf("\tLoading vertices uvs...\n");
+	// Fill vertices texture coordinates
+	uvs.reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
+		aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
+		uvs.push_back(glm::vec2(UVW.x, UVW.y));
+	}
+
+	printf("\tLoading vertices normals...\n");
+	// Fill vertices normals
+	normals.reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
+		aiVector3D n = mesh->mNormals[i];
+		normals.push_back(glm::vec3(n.x, n.y, n.z));
+	}
+
+	printf("\tLoading face indices...\n");
+	// Fill face indices
+	indices.reserve(3 * mesh->mNumFaces);
+	for (unsigned int i = 0; i<mesh->mNumFaces; i++) {
+		// Assume the model has only triangles.
+		indices.push_back(mesh->mFaces[i].mIndices[0]);
+		indices.push_back(mesh->mFaces[i].mIndices[1]);
+		indices.push_back(mesh->mFaces[i].mIndices[2]);
+	}
+
+	printf("\tReturning mesh...\n");
+	return &(Mesh(indices, vertices, uvs, normals));
+}
+
+void processNode(std::vector <Mesh>& meshes, aiNode* node, const aiScene* scene) {
+
+	/* -- Process Node -- */
+
+	printf("NUMBER_OF_MESHES_IN_NODE::ASSIMP::%d::\n", node->mNumMeshes);
+	//Process each mesh in this node
+	for (int i = 0; i < node->mNumMeshes; i++) {
+		aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
+		Mesh mesh = *processMesh(aimesh, scene, i);
+		meshes.push_back(mesh);
+		printf("\Mesh %d of current node pushed to vector. Current size: %d\n", i, meshes.size());
+	}
+	printf("END_OF_NODE::ASSIMP::\n");
+
+	// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+	for (GLuint i = 0; i < node->mNumChildren; i++)
+	{
+		processNode(meshes, node->mChildren[i], scene);
+	}
+	/* -- Process Node -- */
+}
+
+std::vector <Mesh> * loadAssImp(std::string path)
 {
+	std::vector <Mesh> meshes;
 	printf("Starting to load assimp\n");
 
 	Assimp::Importer importer;
@@ -132,57 +201,15 @@ void loadAssImp(std::string path, std::vector <Mesh>& meshes)
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 	if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		printf("ERROR::ASSIMP::%s\n", importer.GetErrorString());
-		return;
+		return &meshes;
 	}
 
 	directory = path.substr(0, path.find_last_of('/'));
 
-	
+	processNode(meshes, scene->mRootNode, scene);
 
-	for (int i = 0; i < scene->mRootNode->mNumMeshes; i++ ) {
-		printf("Loading mesh %d\n", i);
-		std::vector<unsigned short> indices;
-		std::vector<glm::vec3> vertices;
-		std::vector<glm::vec2> uvs;
-		std::vector<glm::vec3> normals;
-
-		const aiMesh* mesh = scene->mMeshes[i]; // In this simple example code we always use the 1rst mesh (in OBJ files there is often only one anyway)
-												// Fill vertices positions
-		vertices.reserve(mesh->mNumVertices);
-		for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
-			aiVector3D pos = mesh->mVertices[i];
-			vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
-		}
-
-		// Fill vertices texture coordinates
-		uvs.reserve(mesh->mNumVertices);
-		for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
-			aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
-			uvs.push_back(glm::vec2(UVW.x, UVW.y));
-		}
-
-		// Fill vertices normals
-		normals.reserve(mesh->mNumVertices);
-		for (unsigned int i = 0; i<mesh->mNumVertices; i++) {
-			aiVector3D n = mesh->mNormals[i];
-			normals.push_back(glm::vec3(n.x, n.y, n.z));
-		}
-
-
-		// Fill face indices
-		indices.reserve(3 * mesh->mNumFaces);
-		for (unsigned int i = 0; i<mesh->mNumFaces; i++) {
-			// Assume the model has only triangles.
-			indices.push_back(mesh->mFaces[i].mIndices[0]);
-			indices.push_back(mesh->mFaces[i].mIndices[1]);
-			indices.push_back(mesh->mFaces[i].mIndices[2]);
-		}
-
-		meshes.push_back(Mesh(indices, vertices, uvs, normals));
-		
-	}
-	printf("Finished loading with assimp\n");
-	return;
+	printf("Finished loading with assimp. Mesh vector size: %d\n", meshes.size());
+	return &meshes;
 	
 	
 	// The "scene" pointer will be deleted automatically by "importer"
