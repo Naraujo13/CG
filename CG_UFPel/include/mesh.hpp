@@ -45,6 +45,7 @@ public:
 	void loadMesh();
 	void cleanup();
 	void rebind();
+	void Mesh::verifyMesh();
 
 
 private:

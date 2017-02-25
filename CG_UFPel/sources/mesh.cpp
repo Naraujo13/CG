@@ -15,7 +15,12 @@ Mesh::Mesh(
 	std::vector<glm::vec2> uvs, 
 	std::vector<glm::vec3> normals)
 {
+	printf("Creating a new mesh:\n\Vertices: %d\n\t Uvs: %d\n\tNormals: %d\n\tIndices: %d\n-----------------------------\n",
+		vertices.size(), uvs.size(), normals.size(),indices.size());
+
 	indexVBO(vertices, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
+	this->indices = indices;
+	
 
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -34,6 +39,9 @@ Mesh::Mesh(
 	glGenBuffers(1, &elementbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+
+	printf("Mesh Created\n\Vertices: %d\n\t Uvs: %d\n\tNormals: %d\n\tIndices: %d\n-----------------------------\n",
+		indexed_vertices.size(), indexed_uvs.size(), indexed_normals.size(), this->indices.size());
 }
 
 //Getters
@@ -146,4 +154,8 @@ void Mesh::rebind() {
 	glGenBuffers(1, &elementbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0], GL_STATIC_DRAW);
+}
+
+void Mesh::verifyMesh() {
+	printf("\tIndices: %d\n\tVertices: %d\n\tUvs: %d\n\tNormals: %d\n", this->indices.size(), this->indexed_vertices.size(), this->indexed_uvs.size(), this->indexed_normals.size());
 }

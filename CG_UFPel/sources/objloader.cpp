@@ -120,7 +120,7 @@ bool loadOBJ(
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
-Mesh* processMesh(aiMesh* mesh2, const aiScene* scene, int i) {
+Mesh processMesh(aiMesh* mesh2, const aiScene* scene, int i) {
 	printf("Loading mesh %d of current node\n", i);
 	std::vector<unsigned short> indices;
 	std::vector<glm::vec3> vertices;
@@ -164,7 +164,7 @@ Mesh* processMesh(aiMesh* mesh2, const aiScene* scene, int i) {
 	}
 
 	printf("\tReturning mesh...\n");
-	return &(Mesh(indices, vertices, uvs, normals));
+	return (Mesh(indices, vertices, uvs, normals));
 }
 
 void processNode(std::vector <Mesh>& meshes, aiNode* node, const aiScene* scene) {
@@ -175,7 +175,7 @@ void processNode(std::vector <Mesh>& meshes, aiNode* node, const aiScene* scene)
 	//Process each mesh in this node
 	for (int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* aimesh = scene->mMeshes[node->mMeshes[i]];
-		Mesh mesh = *processMesh(aimesh, scene, i);
+		Mesh mesh = processMesh(aimesh, scene, i);
 		meshes.push_back(mesh);
 		printf("\Mesh %d of current node pushed to vector. Current size: %d\n", i, meshes.size());
 	}
@@ -189,7 +189,7 @@ void processNode(std::vector <Mesh>& meshes, aiNode* node, const aiScene* scene)
 	/* -- Process Node -- */
 }
 
-std::vector <Mesh> * loadAssImp(std::string path)
+std::vector <Mesh> loadAssImp(std::string path)
 {
 	std::vector <Mesh> meshes;
 	printf("Starting to load assimp\n");
@@ -201,7 +201,7 @@ std::vector <Mesh> * loadAssImp(std::string path)
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 	if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		printf("ERROR::ASSIMP::%s\n", importer.GetErrorString());
-		return &meshes;
+		return meshes;
 	}
 
 	directory = path.substr(0, path.find_last_of('/'));
@@ -209,10 +209,23 @@ std::vector <Mesh> * loadAssImp(std::string path)
 	processNode(meshes, scene->mRootNode, scene);
 
 	printf("Finished loading with assimp. Mesh vector size: %d\n", meshes.size());
-	return &meshes;
+	//Check meshes
+	return meshes;
 	
 	
 	// The "scene" pointer will be deleted automatically by "importer"
 }
 
 #endif
+
+
+/*
+int i = 0;
+for (auto it = meshes.begin(); it != meshes.end(); ++it) {
+printf("-----------------------------\n");
+printf("Verifying mesh %d:\n", i);
+it->verifyMesh();
+printf("-----------------------------\n");
+i++;
+}
+*/

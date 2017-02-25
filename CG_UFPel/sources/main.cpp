@@ -666,17 +666,28 @@ int main(void)
 	int continuousMeshSimplification = 0;
 	MeshSimplification MS;
 	// Read our .obj file and creates meshes
-	//manager.createMesh("mesh/suzanne.obj");
-	//manager.createMesh("mesh/goose.obj");
-	//manager.createMesh("mesh/cube.obj");
-	//manager.createMesh("mesh/nanosuit.obj");
-	
+	//manager.loadMeshes("mesh/suzanne.obj");
+	//manager.loadMeshes("mesh/goose.obj");
+	//manager.loadMeshes("mesh/cube.obj");
+	//manager.loadMeshes("mesh/g1.obj");
+	//manager.loadMeshes("mesh/luxury_house.obj");
 	manager.loadMeshes("mesh/nanosuit.obj");
+	
+	int i = 0;
+	std::vector <Mesh> meshes = *manager.getMeshes();
+	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
+		printf("-----------------------------\n");
+		printf("Verifying mesh %d:\n", i);
+		it->verifyMesh();
+		printf("-----------------------------\n");
+		manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(i), glm::vec3(3, 3, 0));
+		i++;
+	}
+	
 
 	//----- Trabalho 2: Model Transformation
 	//Creates models
-	if ((*manager.getMeshes()).size() > 0)
-		manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
+	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
 	//manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3, 3, 0));
 	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(3, -3, 0));
 	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(3), glm::vec3(-3, -3, 0));
@@ -684,7 +695,7 @@ int main(void)
 	//----- Trabalho 3: Câmeras
 	//Creates Camera 1
 	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 10)), getProjectionMatrix());
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 10, 20)), getProjectionMatrix());
 	//Creates Camera 2
 	manager.createCamera(getViewMatrix(), getProjectionMatrix());
 	 
@@ -760,7 +771,7 @@ int main(void)
 
 		manager.clearScreen();
 
-		//Is Normal Shader Active?
+		//Is Normals Shader Active?
 		if (drawNormals == true) {
 			manager.useShader(0);
 			//Draw
