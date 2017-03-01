@@ -77,7 +77,7 @@ public:
 	void loadMeshes(std::string path);
 
 	//models
-	void createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position);
+	void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position);
 	void cleanup();
 	void clearScreen();
 	void swapBuffers(GLFWwindow* g_pWindow);

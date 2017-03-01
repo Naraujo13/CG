@@ -10,19 +10,19 @@
 #define STEPS 40 //number of steps of an animations
 #define LOD 100//Level of detail of the curve
 //Constructor
-Model::Model(const char *textPath, const char *textSampler, GLuint programID, Mesh &modelMesh, glm::vec3 pos)
+Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position)
 {
 	texture = loadDDS(textPath);
 	textureID = glGetUniformLocation(programID, "myTextureSampler");
-	mesh = &modelMesh;
+	this->meshes = meshes;
 	modelMatrixID = glGetUniformLocation(programID, "M");
-	modelMatrix = glm::mat4(glm::translate(glm::mat4(1), pos));
+	modelMatrix = glm::mat4(glm::translate(glm::mat4(1), position));
 	state = 0;
 	timeBtwn = 0;
 	lastTransformed = glfwGetTime();
 	geometry = false;
-	lastUsedGeometry = 0.0f;
-	geometryStart = 0.0f;
+	lastUsedGeometry = -1.55;
+	geometryStart = glfwGetTime();
 }
 
 //Getters
@@ -38,8 +38,8 @@ GLuint* Model::getTexture() {
 glm::mat4 Model::getModelMatrix() {
 	return modelMatrix;
 }
-Mesh* Model::getMesh() {
-	return mesh;
+std::vector<Mesh> * Model::getMeshes() {
+	return &meshes;
 }
 std::vector<Transformation> * Model::getTransformationQueue() {
 	return &transformationQueue;
@@ -73,8 +73,19 @@ void Model::setState(int newState) {
 }
 void Model::setGeometry(bool newState) {
 	Model::geometry = newState;
+	long double time = glfwGetTime();
 	if (Model::geometry)
-		Model::geometryStart = glfwGetTime();
+		Model::geometryStart = time;
+	else {
+		long double previous = Model::lastUsedGeometry;
+		Model::lastUsedGeometry = Model::lastUsedGeometry + (time - Model::geometryStart);
+		//std::cout << " Last( " << previous << ") + ( time(" << time << ") - start(" << Model::geometryStart << ") ) = " << Model::lastUsedGeometry << std::endl;
+		//getchar();
+	}
+}
+
+void Model::setGeometryStart(long double time) {
+	geometryStart = time;
 }
 
 void Model::setLastUsedGeometry(long double time) {

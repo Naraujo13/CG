@@ -55,8 +55,8 @@ void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fr
 	shaders.push_back(Shader(vertex_file_path, fragment_file_path, geometry_file_path));
 }
 //creates a new model and adds to the vector
-void ModelManager::createModel(char *textPath, char *textSampler, Mesh &mesh, glm::vec3 position) {
-	models.push_back(Model(textPath, textSampler, currentShaderProgramID, mesh, position));
+void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position) {
+	models.push_back(Model(textPath, textSampler, currentShaderProgramID, meshes, position));
 }
 
 void ModelManager::loadMeshes(std::string path) {
@@ -146,9 +146,9 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
 		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
 		if (it->getGeometry()) {			
-			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()))/2;
+			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
 			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-			it->setLastUsedGeometry(time);
+			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
 		}
 		else {
 			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
@@ -169,15 +169,21 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i((*it).getTextureID(), 0);
 
-		(*(*it).getMesh()).loadMesh();
+		//Load/Draw meshes
+		for (auto it2 = (*it->getMeshes()).begin(); it2 < (*it->getMeshes()).end(); ++it2) {
 
-		// Draw the triangles !
-		glDrawElements(
-			GL_TRIANGLES,        // mode
-			(*(*(*it).getMesh()).getIndices()).size(),      // count
-			GL_UNSIGNED_SHORT,   // type
-			(void*)0             // element array buffer offset
-		);
+			//Load mesh
+			it2->loadMesh();
+
+			// Draw the triangles !
+			glDrawElements(
+				GL_TRIANGLES,        // mode
+				(*it2->getIndices()).size(),      // count
+				GL_UNSIGNED_SHORT,   // type
+				(void*)0             // element array buffer offset
+			);
+
+		}		
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);

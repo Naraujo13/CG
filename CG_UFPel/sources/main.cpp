@@ -172,51 +172,6 @@ void initialiseTransformationVariables() {
 	lk.up = glm::vec3(0, 1, 0);
 }
 
-void meshSimplificationInput(
-	int& continuousMeshSimplification,
-	long double& currentTime2,
-	long double& lastTime2,
-	MeshSimplification& MS,
-	int& currentModelID,
-	ModelManager& manager) {
-	//Sets continuous simplification or "un-simplifications". Backspace for simplfications, equal to undo it, space to stop both.
-	if (glfwGetKey(g_pWindow, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
-		continuousMeshSimplification = 1;
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_EQUAL) == GLFW_PRESS)
-		continuousMeshSimplification = -1;
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS)
-		continuousMeshSimplification = 0;
-
-	//Trabalho 1 - Mesh Simplification
-	if ((currentTime2 >= lastTime2 + 0.5 && (glfwGetKey(g_pWindow, GLFW_KEY_F10) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == 1) {
-
-		lastTime2 = glfwGetTime();
-		/* ------------ Trabalho 1 ----------------- *
-		* -- Algoritmo de simplificação de Mesh --- *
-		* - Parte 1: Cálculo inicial de vizinhos ---*
-		* - Parte 2: Remoção do Vértice ----------- *
-		* - Parte 3: Collapse --------------------- *
-		* - Parte 4: Cálculo dos vizinhos alterados *
-		* ----------------------------------------- */
-
-		//Calls function to reduce the mesh
-		MS.reduce(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndexedNormals(), continuousMeshSimplification);
-
-		//Bind
-		(*(*manager.getModels())[currentModelID].getMesh()).rebind();
-		//End Bind
-
-	}
-	else if (((currentTime2 >= lastTime2 + 0.5) && (glfwGetKey(g_pWindow, GLFW_KEY_F11) == GLFW_PRESS) && continuousMeshSimplification == 0) || continuousMeshSimplification == -1) {
-		lastTime2 = glfwGetTime();
-		MS.reconstruct(*(*(*manager.getModels())[currentModelID].getMesh()).getIndexedVertices(), *(*(*manager.getModels())[currentModelID].getMesh()).getIndices(), continuousMeshSimplification);
-
-		//Bind
-		(*(*manager.getModels())[currentModelID].getMesh()).rebind();
-
-	}
-}
-
 void drawModeInput() {
 	//Set the draw mode. L to lines, P to points and F to fill.
 	if (glfwGetKey(g_pWindow, GLFW_KEY_L) == GLFW_PRESS)
@@ -316,12 +271,14 @@ void transformationInput(long double& currentTime, long double& lastTime3, Model
 	else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
 		lastTime3 = glfwGetTime();
 		if (m_currentActive == MODEL) {
+			std::vector <Mesh> tempMeshes;
 			if (m_currentMesh == SUZANNE)
-				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), newModelPos);
+				tempMeshes.push_back((*manager.getMeshes()).at(0));
 			else if (m_currentMesh == GOOSE)
-				manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), newModelPos);
+				tempMeshes.push_back((*manager.getMeshes()).at(1));
 			else if (m_currentMesh == CUBE)
-				manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), newModelPos);
+				tempMeshes.push_back((*manager.getMeshes()).at(2));
+			manager.createModel("mesh/uvmap.DDS", "myTextureSampler", tempMeshes, newModelPos);
 			numModelos++;
 		}
 		else if (m_currentActive == CAMERA) {
@@ -399,15 +356,25 @@ void shaderInput(long double& currentTime, long double& lastTime3, ModelManager&
 	//Explosion Geometry Shader
 	if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
 		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].setGeometry(true);
+			if (!(*manager.getModels())[currentModelID].getGeometry()) {
+				(*manager.getModels())[currentModelID].setGeometry(true);
+			}
 		}
 	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
-		if (m_currentActive == MODEL)
-			(*manager.getModels())[currentModelID].setGeometry(false);
-	}
-	else if (currentShaderProgramID != 1)
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1 && (*manager.getModels())[currentModelID].getGeometry()) {
+		//std::cout << "wILL CHANGE GEOMETRY TO FALSE 1st IF" << std::endl;
+		//getchar();
 		(*manager.getModels())[currentModelID].setGeometry(false);
+	}
+	else if (currentShaderProgramID != 1 && (*manager.getModels())[currentModelID].getGeometry()) {
+		//std::cout << "wILL CHANGE GEOMETRY TO FALSE 2nd IF" << std::endl;
+		//getchar();
+		(*manager.getModels())[currentModelID].setGeometry(false);
+	}
+//	if (!(*manager.getModels())[currentModelID].getGeometry()) {
+//		std::cout << "DEBUG::SHADER:: | Geometry Start " << (*manager.getModels())[currentModelID].getGeometryStart() << " | Last " << (*manager.getModels())[currentModelID].getLastUsedGeometry() << " | ::SHADER::DEBUG" << std::endl;
+//	}
+	
 }
 
 
@@ -680,9 +647,9 @@ int main(void)
 		printf("Verifying mesh %d:\n", i);
 		it->verifyMesh();
 		printf("-----------------------------\n");
-		manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(i), glm::vec3(3, 3, 0));
 		i++;
 	}
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 0, 0));
 	
 
 	//----- Trabalho 2: Model Transformation
@@ -713,15 +680,6 @@ int main(void)
 
 		//Draw Mode Input
 		drawModeInput();
-
-		/* ----- Trabalho 1: Mesh Simplification ----- */
-		meshSimplificationInput(
-			continuousMeshSimplification,
-			currentTime2,
-			lastTime2,
-			MS,
-			currentModelID,
-			manager);
 
         //use the control key to free the mouse
 		if (glfwGetKey(g_pWindow, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)

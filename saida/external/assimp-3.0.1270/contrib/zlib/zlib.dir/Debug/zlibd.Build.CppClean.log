@@ -1,12 +1,12 @@
-f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\inffast.obj
-f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\trees.obj
-f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\adler32.obj
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\compress.obj
+f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\inffast.obj
+f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\zutil.obj
+f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\adler32.obj
+f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\inftrees.obj
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\crc32.obj
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\inflate.obj
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\deflate.obj
-f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\zutil.obj
-f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\inftrees.obj
+f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\trees.obj
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\cmakefiles\generate.stamp
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\debug\zlibd.lib
 f:\downloads\aula\cg\saida\external\assimp-3.0.1270\contrib\zlib\zlib.dir\debug\zlib.tlog\cl.command.1.tlog

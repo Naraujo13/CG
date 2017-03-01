@@ -43,17 +43,17 @@ private:
 	GLuint textureID;
 
 	//Mesh
-	Mesh* mesh;
+	std::vector<Mesh> meshes;
 
 public:
 	//Constructor
-	Model::Model(const char *textPath, const char *textSample, GLuint programID, Mesh &mesh, glm::vec3 position);
+	Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position);
 	//Getters
 	GLuint getModelMatrixID();
 	GLuint getTextureID();
 	GLuint *getTexture();
 	glm::mat4 getModelMatrix();
-	Mesh* getMesh();
+	std::vector<Mesh> * getMeshes();
 	std::vector<Transformation> * getTransformationQueue();
 	int getState();
 	long double getLastTransformed();
@@ -67,6 +67,7 @@ public:
 	 void setModelMatrix(glm::mat4 transformation);
 	 void setState(int newState);
 	 void setGeometry(bool newState);
+	 void setGeometryStart(long double time);
 	 void setLastUsedGeometry(long double time);
 
 
