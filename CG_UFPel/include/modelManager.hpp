@@ -84,6 +84,7 @@ public:
 	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow);
 	void transformModels();
 	void setModelTransformation(int modelID);
+	GLboolean checkCollision(Model A, Model B);
 };
 
 #endif

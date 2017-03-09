@@ -61,6 +61,7 @@ public:
 	bool getGeometry();
 	long double getGeometryStart();
 	long double getLastUsedGeometry();
+	glm::vec3 getPosition();
 	
 
 	//Set

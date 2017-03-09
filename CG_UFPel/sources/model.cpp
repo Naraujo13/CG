@@ -63,6 +63,9 @@ long double Model::getGeometryStart() {
 long double Model::getLastUsedGeometry() {
 	return lastUsedGeometry;
 }
+glm::vec3 Model::getPosition() {
+	return glm::vec3(Model::modelMatrix[3][0], Model::modelMatrix[3][1], Model::modelMatrix[3][2]);
+}
 
 //Setter
 void Model::setModelMatrix(glm::mat4 matrix) {

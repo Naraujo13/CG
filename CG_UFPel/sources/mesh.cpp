@@ -42,6 +42,8 @@ Mesh::Mesh(
 
 	printf("Mesh Created\n\Vertices: %d\n\t Uvs: %d\n\tNormals: %d\n\tIndices: %d\n-----------------------------\n",
 		indexed_vertices.size(), indexed_uvs.size(), indexed_normals.size(), this->indices.size());
+
+	updateSize();
 }
 
 //Getters
@@ -79,6 +81,37 @@ GLuint Mesh::getNormalBuffer()
 GLuint Mesh::getElementBuffer()
 {
 	return elementbuffer;
+}
+
+//Size
+void Mesh::updateSize() {
+
+	GLfloat
+		min_x, max_x,
+		min_y, max_y,
+		min_z, max_z;
+	min_x = max_x = Mesh::indexed_vertices[0].x;
+	min_y = max_y = Mesh::indexed_vertices[0].y;
+	min_z = max_z = Mesh::indexed_vertices[0].z;
+
+
+	for (int i = 0; i < Mesh::indexed_vertices.size(); i++) {
+		if (Mesh::indexed_vertices[i].x < min_x) min_x = Mesh::indexed_vertices[i].x;
+		if (Mesh::indexed_vertices[i].x > max_x) max_x = Mesh::indexed_vertices[i].x;
+		if (Mesh::indexed_vertices[i].y < min_y) min_y = Mesh::indexed_vertices[i].y;
+		if (Mesh::indexed_vertices[i].y > max_y) max_y = Mesh::indexed_vertices[i].y;
+		if (Mesh::indexed_vertices[i].z < min_z) min_z = Mesh::indexed_vertices[i].z;
+		if (Mesh::indexed_vertices[i].z > max_z) max_z = Mesh::indexed_vertices[i].z;
+	}
+
+	Mesh::size.x = max_x - min_x;
+	Mesh::size.y = max_y - min_y;
+	Mesh::size.z = max_z - min_z;
+
+}
+
+glm::vec3 Mesh::getSize() {
+	return Mesh::size;
 }
 
 //Load

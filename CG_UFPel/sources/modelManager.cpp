@@ -212,6 +212,23 @@ void ModelManager::transformCameras() {
 	}
 }
 
+/**/
+GLboolean ModelManager::checkCollision(Model A, Model B)
+{
+	bool collisionX = false;
+	bool collisionY = false;
+
+	if ((A.getPosition().x + (*A.getMeshes())[0].getSize().x / 2) >= B.getPosition().x && ((B.getPosition().x + (*B.getMeshes())[0].getSize().x / 2) >= A.getPosition().x))
+	{
+		collisionX = true;
+	}
+	if ((A.getPosition().y + (*A.getMeshes())[0].getSize().y / 2) >= B.getPosition().y && ((B.getPosition().y + (*B.getMeshes())[0].getSize().y / 2) >= A.getPosition().y))
+	{
+		collisionY = true;
+	}
+	return collisionX && collisionY;
+}
+
 void ModelManager::cameraNoise() {
 	noiseSteps = 40;
 	noiseCount = 0;

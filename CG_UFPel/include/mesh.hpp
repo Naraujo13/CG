@@ -41,18 +41,22 @@ public:
 	std::vector<glm::vec2> * getIndexedUvs();
 	std::vector<glm::vec3> * getIndexedNormals();
 	std::vector<unsigned short> * getIndices();
+	glm::vec3 getSize();
 //Load
 	void loadMesh();
 	void cleanup();
 	void rebind();
 	void Mesh::verifyMesh();
-
+//Size
+	void updateSize();
 
 private:
 	std::vector<glm::vec3> indexed_vertices;
 	std::vector<glm::vec2> indexed_uvs;
 	std::vector<glm::vec3> indexed_normals;
 	std::vector<unsigned short> indices;
+
+	glm::vec3 size;
 
 	GLuint vertexbuffer;
 	GLuint uvbuffer;
