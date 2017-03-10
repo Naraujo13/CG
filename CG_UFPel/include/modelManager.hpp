@@ -41,11 +41,16 @@ private:
 	int noiseSteps = 40;
 	int noiseCount = 0;
 
-
 	GLuint VertexArrayID;
 	GLuint currentShaderProgramID;
 	GLuint MatrixID;
 	GLuint LightID;
+
+	//Game Related
+	std::vector<Model> enemies;
+	std::vector<Model> projectiles;
+	std::vector<Model> scenerie;
+	std::vector<Model> player;
 
 public:
 	//Constructor
@@ -77,7 +82,7 @@ public:
 	void loadMeshes(std::string path);
 
 	//models
-	void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position);
+	void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
 	void cleanup();
 	void clearScreen();
 	void swapBuffers(GLFWwindow* g_pWindow);
@@ -85,6 +90,8 @@ public:
 	void transformModels();
 	void setModelTransformation(int modelID);
 	GLboolean checkCollision(Model A, Model B);
+	void printCollisions();
+	void checkAllModelsCollision();
 };
 
 #endif

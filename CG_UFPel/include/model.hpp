@@ -45,9 +45,15 @@ private:
 	//Mesh
 	std::vector<Mesh> meshes;
 
+	//Collision
+	bool alive;
+
+	//Game Related info
+	std::string type;	//'Player', 'Enemy', 'Projectile', 'Scenery'
+
 public:
 	//Constructor
-	Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position);
+	Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
 	//Getters
 	GLuint getModelMatrixID();
 	GLuint getTextureID();
@@ -62,6 +68,8 @@ public:
 	long double getGeometryStart();
 	long double getLastUsedGeometry();
 	glm::vec3 getPosition();
+	bool isAlive();
+	std::string getType();
 	
 
 	//Set
@@ -70,6 +78,7 @@ public:
 	 void setGeometry(bool newState);
 	 void setGeometryStart(long double time);
 	 void setLastUsedGeometry(long double time);
+	 void setAlive(bool newState);
 
 
 	//Transformations

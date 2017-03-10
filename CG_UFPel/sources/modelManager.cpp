@@ -55,8 +55,8 @@ void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fr
 	shaders.push_back(Shader(vertex_file_path, fragment_file_path, geometry_file_path));
 }
 //creates a new model and adds to the vector
-void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position) {
-	models.push_back(Model(textPath, textSampler, currentShaderProgramID, meshes, position));
+void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type) {
+	models.push_back(Model(textPath, textSampler, currentShaderProgramID, meshes, position, type));
 }
 
 void ModelManager::loadMeshes(std::string path) {
@@ -67,8 +67,6 @@ void ModelManager::loadMeshes(std::string path) {
 		this->meshes.push_back(*it);
 	}
 	printf("Number of meshes at manager: %d meshes\n", this->meshes.size());
-
-	//Check?
 }
 
 //creates a new camera and adds to the vector
@@ -212,7 +210,13 @@ void ModelManager::transformCameras() {
 	}
 }
 
-/**/
+/* -- Colisões -- */
+void ModelManager::checkAllModelsCollision() {
+	for (auto it = models.begin(); it != models.end(); ++it) {
+
+	}
+}
+
 GLboolean ModelManager::checkCollision(Model A, Model B)
 {
 	bool collisionX = false;
@@ -226,8 +230,25 @@ GLboolean ModelManager::checkCollision(Model A, Model B)
 	{
 		collisionY = true;
 	}
+	
 	return collisionX && collisionY;
 }
+
+void ModelManager::printCollisions() {
+	int i = 0;
+	std::cout << "----- Colisões: -----" << std::endl;
+	for (auto it = models.begin(); it != models.end(); ++it) {
+		std::cout << "Modelo " << i << " está ";
+		if (it->isAlive())
+			std::cout << " vivo." << std::endl;
+		else
+			std::cout << " morto." << std::endl;
+		i++;
+	}
+	std::cout << std::endl;
+}
+
+/* -- Transformation -- */
 
 void ModelManager::cameraNoise() {
 	noiseSteps = 40;

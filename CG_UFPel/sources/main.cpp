@@ -350,6 +350,14 @@ void transformationInput(long double& currentTime, long double& lastTime3, Model
 			//(*manager.getCameras())[currentCameraID].applyTransformation();
 		}
 	}
+	else if ((currentTime > lastTime3 + 5)) {
+		lastTime3 = glfwGetTime();
+		manager.printCollisions();
+
+	}
+	bool collision = manager.checkCollision((*manager.getModels())[0], (*manager.getModels())[1]);
+	(*manager.getModels())[0].setAlive(!collision);
+	(*manager.getModels())[1].setAlive(!collision);
 }
 
 void shaderInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
@@ -631,25 +639,23 @@ int main(void)
 
 	//----- Trabalho 1: Mesh Simplification
 	int continuousMeshSimplification = 0;
-	MeshSimplification MS;
 	// Read our .obj file and creates meshes
-	//manager.loadMeshes("mesh/suzanne.obj");
-	//manager.loadMeshes("mesh/goose.obj");
 	//manager.loadMeshes("mesh/cube.obj");
 	//manager.loadMeshes("mesh/g1.obj");
 	//manager.loadMeshes("mesh/luxury_house.obj");
-	manager.loadMeshes("mesh/nanosuit.obj");
-	
-	int i = 0;
-	std::vector <Mesh> meshes = *manager.getMeshes();
-	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
-		printf("-----------------------------\n");
-		printf("Verifying mesh %d:\n", i);
-		it->verifyMesh();
-		printf("-----------------------------\n");
-		i++;
-	}
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 0, 0));
+	//manager.loadMeshes("mesh/nanosuit.obj");
+
+	std::vector <Mesh> meshes;
+
+
+	manager.loadMeshes("mesh/suzanne.obj");
+	meshes = *manager.getMeshes();
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 0, 0), "Enemy");
+
+	manager.loadMeshes("mesh/goose.obj");
+	meshes.clear();
+	meshes.push_back((*manager.getMeshes())[1]);
+	manager.createModel("mesh/goose.dds", "myTextureSampler", meshes, glm::vec3(-3, 0, 0), "Player");
 	
 
 	//----- Trabalho 2: Model Transformation
@@ -662,7 +668,7 @@ int main(void)
 	//----- Trabalho 3: Câmeras
 	//Creates Camera 1
 	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 10, 20)), getProjectionMatrix());
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 15)), getProjectionMatrix());
 	//Creates Camera 2
 	manager.createCamera(getViewMatrix(), getProjectionMatrix());
 	 

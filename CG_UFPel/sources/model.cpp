@@ -10,7 +10,7 @@
 #define STEPS 40 //number of steps of an animations
 #define LOD 100//Level of detail of the curve
 //Constructor
-Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position)
+Model::Model(const char *textPath, const char *textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position, std::string type)
 {
 	texture = loadDDS(textPath);
 	textureID = glGetUniformLocation(programID, "myTextureSampler");
@@ -23,6 +23,7 @@ Model::Model(const char *textPath, const char *textSample, GLuint programID, std
 	geometry = false;
 	lastUsedGeometry = -1.55;
 	geometryStart = glfwGetTime();
+	this->type = type;
 }
 
 //Getters
@@ -66,8 +67,17 @@ long double Model::getLastUsedGeometry() {
 glm::vec3 Model::getPosition() {
 	return glm::vec3(Model::modelMatrix[3][0], Model::modelMatrix[3][1], Model::modelMatrix[3][2]);
 }
+bool Model::isAlive() {
+	return alive;
+}
+std::string Model::getType() {
+	return type;
+}
 
 //Setter
+void Model::setAlive(bool newState) {
+	alive = newState;
+}
 void Model::setModelMatrix(glm::mat4 matrix) {
 	Model::modelMatrix = matrix;
 }
