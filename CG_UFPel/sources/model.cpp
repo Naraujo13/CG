@@ -24,6 +24,10 @@ Model::Model(const char *textPath, const char *textSample, GLuint programID, std
 	lastUsedGeometry = -1.55;
 	geometryStart = glfwGetTime();
 	this->type = type;
+	this->position = glm::vec3(
+		this->modelMatrix[3][0],
+		this->modelMatrix[3][1],
+		this->modelMatrix[3][2]);
 }
 
 //Getters
@@ -65,7 +69,7 @@ long double Model::getLastUsedGeometry() {
 	return lastUsedGeometry;
 }
 glm::vec3 Model::getPosition() {
-	return glm::vec3(Model::modelMatrix[3][0], Model::modelMatrix[3][1], Model::modelMatrix[3][2]);
+	return position;
 }
 bool Model::isAlive() {
 	return alive;
@@ -76,7 +80,7 @@ std::string Model::getType() {
 
 //Setter
 void Model::setAlive(bool newState) {
-	alive = newState;
+	this->alive = newState;
 }
 void Model::setModelMatrix(glm::mat4 matrix) {
 	Model::modelMatrix = matrix;
@@ -328,4 +332,8 @@ void Model::applyTransformation() {
 		else
 			timeBtwn = 0;
 	}
+	this->position = glm::vec3(
+		this->modelMatrix[3][0],
+		this->modelMatrix[3][1],
+		this->modelMatrix[3][2]);
 }

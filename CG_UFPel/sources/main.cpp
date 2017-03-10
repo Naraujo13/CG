@@ -182,12 +182,17 @@ void drawModeInput() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void transformationInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
+void transformationInput(long double& currentTime, long double& lastTime3, long double& collisionCheckTime, ModelManager& manager) {
 	//Translação ao pressionar T
 	if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
 		lastTime3 = glfwGetTime();
 		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+			if ((*manager.getModels())[currentModelID].getType() == "Enemy")
+				(*manager.getEnemies())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+			else if ((*manager.getModels())[currentModelID].getType() == "Player")
+				(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+
+			//(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
 			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
 		}
 		else if (m_currentActive == CAMERA) {
@@ -278,7 +283,7 @@ void transformationInput(long double& currentTime, long double& lastTime3, Model
 				tempMeshes.push_back((*manager.getMeshes()).at(1));
 			else if (m_currentMesh == CUBE)
 				tempMeshes.push_back((*manager.getMeshes()).at(2));
-			manager.createModel("mesh/uvmap.DDS", "myTextureSampler", tempMeshes, newModelPos);
+			manager.createModel("mesh/uvmap.DDS", "myTextureSampler", tempMeshes, newModelPos, "Player");
 			numModelos++;
 		}
 		else if (m_currentActive == CAMERA) {
@@ -353,11 +358,12 @@ void transformationInput(long double& currentTime, long double& lastTime3, Model
 	else if ((currentTime > lastTime3 + 5)) {
 		lastTime3 = glfwGetTime();
 		manager.printCollisions();
-
 	}
-	bool collision = manager.checkCollision((*manager.getModels())[0], (*manager.getModels())[1]);
-	(*manager.getModels())[0].setAlive(!collision);
-	(*manager.getModels())[1].setAlive(!collision);
+	if (currentTime > collisionCheckTime + 0.1) {
+		collisionCheckTime = glfwGetTime();
+		manager.checkAllModelsCollision();
+	}
+
 }
 
 void shaderInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
@@ -611,7 +617,7 @@ int main(void)
 	manager.createShader("shaders/PassThroughShading.vertexshader", "shaders/PassThroughShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
 	manager.createShader("shaders/ExplosionGeometryShading.vertexshader", "shaders/ExplosionGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
 	manager.createShader("shaders/VisualizeNormalsShading.vertexshader", "shaders/VisualizeNormalsShading.fragmentshader", "shaders/VisualizeNormalsGeometryShader.gs");
-	manager.useShader(0);
+	manager.useShader(1);
 	
 	GLuint VertexArrayID = manager.getVertexArrayID();
 		
@@ -628,6 +634,7 @@ int main(void)
 	int nbFrames = 0;
 	int simplify = 1;
 	long double lastTime3 = glfwGetTime();
+	long double collisionCheckTime = glfwGetTime();
 	
 
 	// Get a handle for our "LightPosition" uniform
@@ -675,6 +682,9 @@ int main(void)
 	//Trabalho 4: Shaders
 	bool drawNormals = false;
 	
+
+	manager.setTransformEnemies(true);
+
 	//Draw Loop
 	do{
         check_gl_error();
@@ -698,7 +708,7 @@ int main(void)
 		shaderInput(currentTime, lastTime3, manager);
 
 		/* --- Trabalho 2 --- */
-		transformationInput(currentTime, lastTime3, manager);
+		transformationInput(currentTime, lastTime3, collisionCheckTime, manager);
 
 		//Camera Noise
 		manager.cameraNoise();

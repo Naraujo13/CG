@@ -47,10 +47,14 @@ private:
 	GLuint LightID;
 
 	//Game Related
+	bool transformEnemies;
 	std::vector<Model> enemies;
+	bool transformProjectiles;
 	std::vector<Model> projectiles;
-	std::vector<Model> scenerie;
-	std::vector<Model> player;
+	bool transformSceneries;
+	std::vector<Model> sceneries;
+	bool transformPlayers;
+	std::vector<Model> players;
 
 public:
 	//Constructor
@@ -59,6 +63,9 @@ public:
 	std::vector<Shader> * getShaders();
 	std::vector<Camera> * getCameras();
 	std::vector<Model> * getModels();
+	std::vector<Model> * ModelManager::getEnemies();
+	std::vector<Model> * ModelManager::getPlayers();
+	std::vector<Model> * ModelManager::getProjectiles();
 	std::vector<Mesh> * getMeshes();
 	GLuint getVertexArrayID();
 	GLuint getProgramID();
@@ -88,8 +95,12 @@ public:
 	void swapBuffers(GLFWwindow* g_pWindow);
 	void drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::mat4 ProjectionMatrix, GLFWwindow* g_pWindow);
 	void transformModels();
+	void setTransformPlayers(bool newState);
+	void setTransformEnemies(bool newState);
+	void setTransformProjectiles(bool newState);
+	void setTransformScenerie(bool newState);
 	void setModelTransformation(int modelID);
-	GLboolean checkCollision(Model A, Model B);
+	GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB);
 	void printCollisions();
 	void checkAllModelsCollision();
 };

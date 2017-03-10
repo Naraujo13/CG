@@ -29,6 +29,15 @@ std::vector<Camera> * ModelManager::getCameras() {
 std::vector<Model> * ModelManager::getModels() {
 	return &models;
 }
+std::vector<Model> * ModelManager::getEnemies() {
+	return &enemies;
+}
+std::vector<Model> * ModelManager::getPlayers() {
+	return &players;
+}
+std::vector<Model> * ModelManager::getProjectiles() {
+	return &projectiles;
+}
 std::vector<Mesh> * ModelManager::getMeshes() {
 	return &meshes;
 }
@@ -56,7 +65,16 @@ void ModelManager::createShader(const GLchar* vertex_file_path, const GLchar* fr
 }
 //creates a new model and adds to the vector
 void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type) {
-	models.push_back(Model(textPath, textSampler, currentShaderProgramID, meshes, position, type));
+	Model model(textPath, textSampler, currentShaderProgramID, meshes, position, type);
+	models.push_back(model);
+	if (type == "Enemy")
+		enemies.push_back(model);
+	else if (type == "Projectile")
+		projectiles.push_back(model);
+	else if (type == "Player")
+		players.push_back(model);
+	else if (type == "Scenerie")
+		sceneries.push_back(model);
 }
 
 void ModelManager::loadMeshes(std::string path) {
@@ -134,8 +152,8 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 	// Use our shader
 	glUseProgram(currentShaderProgramID);
 
-	//For each model in the manager 
-	for (auto it = models.begin(); it != models.end(); ++it) {
+	//Draw players
+	for (auto it = players.begin(); it != players.end(); ++it) {
 		//Calculate MVP matrix
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
 
@@ -190,13 +208,161 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		// Draw tweak bars
 		TwDraw();
 	}
+
+	for (auto it = enemies.begin(); it != enemies.end(); ++it) {
+		//Calculate MVP matrix
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
+
+		//Geometry Shader Data
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
+		if (it->getGeometry()) {
+			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+		}
+		else {
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
+		}
+
+		// Send our transformation to the currently bound shader,
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv((*it).getModelMatrixID(), 1, GL_FALSE, &(*it).getModelMatrix()[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+		glm::vec3 lightPos = glm::vec3(4, 4, 4);
+		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, *(*it).getTexture());
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i((*it).getTextureID(), 0);
+
+		//Load/Draw meshes
+		for (auto it2 = (*it->getMeshes()).begin(); it2 < (*it->getMeshes()).end(); ++it2) {
+
+			//Load mesh
+			it2->loadMesh();
+
+			// Draw the triangles !
+			glDrawElements(
+				GL_TRIANGLES,        // mode
+				(*it2->getIndices()).size(),      // count
+				GL_UNSIGNED_SHORT,   // type
+				(void*)0             // element array buffer offset
+			);
+
+		}
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+
+		// Draw tweak bars
+		TwDraw();
+	}
+
+	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
+		//Calculate MVP matrix
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
+
+		//Geometry Shader Data
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
+		if (it->getGeometry()) {
+			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+		}
+		else {
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
+		}
+
+		// Send our transformation to the currently bound shader,
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv((*it).getModelMatrixID(), 1, GL_FALSE, &(*it).getModelMatrix()[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+		glm::vec3 lightPos = glm::vec3(4, 4, 4);
+		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, *(*it).getTexture());
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i((*it).getTextureID(), 0);
+
+		//Load/Draw meshes
+		for (auto it2 = (*it->getMeshes()).begin(); it2 < (*it->getMeshes()).end(); ++it2) {
+
+			//Load mesh
+			it2->loadMesh();
+
+			// Draw the triangles !
+			glDrawElements(
+				GL_TRIANGLES,        // mode
+				(*it2->getIndices()).size(),      // count
+				GL_UNSIGNED_SHORT,   // type
+				(void*)0             // element array buffer offset
+			);
+
+		}
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+
+		// Draw tweak bars
+		TwDraw();
+	}
+}
+
+void  ModelManager::setTransformPlayers(bool newState) {
+	transformPlayers = newState;
+}
+void  ModelManager::setTransformEnemies(bool newState) {
+	transformEnemies = newState;
+}
+void  ModelManager::setTransformProjectiles(bool newState) {
+	transformProjectiles = newState;
+}
+void  ModelManager::setTransformScenerie(bool newState) {
+	transformSceneries = newState;
 }
 
 void ModelManager::transformModels() {
 	int i = 0;
-	for (auto it = ModelManager::models.begin(); it != ModelManager::models.end(); ++it, i++) {
-		if (it->getState()) {
-			it->applyTransformation();
+	if (transformPlayers) {
+		for (auto it = ModelManager::players.begin(); it != ModelManager::players.end(); ++it, i++) {
+			if (it->getState()) {
+				it->applyTransformation();
+			}
+		}
+	}
+	if (transformEnemies) {
+		for (auto it = ModelManager::enemies.begin(); it != ModelManager::enemies.end(); ++it, i++) {
+			if (it->getState()) {
+				it->applyTransformation();
+			}
+		}
+	}
+	if (transformProjectiles) {
+		for (auto it = ModelManager::projectiles.begin(); it != ModelManager::projectiles.end(); ++it, i++) {
+			if (it->getState()) {
+				it->applyTransformation();
+			}
+		}
+	}
+	if (transformSceneries) {
+		for (auto it = ModelManager::sceneries.begin(); it != ModelManager::sceneries.end(); ++it, i++) {
+			if (it->getState()) {
+				it->applyTransformation();
+			}
 		}
 	}
 }
@@ -210,28 +376,102 @@ void ModelManager::transformCameras() {
 	}
 }
 
-/* -- Colisões -- */
-void ModelManager::checkAllModelsCollision() {
-	for (auto it = models.begin(); it != models.end(); ++it) {
 
-	}
-}
-
-GLboolean ModelManager::checkCollision(Model A, Model B)
+GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB)
 {
+	
 	bool collisionX = false;
 	bool collisionY = false;
 
-	if ((A.getPosition().x + (*A.getMeshes())[0].getSize().x / 2) >= B.getPosition().x && ((B.getPosition().x + (*B.getMeshes())[0].getSize().x / 2) >= A.getPosition().x))
+	//glm::vec3 positionA = A.getPosition();
+	//glm::vec3 positionB = B.getPosition();
+
+	if (positionA.x + (sizeA.x / 2) >= positionB.x && ((positionB.x + sizeB.x / 2) >= positionA.x))
 	{
 		collisionX = true;
 	}
-	if ((A.getPosition().y + (*A.getMeshes())[0].getSize().y / 2) >= B.getPosition().y && ((B.getPosition().y + (*B.getMeshes())[0].getSize().y / 2) >= A.getPosition().y))
+	if (positionA.y + (sizeA.y / 2) >= positionB.y && ((positionB.y + (sizeB.y / 2) >= positionA.y)))
 	{
 		collisionY = true;
 	}
+
 	
+
+	std::cout <<std::endl<< "Model A position: (" << positionA.x << ", " << positionA.y << ", " << positionA.z << ")";
+	std::cout << " | Model B posiition (" << positionB.x << ", " << positionB.y << ", " << positionB.z << ")" << std::endl;
+
+	std::cout << "Collision X = " << collisionX << " | Collision Y = " << collisionY << std::endl;
 	return collisionX && collisionY;
+}
+
+
+/* -- Colisões -- */
+void ModelManager::checkAllModelsCollision() {
+
+	std::cout << "Starting to check collisions..." << std::endl;
+
+	//Enemy-Player Collision
+	std::cout << "\tChecking Enemy-Player collisions... ";
+	if (!enemies.empty()) {
+		for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
+			if (enemy->isAlive()){
+				for (auto player = players.begin(); player != players.end(); ++player) {
+					if (player->isAlive()) {
+						bool playerCollision = checkCollision(player->getPosition(),  (*player->getMeshes())[0].getSize(), enemy->getPosition(), (*enemy->getMeshes())[0].getSize());
+						std::cout << playerCollision << std::endl;
+						if (playerCollision) {
+							std::cout << "----Detected Enemy-Player collision.----" << std::endl;
+							enemy->setAlive(!playerCollision);
+							player->setAlive(!playerCollision);
+							player->setGeometry(true);
+							enemy->setGeometry(true);
+							//END GAME HERE
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	if (!projectiles.empty()) {
+		for (auto projectile = projectiles.begin(); projectile != models.end(); ++projectile) {
+			if (projectile->isAlive()) {
+
+				std::cout << "\tChecking Projectile-Player collisions..." << std::endl;
+				//Player-Projectile Collision
+				for (auto player = players.begin(); player != players.end(); ++player) {
+					if (player->isAlive()) {
+						bool collision = checkCollision(player->getPosition(), (*player->getMeshes())[0].getSize(), projectile->getPosition(), (*projectile->getMeshes())[0].getSize());
+						if (collision) {
+							std::cout << "----Detected Projectile-Player collision.----" << std::endl;
+							getchar();
+							player->setAlive(!collision);
+							projectile->setAlive(!collision);
+							//END GAME HERE
+						}
+					}
+				}
+
+				std::cout << "\tChecking Enemy-Projectile collisions..." << std::endl;
+				//Enemy-Projectile Collision
+				for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
+					if (enemy->isAlive()) {
+						bool collision = checkCollision(enemy->getPosition(), (*enemy->getMeshes())[0].getSize(), projectile->getPosition(), (*projectile->getMeshes())[0].getSize());
+						if (collision) {
+							std::cout << "----Detected Enemy-Player collision.----" << std::endl;
+							getchar();
+							enemy->setAlive(!collision);
+							projectile->setAlive(!collision);
+						}
+					}
+				}
+
+			}
+		}
+	}
+
+	std::cout << "Finished checking collisions." << std::endl;
 }
 
 void ModelManager::printCollisions() {
@@ -283,8 +523,14 @@ void ModelManager::cameraNoise() {
 
 void ModelManager::setModelTransformation(int modelID) {
 	if (models.size() >= modelID) {
-		models.at(modelID).setState(1);
-		std::cout << "State of model " << modelID << " is now "<< models.at(modelID).getState() << ". Model is tranforming." << std::endl;
+		//models.at(modelID).setState(1);
+		if (models.at(modelID).getType() == "Enemy")
+			enemies.at(0).setState(1);
+		else if (models.at(modelID).getType() == "Player")
+			players.at(0).setState(1);
+		else if (models.at(modelID).getType() == "Projectile")
+			projectiles.at(0).setState(1);
+		//std::cout << "State of model " << modelID << " is now "<< models.at(modelID).getState() << ". Model is tranforming." << std::endl;
 	}
 }
 

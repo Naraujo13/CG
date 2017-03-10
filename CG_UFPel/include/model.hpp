@@ -47,6 +47,7 @@ private:
 
 	//Collision
 	bool alive;
+	glm::vec3 position;
 
 	//Game Related info
 	std::string type;	//'Player', 'Enemy', 'Projectile', 'Scenery'
