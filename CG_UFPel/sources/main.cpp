@@ -167,14 +167,15 @@ void playersSpawn(ModelManager& manager) {
 
 	manager.addModel(player);
 	std::cout << "DEBUG:: FINISHED LOADING PLAYER MODEL ::DEBUG" << std::endl;
+	
+	manager.loadMeshes("mesh/cube.obj"); //[2]
 
 }
 /* ----------------- */
 
-/* ------ Player Movement ----- */
+/* ------ Player Input ----- */
 void playerMovement(ModelManager& manager) {
 	if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS) {
-		std::cout << "Player x (" << (*manager.getPlayers())[0].getPosition().x << ") > -15" << std::endl;
 		if ((*manager.getPlayers())[0].getPosition().x > -15.0f) {
 			t.time = 0.05;
 			t.translationVec = glm::vec3(0.2, 0, 0);
@@ -182,12 +183,25 @@ void playerMovement(ModelManager& manager) {
 		}
 	}
 	else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS) {
-		std::cout << "Player x (" << (*manager.getPlayers())[0].getPosition().x << ") < 15" << std::endl;
 		if ((*manager.getPlayers())[0].getPosition().x < 15.0f) {
 			t.time = 0.05;
 			t.translationVec = glm::vec3(-0.2, 0, 0);
 			(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
 		}
+	}
+}
+void playerShooting(ModelManager& manager) {
+	if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS) {
+		std::vector <Mesh> meshes;
+		std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
+
+		meshes.push_back((*manager.getMeshes())[2]);
+		Model projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, (*manager.getPlayers())[0].getPosition(), "Projectile");
+		projectile.setModelMatrix(glm::translate(projectile.getModelMatrix(), glm::vec3(0,2.0f,0)));
+		projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f,0.25f,0.25f)));
+
+		manager.addModel(projectile);
+		std::cout << "DEBUG:: FINISHED LOADING PROJECTILE MODEL ::DEBUG" << std::endl;
 	}
 }
 /* ---------------------------- */
@@ -323,6 +337,7 @@ int main(void)
 	// ------- Transformation Control
 	manager.setTransformEnemies(true);
 	long double lastPlayerMovement = glfwGetTime();
+	long double lastPlayerShooting = glfwGetTime();
 
 	//Draw Loop
 	do{
@@ -368,9 +383,15 @@ int main(void)
 		}
 
 		//Player Input
+		//Movement
 		if (currentTime > lastPlayerMovement + 0.05f) {
 			playerMovement(manager);
 			lastPlayerMovement = glfwGetTime();
+		}
+		//Shooting
+		if (currentTime > lastPlayerShooting + 0.5f) {
+			playerShooting(manager);
+			lastPlayerShooting = glfwGetTime();
 		}
 
 		//Camera Noise

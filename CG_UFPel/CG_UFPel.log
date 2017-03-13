@@ -18,5 +18,4 @@ C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\vector(1018): war
               _Ty=Mesh
           ]
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\cmath(86): warning C4577: 'noexcept' used with no exception handling mode specified; termination on exception is not guaranteed. Specify /EHsc
-     Creating library F:/Downloads/Aula/CG/saida/Debug/CG_UFPel.lib and object F:/Downloads/Aula/CG/saida/Debug/CG_UFPel.exp
   CG_UFPel.vcxproj -> F:\Downloads\Aula\CG\saida\..\CG_UFPel\CG_UFPel.exe
