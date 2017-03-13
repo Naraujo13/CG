@@ -316,7 +316,6 @@ void Model::BSplineTest(struct bspline l) {
 void Model::applyTransformation() {
 	if (transformationQueue.empty()){
 		Model::state = 0;
-		std::cout << "empty" << std::endl;
 		return;
 	}
 	else if (glfwGetTime() > lastTransformed + timeBtwn) {

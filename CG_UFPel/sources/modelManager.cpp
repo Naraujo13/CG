@@ -560,9 +560,7 @@ void ModelManager::transformModels() {
 	int i = 0;
 	if (transformPlayers) {
 		for (auto it = ModelManager::players.begin(); it != ModelManager::players.end(); ++it, i++) {
-			if (it->getState()) {
-				it->applyTransformation();
-			}
+			it->applyTransformation();
 		}
 	}
 	if (transformEnemies) {

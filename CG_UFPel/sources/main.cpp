@@ -87,6 +87,7 @@ int nUseMouse = 0;
 
 void controlCounterVariables(ModelManager& manager) 
 {
+
 }
 
 void initialiseTransformationVariables() {
@@ -138,7 +139,7 @@ void drawModeInput() {
 void cameraSpawn(ModelManager& manager) {
 	/* -- Camera -- */
 	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 5, 20)), getProjectionMatrix());
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 20)), getProjectionMatrix());
 
 }
 //Enemies
@@ -148,9 +149,9 @@ void enemiesSpawn(ModelManager& manager) {
 	meshes.clear();
 	meshes = *manager.getMeshes();
 	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 5, 0), "Enemy");
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 5, 0), "Enemy");
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 5, 0), "Enemy");
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), "Enemy");
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), "Enemy");
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), "Enemy");
 	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
 }
 //Player
@@ -161,7 +162,7 @@ void playersSpawn(ModelManager& manager) {
 	meshes.clear();
 	meshes.push_back((*manager.getMeshes())[1]);
 
-	Model player("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0, 0, 15), "Player");
+	Model player("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0, -10, -5), "Player");
 	player.setModelMatrix(glm::rotate(player.getModelMatrix(), 180.0f, glm::vec3(0, 1, 0)));
 
 	manager.addModel(player);
@@ -169,6 +170,27 @@ void playersSpawn(ModelManager& manager) {
 
 }
 /* ----------------- */
+
+/* ------ Player Movement ----- */
+void playerMovement(ModelManager& manager) {
+	if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS) {
+		std::cout << "Player x (" << (*manager.getPlayers())[0].getPosition().x << ") > -15" << std::endl;
+		if ((*manager.getPlayers())[0].getPosition().x > -15.0f) {
+			t.time = 0.05;
+			t.translationVec = glm::vec3(0.2, 0, 0);
+			(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+		}
+	}
+	else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS) {
+		std::cout << "Player x (" << (*manager.getPlayers())[0].getPosition().x << ") < 15" << std::endl;
+		if ((*manager.getPlayers())[0].getPosition().x < 15.0f) {
+			t.time = 0.05;
+			t.translationVec = glm::vec3(-0.2, 0, 0);
+			(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+		}
+	}
+}
+/* ---------------------------- */
 
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
@@ -254,6 +276,7 @@ int main(void)
 
 	//Model Manager
 	ModelManager manager = ModelManager();
+	//Shaders
 	manager.createShader("shaders/PassThroughShading.vertexshader", "shaders/PassThroughShading.fragmentshader", "shaders/PassThroughGeometryShader.gs");
 	manager.createShader("shaders/ExplosionGeometryShading.vertexshader", "shaders/ExplosionGeometryShading.fragmentshader", "shaders/ExplosionGeometryShader.gs");
 	manager.createShader("shaders/VisualizeNormalsShading.vertexshader", "shaders/VisualizeNormalsShading.fragmentshader", "shaders/VisualizeNormalsGeometryShader.gs");
@@ -270,7 +293,7 @@ int main(void)
 	GLuint LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 
 	//Speed/Times Auxiliaries
-	long double lastTime = glfwGetTime(), lastTime2 = glfwGetTime();
+	long double lastTime = glfwGetTime();
 	int nbFrames = 0;
 	int simplify = 1;
 	long double lastTime3 = glfwGetTime();
@@ -288,8 +311,8 @@ int main(void)
 	//manager.loadMeshes("mesh/luxury_house.obj");
 	//manager.loadMeshes("mesh/nanosuit.obj");
 
-	std::vector <Mesh> meshes;
 
+	//Spawn
 	cameraSpawn(manager);
 	enemiesSpawn(manager);
 	playersSpawn(manager);
@@ -299,12 +322,13 @@ int main(void)
 	
 	// ------- Transformation Control
 	manager.setTransformEnemies(true);
+	long double lastPlayerMovement = glfwGetTime();
 
 	//Draw Loop
 	do{
         check_gl_error();
 		// Measure speed
-		long double currentTime2 = glfwGetTime();
+		long double currentTime = glfwGetTime();
 		
 		//Control counter's limits
 		controlCounterVariables(manager);
@@ -317,7 +341,7 @@ int main(void)
 			nUseMouse = 0;
 		else
 			nUseMouse = 1;
-		long double currentTime = glfwGetTime();
+		
 
 		/* --- Shaders --- */
 		//Explode
@@ -343,6 +367,11 @@ int main(void)
 			manager.checkAllModelsCollision();
 		}
 
+		//Player Input
+		if (currentTime > lastPlayerMovement + 0.05f) {
+			playerMovement(manager);
+			lastPlayerMovement = glfwGetTime();
+		}
 
 		//Camera Noise
 		manager.cameraNoise();
