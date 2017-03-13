@@ -85,58 +85,8 @@ int currentCameraID = 0;
 int nUseMouse = 0;
 
 
-void printInstructions() {
-	/* ---- Instructions to user ---- */
-	std::cout << "-----------------------------------" << std::endl;
-	std::cout << "Instrucoes:" << std::endl;
-	std::cout << "\t1. Operacoes unitarias:" << std::endl;
-	std::cout << "\t\t1.1. A tecla \"N\" fara a simplificacao de 1 vertice quando pressionada." << std::endl;
-	std::cout << "\t\t1.2. A tecla \"B\" ira desfazer a simplificacao de 1 vertice quando pressionada." << std::endl;
-	std::cout << "\t2. Operacoes Continuas:" << std::endl;
-	std::cout << "\t\t2.1. A tecla \"Backspace\" ira colocar o programa num modo de simplificacao continuo." << std::endl;
-	std::cout << "\t\t2.2. A tecla \"=\" ira colocar o programa num modo de desfazer a simplificacao continuo." << std::endl;
-	std::cout << "\t\t2.3. tA tecla \"Space\" ira parar qualquer um dos dois modos continuos anteriores." << std::endl;
-	std::cout << "\t3. Modos de desenho:" << std::endl;
-	std::cout << "\t\t3.1. A tecla \"P\" ira setar o modo de desenho para \"pontos\"." << std::endl;
-	std::cout << "\t\t3.2. A tecla \"L\" ira setar o modo de desenho para \"linhas\"." << std::endl;
-	std::cout << "\t\t3.3. A tecla \"F\" ira setar o modo de desenho para \"preenhcer\"." << std::endl;
-	std::cout << "\t4. Movimentação da câmera:" << std::endl;
-	std::cout << "\t\t4.1. A tecla \"Control\" libera o mouse." << std::endl;
-	std::cout << "\t\t4.2. As setas direcionais podem ser usadas para movimentao." << std::endl;
-	std::cout << "\t5. Controle Geral:" << std::endl;
-	std::cout << "\t\t5.1. O modelo ativo no momento pode ser escolhido atraves do campo da interface ou das teclas numericas." << std::endl;
-	std::cout << "\t\t5.2. A tecla \"Insert\" adiciona um novo modelo utilizando a mesh e a posicao inicial selecionadas na interface" << std::endl;
-	std::cout << "\t\t5.3. A tecla \"Delete\" ira resetar todas as entradas da interface." << std::endl;
-	std::cout << "\t6. Transformacoes sobre modelos:" << std::endl;
-	std::cout << "\t\t6.1. A tecla \"T\" adiciona uma translacao com os parametros selecionados na interface." << std::endl;
-	std::cout << "\t\t6.2. A tecla \"S\" adiciona uma escala com os parametros selecionados na interface." << std::endl;
-	std::cout << "\t\t6.3. A tecla \"R\" adiciona uma rotacao com os parametros selecionados na interface." << std::endl;
-	std::cout << "\t\t6.4. A tecla \"C\" adiciona uma transformacao composta usando os parametros de rotacao e translacao, e o tempo pra realizar a animacao composta." << std::endl;
-	std::cout << "\t\t6.5. A tecla \"H\" adiciona uma transformacao de shear com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.6. A tecla \"A\" adiciona uma rotacao ao redor de ponto com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.7. A tecla \"B\" adiciona uma curva B-Spline com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.8. A tecla \"Z\" adiciona uma curva Bezier com os parametros selecionados na interface" << std::endl;
-	std::cout << "\t\t6.9. A tecla \"D\" adiciona uma projecao 3Dom os parametros selecionados na interface." << std::endl;
-	std::cout << "\t\t6.10. A tecla \"U\" ativa a realizacao de todas as transformacoes na fila." << std::endl;
-	std::cout << "\t\t Todos os comandos da secao 6 serao realizados para o modelo ativo no momento." << std::endl;
-	std::cout << "\t Ao manter-se a tecla \"Left Shift\" pressionada, sera impresso um print de performance a cada 1 segundo." << std::endl;
-	std::cout << "----------------------------------" << std::endl;
-}
-
 void controlCounterVariables(ModelManager& manager) 
 {
-	//Limita ShaderID ao tamanho do vetor
-	if (currentShaderProgramID > (*manager.getShaders()).size() - 1)
-		currentShaderProgramID = (*manager.getShaders()).size() - 1;
-	//Limita cameraID ao tamanho do vetor
-	if (currentCameraID > (*manager.getCameras()).size() - 1)
-		currentCameraID = (*manager.getCameras()).size() - 1;
-	//Limita ModelID ao tamanho do vetor
-	if (currentModelID > (*manager.getModels()).size() - 1)
-		currentModelID = (*manager.getModels()).size() - 1;
-	//Numero de pontos automatico
-	if (numLinearPoints != linearPoints.size() + 1)
-		numLinearPoints = linearPoints.size() + 1;
 }
 
 void initialiseTransformationVariables() {
@@ -182,215 +132,43 @@ void drawModeInput() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void transformationInput(long double& currentTime, long double& lastTime3, long double& collisionCheckTime, ModelManager& manager) {
-	//Translação ao pressionar T
-	if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Translation ('T') - both
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			if ((*manager.getModels())[currentModelID].getType() == "Enemy")
-				(*manager.getEnemies())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
-			else if ((*manager.getModels())[currentModelID].getType() == "Player")
-				(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
 
-			//(*manager.getModels())[currentModelID].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
-			std::cout << "Queue size:" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (m_currentActive == CAMERA) {
-			(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
-			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_S) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Scale ('S')
-		lastTime3 = glfwGetTime();
-		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, &s, NULL, NULL, s.time);
-		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_R) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Rotation ('R') - both
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].addCompTransformation(NULL, &r, NULL, NULL, NULL, r.time);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (m_currentActive == CAMERA) {
-			(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, &r, NULL);
-			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_A) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotation Around point ('A') - both - buggy
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].rotationAroundPoint(&p);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (m_currentActive == CAMERA) {
-			(*manager.getCameras())[currentCameraID].aroundPoint(&cp);
-			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_C) == GLFW_PRESS && (currentTime > lastTime3 + 0.1) && currentModelID < numModelos) {	//Rotação + Translação + Escala ('C')
-		lastTime3 = glfwGetTime();
-		(*manager.getModels())[currentModelID].addCompTransformation(&t, &r, &s, NULL, NULL, compositionTime);
-		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_H) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Shear ('H')
-		lastTime3 = glfwGetTime();
-		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, &h, NULL, h.time);
-		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_Z) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Bezier ('Z') - both
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].bezierCurve(b);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (m_currentActive == CAMERA) {
-			(*manager.getCameras())[currentCameraID].bezierCurve(b);
-			std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_B) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//B-Spline ('B') - both
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			(*manager.getModels())[currentModelID].BSplineTest(l);
-			std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-		}
-		else if (m_currentActive == CAMERA) {
-			//(*manager.getCameras())[currentCameraID].BSpline(l);
-			(*manager.getCameras())[currentCameraID].BSplineTest(l);
-			std::cout << "Queue size of camera" << currentCameraID << ":" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_D) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentModelID < numModelos) {	//Projection 3D ('D')
-		lastTime3 = glfwGetTime();
-		(*manager.getModels())[currentModelID].addCompTransformation(NULL, NULL, NULL, NULL, &p3D, 0);
-		std::cout << "Queue size of model" << currentModelID << ":" << (*(*manager.getModels())[currentModelID].getTransformationQueue()).size() << std::endl;
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_K) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {					//Look At (K) - Camera only
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == CAMERA) {
-			(*manager.getCameras())[currentCameraID].addCompTransformation(NULL, NULL, &lk);
-			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_INSERT) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insere novo modelo ('Insert')
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			std::vector <Mesh> tempMeshes;
-			if (m_currentMesh == SUZANNE)
-				tempMeshes.push_back((*manager.getMeshes()).at(0));
-			else if (m_currentMesh == GOOSE)
-				tempMeshes.push_back((*manager.getMeshes()).at(1));
-			else if (m_currentMesh == CUBE)
-				tempMeshes.push_back((*manager.getMeshes()).at(2));
-			manager.createModel("mesh/uvmap.DDS", "myTextureSampler", tempMeshes, newModelPos, "Player");
-			numModelos++;
-		}
-		else if (m_currentActive == CAMERA) {
-			//manager.createCamera(( getViewMatrix() * glm::translate(glm::mat4(1.0f), newCamPos * glm::vec3(-1)) ),getProjectionMatrix());
-			manager.createCamera(fieldOfView, hAux / vAux, near, far, newCamPos, newCamUp, newCamSight);
-			numCameras++;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_F1) == GLFW_PRESS && (currentTime > lastTime3 + 0.3)) {	//Insert point to Linear Path (F1) - Camera only
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == CAMERA) {
-			linearPoints.push_back(linearPoint);
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_F2) == GLFW_PRESS && (currentTime > lastTime3 + 0.3 && linearPoints.size()>0)) {	//Put current Linear Path (F2) - Camera only
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == CAMERA) {
-			glm::vec3 previous, current;
-			struct translation t;
-			t.time = linearTime / linearPoints.size();
-			previous = glm::vec3((*manager.getCameras())[currentCameraID].getViewMatrix()[3][0],
-				(*manager.getCameras())[currentCameraID].getViewMatrix()[3][1],
-				(*manager.getCameras())[currentCameraID].getViewMatrix()[3][2]);
-			for (int i = 0; i < linearPoints.size(); i++) {
-				current = linearPoints[i];
-				t.translationVec = current - previous;
-
-				(*manager.getCameras())[currentCameraID].addCompTransformation(&t, NULL, NULL);
-
-				previous = current;
-			}
-			std::cout << "Camera " << currentCameraID << " Queue size:" << (*(*manager.getCameras())[currentCameraID].getTransformationQueue()).size() << std::endl;
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_DELETE) == GLFW_PRESS) {	//Resets all  input data
-		t.translationVec = glm::vec3(0, 0, 0);
-		t.time = 1.0f;
-		s.scaleVec = glm::vec3(1);
-		s.time = 1.0f;
-		r.rotationVec = glm::vec3(1, 0, 0);
-		r.rotationDegrees = 0.0f;
-		r.time = 1.0f;
-		h.shearVec = glm::vec3(0, 0, 0);
-		h.time = 1.0f;
-		b.controlPoints[0] = glm::vec3(0);
-		b.controlPoints[1] = glm::vec3(0);
-		b.controlPoints[2] = glm::vec3(0);
-		b.time = 1.0f;
-		l.controlPoints[0] = glm::vec3(0);
-		l.controlPoints[1] = glm::vec3(0);
-		l.controlPoints[2] = glm::vec3(0);
-		l.controlPoints[3] = glm::vec3(0);
-		l.time = 1.0f;
-		p.rotationAngle = 0.0f;
-		p.point = glm::vec3(0);
-		p.time = 1.0f;
-		p3D.projVector = glm::vec3(0, 0, 2);
-		p3D.time = 1.0f;
-		newModelPos = glm::vec3(0);
-		newCamPos = glm::vec3(0);
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_U) == GLFW_PRESS && (currentTime > lastTime3 + 0.1)) {	//Apply all
-		lastTime3 = glfwGetTime();
-		if (m_currentActive == MODEL) {
-			manager.setModelTransformation(currentModelID);
-		}
-		else if (m_currentActive == CAMERA) {
-			manager.setCamerasTransformation(currentCameraID);
-			//(*manager.getCameras())[currentCameraID].applyTransformation();
-		}
-	}
-	else if ((currentTime > lastTime3 + 5)) {
-		lastTime3 = glfwGetTime();
-		manager.printCollisions();
-	}
-	if (currentTime > collisionCheckTime + 0.1) {
-		collisionCheckTime = glfwGetTime();
-		manager.checkAllModelsCollision();
-	}
+/* ----- Spawns ---- */
+//CameraSpawn
+void cameraSpawn(ModelManager& manager) {
+	/* -- Camera -- */
+	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
+	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 5, 20)), getProjectionMatrix());
 
 }
-
-void shaderInput(long double& currentTime, long double& lastTime3, ModelManager& manager) {
-	//Explosion Geometry Shader
-	if (glfwGetKey(g_pWindow, GLFW_KEY_F5) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1) {
-		if (m_currentActive == MODEL) {
-			if (!(*manager.getModels())[currentModelID].getGeometry()) {
-				(*manager.getModels())[currentModelID].setGeometry(true);
-			}
-		}
-	}
-	else if (glfwGetKey(g_pWindow, GLFW_KEY_F6) == GLFW_PRESS && (currentTime > lastTime3 + 0.3) && currentShaderProgramID == 1 && (*manager.getModels())[currentModelID].getGeometry()) {
-		//std::cout << "wILL CHANGE GEOMETRY TO FALSE 1st IF" << std::endl;
-		//getchar();
-		(*manager.getModels())[currentModelID].setGeometry(false);
-	}
-	else if (currentShaderProgramID != 1 && (*manager.getModels())[currentModelID].getGeometry()) {
-		//std::cout << "wILL CHANGE GEOMETRY TO FALSE 2nd IF" << std::endl;
-		//getchar();
-		(*manager.getModels())[currentModelID].setGeometry(false);
-	}
-//	if (!(*manager.getModels())[currentModelID].getGeometry()) {
-//		std::cout << "DEBUG::SHADER:: | Geometry Start " << (*manager.getModels())[currentModelID].getGeometryStart() << " | Last " << (*manager.getModels())[currentModelID].getLastUsedGeometry() << " | ::SHADER::DEBUG" << std::endl;
-//	}
-	
+//Enemies
+void enemiesSpawn(ModelManager& manager) {
+	std::vector <Mesh> meshes;
+	manager.loadMeshes("mesh/suzanne.obj");
+	meshes.clear();
+	meshes = *manager.getMeshes();
+	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 5, 0), "Enemy");
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 5, 0), "Enemy");
+	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 5, 0), "Enemy");
+	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
 }
+//Player
+void playersSpawn(ModelManager& manager) {
+	std::vector <Mesh> meshes;
+	std::cout << "DEBUG:: LOADING PLAYER MODEL... ::DEBUG" << std::endl;
+	manager.loadMeshes("mesh/goose.obj");
+	meshes.clear();
+	meshes.push_back((*manager.getMeshes())[1]);
 
+	Model player("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0, 0, 15), "Player");
+	player.setModelMatrix(glm::rotate(player.getModelMatrix(), 180.0f, glm::vec3(0, 1, 0)));
+
+	manager.addModel(player);
+	std::cout << "DEBUG:: FINISHED LOADING PLAYER MODEL ::DEBUG" << std::endl;
+
+}
+/* ----------------- */
 
 void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 
@@ -400,10 +178,6 @@ void WindowSizeCallBack(GLFWwindow *pWindow, int nWidth, int nHeight) {
 	TwWindowSize(g_nWidth, g_nHeight);
 }
 
-void TW_CALL transformModel(void *, ModelManager manager, int model)
-{
-	manager.setModelTransformation(model);
-}
 
 int main(void)
 {
@@ -454,148 +228,14 @@ int main(void)
 	glfwSetWindowSizeCallback(g_pWindow, WindowSizeCallBack);
 
 	//create the toolbar
-	g_pToolBar = TwNewBar("CG UFPel ToolBar");
-	TwAddSeparator(g_pToolBar, "Mesh", NULL);
-	TwAddButton(g_pToolBar, "Mesh options", NULL, NULL, "");
-	
-	// Array of drop down items
-	TwEnumVal Meshes[] = { { SUZANNE, "Suzanne" },{ CUBE, "Cube" },{ GOOSE, "Goose" } };
-
-	// ATB identifier for the array
-	TwType MeshTwType = TwDefineEnum("MeshType", Meshes, 3);
-
-	// Link it to the tweak bar
-	TwAddVarRW(g_pToolBar, "Mesh: ", MeshTwType, &m_currentMesh, NULL);
-	//New Model position
-	
-	TwAddVarRW(g_pToolBar, "New Model position:", TW_TYPE_DIR3D, &newModelPos, NULL);
-	
-	TwAddVarRW(g_pToolBar, "Active model: ", TW_TYPE_INT8, &currentModelID, "min=0 max=20 step=1 label='Active model");
-
-	
-	//Add Model-Camera Switch
-		TwAddSeparator(g_pToolBar, "Model-Camera Switch:", NULL);
-
-		// Array of drop down items
-		TwEnumVal Actives[] = { { MODEL, "Model" },{ CAMERA, "Camera" } };
-
-		// ATB identifier for the array
-		TwType ActiveTwType = TwDefineEnum("ActiveType", Actives, 2);
-
-		// Link it to the tweak bar
-		TwAddVarRW(g_pToolBar, "Model-Camera Switch: ", ActiveTwType, &m_currentActive, NULL);
+	g_pToolBar = TwNewBar("CG UFPel ToolBar");	
 
 	//Add 'Shader' Options
 	TwAddSeparator(g_pToolBar, "Shader Program", NULL);
 	TwAddButton(g_pToolBar, "Shader options:", NULL, NULL, "");
 	TwAddVarRW(g_pToolBar, "Active Shader Program: ", TW_TYPE_INT8, &currentShaderProgramID, "min=0 step = 1 label='Active Shader Program'");
 
-	//Add 'Camera' Options
-	TwAddSeparator(g_pToolBar, "Camera", NULL);
-	TwAddButton(g_pToolBar, "Camera options:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Active Camera: ", TW_TYPE_INT8, &currentCameraID, "min=0 step = 1 label='Active Camera'");
-	
-	TwAddButton(g_pToolBar, "New Camera parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "New Camera Position: ", TW_TYPE_DIR3F, &newCamPos, NULL);
-	TwAddVarRW(g_pToolBar, "New Camera Up: ", TW_TYPE_DIR3F, &newCamUp, NULL);
-	TwAddVarRW(g_pToolBar, "New Camera Sight: ", TW_TYPE_DIR3F, &newCamSight, NULL);
-
-	TwAddVarRW(g_pToolBar, "Field Of View:", TW_TYPE_FLOAT, &fieldOfView, " min=0.0 step=0.1 label=''");
-	TwAddVarRW(g_pToolBar, "Aspect Ratio Horizontal:", TW_TYPE_INT8, &hAux, " min=0.0 step=1 label=''");
-	TwAddVarRW(g_pToolBar, "Aspect Ratio Vertical:", TW_TYPE_INT8, &vAux, " min=0.0 step=1 label=''");
-	TwAddVarRW(g_pToolBar, "Near Plane:", TW_TYPE_FLOAT, &near, " min=0.0 step=0.1 label=''");
-	TwAddVarRW(g_pToolBar, "Far Plane:", TW_TYPE_FLOAT, &far, " min=0.0 step=0.1 label=''");
-
-
-	
-	
-	//Add 'Translation' options
-	TwAddSeparator(g_pToolBar, "Translation", NULL);
-	TwAddButton(g_pToolBar, "Translation (Both):", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Translation: ", TW_TYPE_DIR3F, &t.translationVec, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Translation Time: ", TW_TYPE_DOUBLE, &t.time, " min=0.0 step=0.1 label='Time to do the translation (seconds):");
-	
-	//Add 'LookAt' options
-	TwAddSeparator(g_pToolBar, "Look At: ", NULL);
-	TwAddButton(g_pToolBar, "Look At (Camera):", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Eye: ", TW_TYPE_DIR3F, &lk.eye, " label='eye position");
-	TwAddVarRW(g_pToolBar, "Center: ", TW_TYPE_DIR3F, &lk.center, " label='point to look:");
-	TwAddVarRW(g_pToolBar, "Up: ", TW_TYPE_DIR3F, &lk.up, " label='up vector:");
-	TwAddVarRW(g_pToolBar, "Look At Time:", TW_TYPE_DOUBLE, &lk.time, " min=0.0 step=0.1 label='animation time'");
-
-	//Add 'Rotation' options
-	TwAddSeparator(g_pToolBar, "Rotation", NULL);
-	TwAddButton(g_pToolBar, "Rotation parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Rotation direction: ", TW_TYPE_DIR3F, &r.rotationVec, " label='Translation to put to queue:");
-	TwAddVarRW(g_pToolBar, "Rotation Degrees:", TW_TYPE_FLOAT, &r.rotationDegrees, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation Time:", TW_TYPE_DOUBLE, &r.time, " min=0.0 step=0.1 label='Rotation time'");
-
-	//Add 'Rotation Around Point' options
-	TwAddSeparator(g_pToolBar, "Rotation Around Point Camera", NULL);
-	TwAddButton(g_pToolBar, "Rotation Around Point Camera: ", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Point:  ", TW_TYPE_DIR3F, &cp.point, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Orbit degrees:  ", TW_TYPE_FLOAT, &cp.rotationAngle, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation Axis:  ", TW_TYPE_DIR3F, &cp.rotationAxis, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Rotation around point time:  ", TW_TYPE_DOUBLE, &cp.time, " min=0.0 step=0.1 label='Rotation around point time'");
-
-	//Linear Path Options
-	TwAddSeparator(g_pToolBar, "Linear Path Options", NULL);
-	TwAddButton(g_pToolBar, "Linear Path: (P0 is current position)", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Number of points (automatic):  ", TW_TYPE_INT32, &numLinearPoints, " min=1.0 label=''");
-	TwAddVarRW(g_pToolBar, "Point (F1 to add a point):  ", TW_TYPE_DIR3F, &linearPoint, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Linear Path Time (F2 to go trought path): ", TW_TYPE_DOUBLE, &linearTime, " min=0.0 step=0.1 label=''");
-
-
-	//Add 'Scale' options
-	TwAddSeparator(g_pToolBar, "'Scale'", NULL);
-	TwAddButton(g_pToolBar, "Scale parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Scale: ", TW_TYPE_DIR3F, &s.scaleVec, "min=0.1 step=0.1 label='Scale to put to queue:");
-	TwAddVarRW(g_pToolBar, "Scaling Time: ", TW_TYPE_DOUBLE, &s.time, " min=0.0 step=0.1 help='Time to do the scaling (seconds)' ");
-
-	//Add 'Composition animation' options
-	
-	TwAddSeparator(g_pToolBar, "Composition", NULL);
-	TwAddButton(g_pToolBar, "Compasition parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Composition Time:", TW_TYPE_DOUBLE, &compositionTime, " min=0.0 step=0.1 label='Composition time'");
-
-	//Add 'Rotation around point' options
-	TwAddSeparator(g_pToolBar, "Rotation around point", NULL);
-	TwAddButton(g_pToolBar, "Rotation around point parameters:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Point to be rotated around: ", TW_TYPE_DIR3F, &p.point, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Orbit degrees:", TW_TYPE_FLOAT, &p.rotationAngle, "step=0.5 label='Rotation angle'");
-	TwAddVarRW(g_pToolBar, "Rotation around point time:", TW_TYPE_DOUBLE, &p.time, " min=0.0 step=0.1 label='Rotation around point time'");
-
-	TwAddSeparator(g_pToolBar, "Projection 3D", NULL);
-	TwAddButton(g_pToolBar, "Projection 3D:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Projection Vector: ", TW_TYPE_DIR3F, &p3D.projVector, "step=0.1");
-	//TwAddVarRW(g_pToolBar, "Projection Time", TW_TYPE_DOUBLE, &p3D.time, " min=0.0 step=0.1");
-
-	//Add 'Shear' Options
-	TwAddSeparator(g_pToolBar, "Shear", NULL);
-	TwAddButton(g_pToolBar, "Shear:", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "Shear vector: ", TW_TYPE_DIR3F, &h.shearVec, "step=0.1");
-	TwAddVarRW(g_pToolBar, "Shear time:", TW_TYPE_DOUBLE, &h.time, " min=0.0 step=0.1 label='Shear time'");
-
-	//Add 'Bezier' Options
-	TwAddSeparator(g_pToolBar, "Bezier curve", NULL);
-	TwAddButton(g_pToolBar, "Bezier Curve:", NULL, NULL, "");
-	TwAddButton(g_pToolBar, "P0: current position.", NULL, NULL, "");
-	TwAddVarRW(g_pToolBar, "P1:", TW_TYPE_DIR3F, &b.controlPoints[1], "step=0.1");
-	TwAddVarRW(g_pToolBar, "P2:", TW_TYPE_DIR3F, &b.controlPoints[2], "step=0.1");
-	TwAddVarRW(g_pToolBar, "Bezier Time:", TW_TYPE_DOUBLE, &b.time, " min=0.0 step=0.1 label='Bezier time'");
-
-	//Add 'B-Spline' Options
-	TwAddSeparator(g_pToolBar, "B-Spline curve", NULL);
-	TwAddButton(g_pToolBar, "B-Spline Curve:", NULL, NULL, "");
-	TwAddButton(g_pToolBar, "P0: current position. ", NULL, NULL, "");
-	//TwAddVarRW(g_pToolBar, "P0: ", TW_TYPE_DIR3F, &l.controlPoints[0], "step=0.1");
-	TwAddVarRW(g_pToolBar, "P1: ", TW_TYPE_DIR3F, &l.controlPoints[1], "step=0.1");
-	TwAddVarRW(g_pToolBar, "P2: ", TW_TYPE_DIR3F, &l.controlPoints[2], "step=0.1");
-	TwAddVarRW(g_pToolBar, "P3: ", TW_TYPE_DIR3F, &l.controlPoints[3], "step=0.1");
-	TwAddVarRW(g_pToolBar, "B-Spline Time:", TW_TYPE_DOUBLE, &l.time, " min=0.0 step=0.1 label='B-Spline time'");
-
 	TwAddSeparator(g_pToolBar, "End", NULL);
-
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(g_pWindow, GLFW_STICKY_KEYS, GL_TRUE);
@@ -641,11 +281,7 @@ int main(void)
 	glUseProgram(manager.getProgramID());
 	LightID = glGetUniformLocation(manager.getProgramID(), "LightPosition_worldspace");
 
-	//Print Instructions
-	printInstructions();
-
-	//----- Trabalho 1: Mesh Simplification
-	int continuousMeshSimplification = 0;
+	
 	// Read our .obj file and creates meshes
 	//manager.loadMeshes("mesh/cube.obj");
 	//manager.loadMeshes("mesh/g1.obj");
@@ -654,35 +290,14 @@ int main(void)
 
 	std::vector <Mesh> meshes;
 
+	cameraSpawn(manager);
+	enemiesSpawn(manager);
+	playersSpawn(manager);
 
-	manager.loadMeshes("mesh/suzanne.obj");
-	meshes = *manager.getMeshes();
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 0, 0), "Enemy");
-
-	manager.loadMeshes("mesh/goose.obj");
-	meshes.clear();
-	meshes.push_back((*manager.getMeshes())[1]);
-	manager.createModel("mesh/goose.dds", "myTextureSampler", meshes, glm::vec3(-3, 0, 0), "Player");
-	
-
-	//----- Trabalho 2: Model Transformation
-	//Creates models
-	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(0), glm::vec3(3, 3, 0));
-	//manager.createModel("mesh/goose.dds", "myTextureSampler", (*manager.getMeshes()).at(1), glm::vec3(-3, 3, 0));
-	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(2), glm::vec3(3, -3, 0));
-	//manager.createModel("mesh/uvmap.DDS", "myTextureSampler", (*manager.getMeshes()).at(3), glm::vec3(-3, -3, 0));
-	
-	//----- Trabalho 3: Câmeras
-	//Creates Camera 1
-	computeMatricesFromInputs(nUseMouse, g_nWidth, g_nHeight);
-	manager.createCamera(getViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(-1)*glm::vec3(0, 0, 15)), getProjectionMatrix());
-	//Creates Camera 2
-	manager.createCamera(getViewMatrix(), getProjectionMatrix());
-	 
-	//Trabalho 4: Shaders
+	// ------ Shader Control
 	bool drawNormals = false;
 	
-
+	// ------- Transformation Control
 	manager.setTransformEnemies(true);
 
 	//Draw Loop
@@ -704,11 +319,30 @@ int main(void)
 			nUseMouse = 1;
 		long double currentTime = glfwGetTime();
 
-		/* --- Trabalho 4 --- */
-		shaderInput(currentTime, lastTime3, manager);
+		/* --- Shaders --- */
+		//Explode
+		//(*manager.getModels())[currentModelID].setGeometry(true);
 
-		/* --- Trabalho 2 --- */
-		transformationInput(currentTime, lastTime3, collisionCheckTime, manager);
+		//Stop Explosion
+		//(*manager.getModels())[currentModelID].setGeometry(false);
+
+		/* --- Transformações --- */
+		//Translação		
+		//(*manager.getEnemies())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
+
+		//Apply
+		//manager.setModelTransformation(currentModelID);
+
+		//Collisions
+		if ((currentTime > lastTime3 + 5)) {
+			lastTime3 = glfwGetTime();
+			manager.printCollisions();
+		}
+		if (currentTime > collisionCheckTime + 0.1) {
+			collisionCheckTime = glfwGetTime();
+			manager.checkAllModelsCollision();
+		}
+
 
 		//Camera Noise
 		manager.cameraNoise();
@@ -717,14 +351,13 @@ int main(void)
 		//Transform models
 		manager.transformModels();
 
-		
-		// Measure speed
+		// Measure speed	
 		currentTime = glfwGetTime();
 		nbFrames++;
 		if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1sec ago
 			if (glfwGetKey(g_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 				// printf and reset
-				printf("%f ms/frame\t Contious state: %d\n", 1000.0 / double(nbFrames), continuousMeshSimplification);
+				printf("%f ms/frame\n", 1000.0 / double(nbFrames));
 			}
 			nbFrames = 0;
 			lastTime += 1.0;

@@ -26,10 +26,8 @@ class ModelManager {
 private:
 	//Vector to store shaders
 	std::vector<Shader> shaders;
-	//Vector to store the models
-	std::vector<Mesh> meshes;
 	//Vector to store the meshes
-	std::vector<Model> models;
+	std::vector<Mesh> meshes;
 	//Vector to store the cameras
 	std::vector<Camera> cameras;
 	//Current Camera
@@ -62,7 +60,6 @@ public:
 	//Getters
 	std::vector<Shader> * getShaders();
 	std::vector<Camera> * getCameras();
-	std::vector<Model> * getModels();
 	std::vector<Model> * ModelManager::getEnemies();
 	std::vector<Model> * ModelManager::getPlayers();
 	std::vector<Model> * ModelManager::getProjectiles();
@@ -89,7 +86,8 @@ public:
 	void loadMeshes(std::string path);
 
 	//models
-	void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
+	void createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
+	void addModel(Model model);
 	void cleanup();
 	void clearScreen();
 	void swapBuffers(GLFWwindow* g_pWindow);
@@ -99,10 +97,15 @@ public:
 	void setTransformEnemies(bool newState);
 	void setTransformProjectiles(bool newState);
 	void setTransformScenerie(bool newState);
-	void setModelTransformation(int modelID);
+	void setModelTransformation(int modelID, std::string type);
+
+	//Collision
 	GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB);
 	void printCollisions();
 	void checkAllModelsCollision();
+
+	//Enemies
+	void ModelManager::enemyPattern(int direction);
 };
 
 #endif
