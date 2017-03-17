@@ -48,6 +48,7 @@ private:
 	//Collision
 	bool alive;
 	glm::vec3 position;
+	glm::vec3 collisionBox;
 
 	//Game Related info
 	std::string type;	//'Player', 'Enemy', 'Projectile', 'Scenery'
@@ -88,6 +89,9 @@ public:
 	void Model::rotationAroundPoint(struct rotationAP *p);
 	void bezierCurve(struct bezier b);
 	void Model::BSplineTest(struct bspline l);
+
+	double getScalingFactor();
+	glm::vec3 Model::getSize();
 
 };
 

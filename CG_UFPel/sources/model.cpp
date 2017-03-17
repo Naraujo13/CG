@@ -28,6 +28,7 @@ Model::Model(const char *textPath, const char *textSample, GLuint programID, std
 		this->modelMatrix[3][0],
 		this->modelMatrix[3][1],
 		this->modelMatrix[3][2]);
+	this->alive = true;
 }
 
 //Getters
@@ -69,7 +70,10 @@ long double Model::getLastUsedGeometry() {
 	return lastUsedGeometry;
 }
 glm::vec3 Model::getPosition() {
-	return position;
+	return glm::vec3(
+		this->modelMatrix[3][0],
+		this->modelMatrix[3][1],
+		this->modelMatrix[3][2]);
 }
 bool Model::isAlive() {
 	return alive;
@@ -335,4 +339,13 @@ void Model::applyTransformation() {
 		this->modelMatrix[3][0],
 		this->modelMatrix[3][1],
 		this->modelMatrix[3][2]);
+}
+double Model::getScalingFactor() {
+	glm::mat4 m = this->modelMatrix;
+	return sqrt(m[0][0] * m[0][0] + m[1][0] * m[1][0] + m[2][0] * m[2][0]);
+
+}
+
+glm::vec3 Model::getSize() {
+	return meshes[0].getSize();
 }

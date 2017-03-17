@@ -1,6 +1,7 @@
 #include "modelManager.hpp"
 #include <GL/glew.h>
 #include <model.hpp>
+#include <projectile.hpp>
 #include <texture.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <AntTweakBar.h>
@@ -10,6 +11,8 @@
 #include "controls.hpp"
 #include "objloader.hpp"
 
+#define GEOMETRYLIMIT 0.0f
+
 
 //Constructor
 ModelManager::ModelManager()
@@ -17,6 +20,7 @@ ModelManager::ModelManager()
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
 	currentCamera = 0;
+	difficulty = 1;
 }
 
 /* -- Getters -- */
@@ -32,7 +36,7 @@ std::vector<Model> * ModelManager::getEnemies() {
 std::vector<Model> * ModelManager::getPlayers() {
 	return &players;
 }
-std::vector<Model> * ModelManager::getProjectiles() {
+std::vector<Projectile> * ModelManager::getProjectiles() {
 	return &projectiles;
 }
 std::vector<Mesh> * ModelManager::getMeshes() {
@@ -50,6 +54,9 @@ GLuint ModelManager::getMatrixID() {
 GLuint ModelManager::getLightID() {
 	return LightID;
 }
+double ModelManager::getDifficulty() {
+	return difficulty;
+}
 /* ------------- */
 
 /* -- Models -- */
@@ -58,22 +65,23 @@ void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Me
 	Model model(textPath, textSampler, currentShaderProgramID, meshes, position, type);
 	if (type == "Enemy")
 		enemies.push_back(model);
-	else if (type == "Projectile")
-		projectiles.push_back(model);
 	else if (type == "Player")
 		players.push_back(model);
 	else if (type == "Scenerie")
 		sceneries.push_back(model);
 }
+
 void ModelManager::addModel(Model model) {
 	if (model.getType() == "Enemy")
 		enemies.push_back(model);
-	else if (model.getType() == "Projectile")
-		projectiles.push_back(model);
 	else if (model.getType() == "Player")
 		players.push_back(model);
 	else if (model.getType() == "Scenerie")
 		sceneries.push_back(model);
+}
+
+void ModelManager::addModel(Projectile model) {
+	projectiles.push_back(model);
 }
 /* ------------ */
 
@@ -155,8 +163,12 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
 		if (it->getGeometry()) {
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
-			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			if (time < GEOMETRYLIMIT) {
+				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			}
+			else
+				it->setGeometry(false);
 		}
 		else {
 			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
@@ -201,6 +213,7 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		TwDraw();
 	}
 
+	//Draw enemies
 	for (auto it = enemies.begin(); it != enemies.end(); ++it) {
 		//Calculate MVP matrix
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
@@ -211,8 +224,12 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
 		if (it->getGeometry()) {
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
-			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			if (time < GEOMETRYLIMIT) {
+				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			}
+			else
+				it->setGeometry(false);
 		}
 		else {
 			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
@@ -257,6 +274,7 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		TwDraw();
 	}
 
+	//Draw projectiles
 	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
 		//Calculate MVP matrix
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
@@ -267,8 +285,12 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
 		if (it->getGeometry()) {
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
-			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-			std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			if (time < GEOMETRYLIMIT) {
+				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
+			}
+			else
+				it->setGeometry(false);
 		}
 		else {
 			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
@@ -370,9 +392,9 @@ void ModelManager::cleanup() {
 
 /* -- Colisões -- */
 //Verifica colisão entre dois modelos
-GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB)
+GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB, std::string type)
 {
-	
+
 	bool collisionX = false;
 	bool collisionY = false;
 	bool collisionZ = false;
@@ -385,16 +407,11 @@ GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm
 	{
 		collisionY = true;
 	}
-	if (positionA.z + (sizeA.z / 2) >= positionB.z && ((positionB.z + (sizeB.z / 2) >= positionA.z)))
-	{
-		collisionZ = true;
-	}
-
-	//std::cout <<std::endl<< "Model A position: (" << positionA.x << ", " << positionA.y << ", " << positionA.z << ")";
-	//std::cout << " | Model B posiition (" << positionB.x << ", " << positionB.y << ", " << positionB.z << ")" << std::endl;
-
-	//std::cout << "Collision X = " << collisionX << " | Collision Y = " << collisionY << std::endl;
-	return collisionX && collisionY && collisionZ;
+	//if (positionA.z + (sizeA.z / 2) >= positionB.z && ((positionB.z + (sizeB.z / 2) >= positionA.z)))
+	//{
+	//	collisionZ = true;
+	//}
+	return collisionX && collisionY;
 }
 
 //Verifica colisão entre todos os modelos
@@ -409,7 +426,7 @@ void ModelManager::checkAllModelsCollision() {
 			if (enemy->isAlive()){
 				for (auto player = players.begin(); player != players.end(); ++player) {
 					if (player->isAlive()) {
-						bool playerCollision = checkCollision(player->getPosition(),  (*player->getMeshes())[0].getSize(), enemy->getPosition(), (*enemy->getMeshes())[0].getSize());
+						bool playerCollision = checkCollision(player->getPosition(),  player->getSize(), enemy->getPosition(), enemy->getSize(), "P-E");
 						//std::cout << playerCollision << std::endl;
 						if (playerCollision) {
 							//std::cout << "----Detected Enemy-Player collision.----" << std::endl;
@@ -427,39 +444,25 @@ void ModelManager::checkAllModelsCollision() {
 	if (!projectiles.empty()) {
 		for (auto projectile = projectiles.begin(); projectile != projectiles.end(); ++projectile) {
 			if (projectile->isAlive()) {
-				//std::cout << "\tChecking Projectile-Player collisions..." << std::endl;
-				//Player-Projectile Collision
-				for (auto player = players.begin(); player != players.end(); ++player) {
-					if (player->isAlive()) {
-						bool collision = checkCollision(player->getPosition(), (*player->getMeshes())[0].getSize(), projectile->getPosition(), (*projectile->getMeshes())[0].getSize());
-						if (collision) {
-							//std::cout << "----Detected Projectile-Player collision.----" << std::endl;
-							getchar();
-							player->setAlive(!collision);
-							projectile->setAlive(!collision);
-							player->setGeometry(true);
-							projectile->setGeometry(true);
-							//END GAME HERE
-						}
-					}
-				}
-
 				//std::cout << "\tChecking Enemy-Projectile collisions..." << std::endl;
 				//Enemy-Projectile Collision
 				for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
 					if (enemy->isAlive()) {
-						bool collision = checkCollision(enemy->getPosition(), (*enemy->getMeshes())[0].getSize(), projectile->getPosition(), (*projectile->getMeshes())[0].getSize());
+						std::cout << "Projectile Position before checking collision: ( " <<
+							projectile->getPosition().x << ", " <<
+							projectile->getPosition().y << ", " <<
+							projectile->getPosition().z << " )" << std::endl;
+						bool collision = checkCollision(projectile->getPosition(), projectile->getSize(), enemy->getPosition(), enemy->getSize(), "E-P");
+						std::cout << "----Collision: " << collision << " ----" << std::endl;
 						if (collision) {
-							//std::cout << "----Detected Enemy-Player collision.----" << std::endl;
-							getchar();
+							std::cout << "----Detected Enemy-Projectile collision.----" << std::endl;
 							enemy->setAlive(!collision);
 							projectile->setAlive(!collision);
 							enemy->setGeometry(true);
-							projectile->setGeometry(true);
+							//projectile->setGeometry(true);
 						}
 					}
 				}
-
 			}
 		}
 	}
@@ -640,4 +643,28 @@ void ModelManager::enemyPattern(int direction) {
 //	default: //Default, go down
 //	}
 }
+/* --------------------- */
+
+/* -- Projectiles Control -- */
+
+void ModelManager::createProjectile(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond) {
+	Projectile projectile(textPath, textSampler, currentShaderProgramID, meshes, position, "Projectile", speedPerSecond);
+	this->projectiles.push_back(projectile);
+}
+
+void ModelManager::projectilesMovementPattern() {
+	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
+		it->moveProjectile();
+	}
+}
+
+void ModelManager::deleteDeadModels() {
+	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
+		if (!it->isAlive()) {
+			Projectile p = *it;
+			delete(&p);
+		}
+	}
+}
+
 /* --------------------- */

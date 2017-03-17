@@ -19,6 +19,7 @@ using namespace glm;
 #include "model.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
+#include "projectile.hpp"
 
 //Define a custom data type to represent a model
 class ModelManager {
@@ -45,12 +46,17 @@ private:
 	GLuint LightID;
 
 	//Game Related
+	double difficulty;
+	//Enemies
 	bool transformEnemies;
 	std::vector<Model> enemies;
+	//Projectiles
 	bool transformProjectiles;
-	std::vector<Model> projectiles;
+	std::vector<Projectile> projectiles;
+	//Sceneries
 	bool transformSceneries;
 	std::vector<Model> sceneries;
+	//Players
 	bool transformPlayers;
 	std::vector<Model> players;
 
@@ -62,12 +68,13 @@ public:
 	std::vector<Camera> * getCameras();
 	std::vector<Model> * ModelManager::getEnemies();
 	std::vector<Model> * ModelManager::getPlayers();
-	std::vector<Model> * ModelManager::getProjectiles();
+	std::vector<Projectile> * ModelManager::getProjectiles();
 	std::vector<Mesh> * getMeshes();
 	GLuint getVertexArrayID();
 	GLuint getProgramID();
 	GLuint getMatrixID();
 	GLuint getLightID();
+	double ModelManager::getDifficulty();
 	
 	//Shaders
 	void createShader(const GLchar* vertex_file_path, const GLchar* fragment_file_path);
@@ -87,7 +94,8 @@ public:
 
 	//models
 	void createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
-	void addModel(Model model);
+	void ModelManager::addModel(Model model);
+	void ModelManager::addModel(Projectile model);
 	void cleanup();
 	void clearScreen();
 	void swapBuffers(GLFWwindow* g_pWindow);
@@ -100,12 +108,17 @@ public:
 	void setModelTransformation(int modelID, std::string type);
 
 	//Collision
-	GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB);
+	GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB, std::string type);
 	void printCollisions();
 	void checkAllModelsCollision();
+	void deleteDeadModels();
 
 	//Enemies
 	void ModelManager::enemyPattern(int direction);
+
+	//Projectiles
+	void ModelManager::createProjectile(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond);
+	void ModelManager::projectilesMovementPattern();
 };
 
 #endif
