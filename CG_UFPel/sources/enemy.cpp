@@ -41,12 +41,6 @@ void Enemy::moveEnemy(std::string direction)
 		else if (direction == "Down")
 			this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(0, -speedPerStep/2, 0)));
 
-		//Debug
-		//glm::vec3 pos = glm::vec3(this->getModelMatrix()[3][0], this->getModelMatrix()[3][1], this->getModelMatrix()[3][2]);
-		/*std::cout << "Posição Atual do Inimigo: (" << pos.x << ", " << pos.y << ", "<< pos.z << ")"<< std::endl;
-		if (pos.y == 10 && pos.z == -5)
-		getchar();*/
-
 		this->checkBoundaries();
 	}
 }

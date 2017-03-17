@@ -34,15 +34,12 @@ void Projectile::moveProjectile()
 
 		//Debug
 		glm::vec3 pos = glm::vec3(this->getModelMatrix()[3][0], this->getModelMatrix()[3][1], this->getModelMatrix()[3][2]);
-		/*std::cout << "Posição Atual do Projétil: (" << pos.x << ", " << pos.y << ", "<< pos.z << ")"<< std::endl;
-		if (pos.y == 10 && pos.z == -5)
-			getchar();*/
 
 		this->checkBoundaries();
 	}
 }
 
 void Projectile::checkBoundaries() {
-	if (this->getPosition().y > 12)
+	if (this->getPosition().y > 15)
 		this->setAlive(false);
 }

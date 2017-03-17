@@ -332,6 +332,9 @@ int main(void)
 	long double lastPlayerMovement = glfwGetTime();
 	long double lastPlayerShooting = glfwGetTime();
 
+	// ------- Dead Models Collector
+	long double lastCollected = glfwGetTime();
+
 	//Draw Loop
 	do{
         check_gl_error();
@@ -349,21 +352,12 @@ int main(void)
 			nUseMouse = 0;
 		else
 			nUseMouse = 1;
-		
 
-		/* --- Shaders --- */
-		//Explode
-		//(*manager.getModels())[currentModelID].setGeometry(true);
-
-		//Stop Explosion
-		//(*manager.getModels())[currentModelID].setGeometry(false);
-
-		/* --- Transformações --- */
-		//Translação		
-		//(*manager.getEnemies())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
-
-		//Apply
-		//manager.setModelTransformation(currentModelID);
+		//Dead Models Collector
+		if (currentTime > lastCollected + 2.0f) {
+			lastCollected = glfwGetTime();
+			manager.deadModelsCollector();
+		}
 
 		//Collisions
 		if ((currentTime > lastTime3 + 5)) {

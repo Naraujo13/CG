@@ -47,8 +47,10 @@ private:
 
 	//Collision
 	bool alive;
+	long double timeOfDeath = 0;
 	glm::vec3 position;
 	glm::vec3 collisionBox;
+	
 
 	//Game Related info
 	std::string type;	//'Player', 'Enemy', 'Projectile', 'Scenery'
@@ -72,6 +74,7 @@ public:
 	glm::vec3 getPosition();
 	bool isAlive();
 	std::string getType();
+	long double getTimeOfDeath();
 	
 
 	//Set

@@ -19,6 +19,10 @@
 #define TOPBOUNDARY 12.0f
 #define BOTTOMBOUNDARY 12.0f
 
+//Dead Models Time Limits
+#define CLEANPROJECTILES 2.0f
+#define CLEANENEMIES 5.0f
+
 
 //Constructor
 ModelManager::ModelManager()
@@ -172,7 +176,6 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
 			if (time < GEOMETRYLIMIT) {
 				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
 			}
 			else
 				it->setGeometry(false);
@@ -233,7 +236,6 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
 			if (time < GEOMETRYLIMIT) {
 				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
 			}
 			else
 				it->setGeometry(false);
@@ -294,7 +296,6 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
 			if (time < GEOMETRYLIMIT) {
 				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
-				std::cout << "DEBUG::SHADER:: | Time " << time << " | ::SHADER::DEBUG" << std::endl;
 			}
 			else
 				it->setGeometry(false);
@@ -424,19 +425,14 @@ GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm
 //Verifica colisão entre todos os modelos
 void ModelManager::checkAllModelsCollision() {
 
-	//std::cout << "Starting to check collisions..." << std::endl;
-
 	//Enemy-Player Collision
-	//std::cout << "\tChecking Enemy-Player collisions... ";
 	if (!enemies.empty()) {
 		for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
 			if (enemy->isAlive()){
 				for (auto player = players.begin(); player != players.end(); ++player) {
 					if (player->isAlive()) {
 						bool playerCollision = checkCollision(player->getPosition(),  player->getSize(), enemy->getPosition(), enemy->getSize(), "P-E");
-						//std::cout << playerCollision << std::endl;
 						if (playerCollision) {
-							//std::cout << "----Detected Enemy-Player collision.----" << std::endl;
 							player->setAlive(!playerCollision);
 							player->setGeometry(true);
 							//END GAME HERE
@@ -451,22 +447,15 @@ void ModelManager::checkAllModelsCollision() {
 	if (!projectiles.empty()) {
 		for (auto projectile = projectiles.begin(); projectile != projectiles.end(); ++projectile) {
 			if (projectile->isAlive()) {
-				//std::cout << "\tChecking Enemy-Projectile collisions..." << std::endl;
 				//Enemy-Projectile Collision
 				for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
 					if (enemy->isAlive()) {
-						std::cout << "Projectile Position before checking collision: ( " <<
-							projectile->getPosition().x << ", " <<
-							projectile->getPosition().y << ", " <<
-							projectile->getPosition().z << " )" << std::endl;
 						bool collision = checkCollision(projectile->getPosition(), projectile->getSize(), enemy->getPosition(), enemy->getSize(), "E-P");
-						std::cout << "----Collision: " << collision << " ----" << std::endl;
 						if (collision) {
-							std::cout << "----Detected Enemy-Projectile collision.----" << std::endl;
 							enemy->setAlive(!collision);
 							projectile->setAlive(!collision);
 							enemy->setGeometry(true);
-							//projectile->setGeometry(true);
+							projectile->setGeometry(true);
 						}
 					}
 				}
@@ -474,7 +463,6 @@ void ModelManager::checkAllModelsCollision() {
 		}
 	}
 
-	//std::cout << "Finished checking collisions." << std::endl;
 }
 
 //Debug para colisoes
@@ -690,10 +678,6 @@ void ModelManager::updateEnemyMovementPattern() {
 	}
 	//std::cout << "New Pattern: " << currentEnemyPattern << std::endl;
 	nova = currentEnemyPattern;
-	if (old != nova) {
-		std::cout << "Mudando padrão de movimentação " << old << " -> " << nova << std::endl;
-		std::cout << "Tempo decorrido: " << currentTime-downPatternStart << "/" << downPatternDuration << std::endl;
-	}
 }
 
 //Put new sequence of movements to any enemies alive
@@ -729,15 +713,30 @@ void ModelManager::createProjectile(char *textPath, char *textSampler, std::vect
 
 void ModelManager::projectilesMovementPattern() {
 	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
-		it->moveProjectile();
+		if (it->isAlive())
+			it->moveProjectile();
 	}
 }
 
-void ModelManager::deleteDeadModels() {
+
+/* -- General -- */
+void ModelManager::deadModelsCollector() {
+	//Inimigos
 	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
 		if (!it->isAlive()) {
-			Projectile p = *it;
-			delete(&p);
+			if (glfwGetTime() > it->getTimeOfDeath() + CLEANPROJECTILES) {
+				projectiles.erase(it);
+				std::cout << "Apagou projétil." << std::endl;
+			}
+		}
+	}
+	//Projeteis
+	for (auto it = enemies.begin(); it != enemies.end(); ++it) {
+		if (!it->isAlive()) {
+			if (glfwGetTime() > it->getTimeOfDeath() + CLEANENEMIES) {
+				enemies.erase(it);
+				std::cout << "Apagou inimigo." << std::endl;			
+			}
 		}
 	}
 }

@@ -116,7 +116,7 @@ public:
 	GLboolean ModelManager::checkCollision(glm::vec3 positionA, glm::vec3 sizeA, glm::vec3 positionB, glm::vec3 sizeB, std::string type);
 	void printCollisions();
 	void checkAllModelsCollision();
-	void deleteDeadModels();
+	void deadModelsCollector();
 
 	//Enemies
 	void ModelManager::createEnemy(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond, int health);

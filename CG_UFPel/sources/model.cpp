@@ -81,10 +81,15 @@ bool Model::isAlive() {
 std::string Model::getType() {
 	return type;
 }
+long double Model::getTimeOfDeath() {
+	return timeOfDeath;
+}
 
 //Setter
 void Model::setAlive(bool newState) {
 	this->alive = newState;
+	if (!newState)
+		timeOfDeath = glfwGetTime();
 }
 void Model::setModelMatrix(glm::mat4 matrix) {
 	Model::modelMatrix = matrix;
@@ -100,8 +105,6 @@ void Model::setGeometry(bool newState) {
 	else {
 		long double previous = Model::lastUsedGeometry;
 		Model::lastUsedGeometry = Model::lastUsedGeometry + (time - Model::geometryStart);
-		//std::cout << " Last( " << previous << ") + ( time(" << time << ") - start(" << Model::geometryStart << ") ) = " << Model::lastUsedGeometry << std::endl;
-		//getchar();
 	}
 }
 
@@ -123,8 +126,6 @@ void Model::addCompTransformation(struct translation *t, struct rotation *r, str
 		steps = 1;
 	long double stepTime = (long double)time / (long double)steps - 0.005;
 
-	//std::cout << "Steps:" << steps << "\tStep time: " << stepTime << std::endl;
-
 	glm::mat4 stepTransformation(1.0);
 
 	//Translação
@@ -133,7 +134,6 @@ void Model::addCompTransformation(struct translation *t, struct rotation *r, str
 	}
 	//Rotação
 	if (r != NULL) {
-		//std::cout << "Rotation step dgs: " << (r->rotationDegrees) << std::endl;
 		stepTransformation = glm::rotate(stepTransformation, (float)(r->rotationDegrees / steps), r->rotationVec);
 	}
 	//Escala
@@ -152,7 +152,6 @@ void Model::addCompTransformation(struct translation *t, struct rotation *r, str
 
 	if (p3D != NULL) {
 		stepTransformation = glm::proj3D(stepTransformation, p3D->projVector / glm::vec3(steps));
-		std::cout << "Projection DONE!" << std::endl;
 	}
 
 	//Push all transformations
@@ -221,21 +220,14 @@ void Model::bezierCurve(struct bezier b) {
 	currentPos.z = modelMatrix[3][2];
 	b.controlPoints[0] = currentPos;
 
-	//double step = 0.005 * b.time;
-	//if (step < 0.0000001)
-		//step = 1;
-
-	//std::cout << "Bezier points | vector:" << std::endl;
 
 	for (double t = 0; t < 1; t += 0.001) {
 		
 		//Calculate next position
 		newPoint = evaluateBezierCurve(b, t);
-		//std::cout << "Point: (" << newPoint.x << "," << newPoint.y << "," << newPoint.z << ")";
 
 		//Calculate vector from current to next
 		trans.translationVec = newPoint - currentPos;
-		//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 			
 		//Puts translation into queue
 		addCompTransformation(&trans, NULL, NULL, NULL, NULL, b.time/1000);
@@ -301,12 +293,8 @@ void Model::BSplineTest(struct bspline l) {
 				b2 * GetPoint(i + 2, l).z +
 				b3 * GetPoint(i + 3, l).z;
 
-			//std::cout << "Point: (" << x << "," << y << "," << z << ")";
-
 			//Calculates vector
 			trans.translationVec = glm::vec3(x, y, z) - currentPos;
-
-			//std::cout << "\tVector: (" << trans.translationVec.x << "," << trans.translationVec.y << "," << trans.translationVec.z << ")" << std::endl;
 
 			//Puts translation to queue
 			addCompTransformation(&trans, NULL, NULL, NULL, NULL, intermediaryTime / lod);
