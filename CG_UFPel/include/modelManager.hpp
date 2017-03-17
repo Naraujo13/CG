@@ -20,6 +20,7 @@ using namespace glm;
 #include "camera.hpp"
 #include "shader.hpp"
 #include "projectile.hpp"
+#include "enemy.hpp"
 
 //Define a custom data type to represent a model
 class ModelManager {
@@ -49,7 +50,7 @@ private:
 	double difficulty;
 	//Enemies
 	bool transformEnemies;
-	std::vector<Model> enemies;
+	std::vector<Enemy> enemies;
 	//Projectiles
 	bool transformProjectiles;
 	std::vector<Projectile> projectiles;
@@ -66,7 +67,7 @@ public:
 	//Getters
 	std::vector<Shader> * getShaders();
 	std::vector<Camera> * getCameras();
-	std::vector<Model> * ModelManager::getEnemies();
+	std::vector<Enemy> * ModelManager::getEnemies();
 	std::vector<Model> * ModelManager::getPlayers();
 	std::vector<Projectile> * ModelManager::getProjectiles();
 	std::vector<Mesh> * getMeshes();
@@ -95,6 +96,7 @@ public:
 	//models
 	void createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type);
 	void ModelManager::addModel(Model model);
+	void ModelManager::addModel(Enemy model);
 	void ModelManager::addModel(Projectile model);
 	void cleanup();
 	void clearScreen();
@@ -114,7 +116,8 @@ public:
 	void deleteDeadModels();
 
 	//Enemies
-	void ModelManager::enemyPattern(int direction);
+	void ModelManager::createEnemy(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond, int health);
+	void ModelManager::enemyPattern(std::string direction);
 
 	//Projectiles
 	void ModelManager::createProjectile(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond);

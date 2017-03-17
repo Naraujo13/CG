@@ -149,19 +149,10 @@ void enemiesSpawn(ModelManager& manager) {
 	meshes.clear();
 	meshes = *manager.getMeshes();
 	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), "Enemy");
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), "Enemy");
-	manager.createModel("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), "Enemy");
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), 0.5f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), 0.5f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), 0.5f, 1);
 	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
-
-	//meshes.clear();
-	//meshes.push_back((*manager.getMeshes())[2]);
-	////(*manager.getPlayers())[0].getPosition()
-	//Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0,10,-5), "Projectile", manager.getDifficulty()*0.1f);
-	////projectile.setModelMatrix(glm::translate(projectile.getModelMatrix(), glm::vec3(0, 2.0f, 0)));
-	//projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f, 0.25f, 0.25f)));
-	//manager.addModel(projectile);
-
 }
 //Player
 void playersSpawn(ModelManager& manager) {
@@ -197,18 +188,6 @@ void playerMovement(ModelManager& manager) {
 			t.translationVec = glm::vec3(-0.2, 0, 0);
 			(*manager.getPlayers())[0].addCompTransformation(&t, NULL, NULL, NULL, NULL, t.time);
 		}
-	}
-	//Debug
-	if (glfwGetKey(g_pWindow, GLFW_KEY_T) == GLFW_PRESS) {
-		std::vector <Mesh> meshes;
-		std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
-
-		meshes.push_back((*manager.getMeshes())[2]);
-		Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0,10,-5), "Projectile", 0.5f);
-		projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f, 0.25f, 0.25f)));
-
-		manager.addModel(projectile);
-		std::cout << "DEBUG:: FINISHED LOADING PROJECTILE MODEL ::DEBUG" << std::endl;
 	}
 }
 
@@ -352,17 +331,6 @@ int main(void)
 	manager.setTransformEnemies(true);
 	long double lastPlayerMovement = glfwGetTime();
 	long double lastPlayerShooting = glfwGetTime();
-
-	std::vector <Mesh> meshes;
-	std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
-
-	meshes.push_back((*manager.getMeshes())[2]);
-	Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, (*manager.getPlayers())[0].getPosition(), "Projectile", 0.1f);
-	projectile.setModelMatrix(glm::translate(projectile.getModelMatrix(), glm::vec3(0, 2.0f, 0)));
-	projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f, 0.25f, 0.25f)));
-
-	manager.addModel(projectile);
-	std::cout << "DEBUG:: FINISHED LOADING PROJECTILE MODEL ::DEBUG" << std::endl;
 
 	//Draw Loop
 	do{

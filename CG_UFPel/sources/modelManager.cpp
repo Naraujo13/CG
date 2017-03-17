@@ -30,7 +30,7 @@ std::vector<Shader> * ModelManager::getShaders() {
 std::vector<Camera> * ModelManager::getCameras() {
 	return &cameras;
 }
-std::vector<Model> * ModelManager::getEnemies() {
+std::vector<Enemy> * ModelManager::getEnemies() {
 	return &enemies;
 }
 std::vector<Model> * ModelManager::getPlayers() {
@@ -63,18 +63,14 @@ double ModelManager::getDifficulty() {
 //creates a new model and adds to the vector
 void ModelManager::createModel(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, std::string type) {
 	Model model(textPath, textSampler, currentShaderProgramID, meshes, position, type);
-	if (type == "Enemy")
-		enemies.push_back(model);
-	else if (type == "Player")
+	if (type == "Player")
 		players.push_back(model);
 	else if (type == "Scenerie")
 		sceneries.push_back(model);
 }
 
 void ModelManager::addModel(Model model) {
-	if (model.getType() == "Enemy")
-		enemies.push_back(model);
-	else if (model.getType() == "Player")
+	if (model.getType() == "Player")
 		players.push_back(model);
 	else if (model.getType() == "Scenerie")
 		sceneries.push_back(model);
@@ -83,6 +79,10 @@ void ModelManager::addModel(Model model) {
 void ModelManager::addModel(Projectile model) {
 	projectiles.push_back(model);
 }
+void ModelManager::addModel(Enemy model) {
+	enemies.push_back(model);
+}
+
 /* ------------ */
 
 /* -- Meshes -- */
@@ -633,15 +633,23 @@ void ModelManager::cameraNoise() {
 /* -------------------- */
 
 /* -- Enemies Control -- */
+//Creates Enemy
+void ModelManager::createEnemy(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond, int health) {
+	this->enemies.push_back(Enemy(textPath, textSampler, currentShaderProgramID, meshes, position, "Enemy", speedPerSecond, health));
+}
 //Put new sequence of movements to any enemies alive
-void ModelManager::enemyPattern(int direction) {
-//	switch (direction) {
+void ModelManager::enemyPattern(std::string direction) {
+
 //	case 0: //Go Right
-//	case 1: //Go Left
-//	case 2:	//Go Down
-//	case 3:	//Go up
-//	default: //Default, go down
-//	}
+	if (direction == "Right") {
+
+	}
+	else if (direction == "Left") {
+
+	}
+	else if (direction == "Down") {
+
+	}
 }
 /* --------------------- */
 
