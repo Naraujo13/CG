@@ -33,19 +33,6 @@ public:
 	std::uint32_t neighbours;
 	std::set<unsigned short> vizinhos;		//vizinhos no set, acesso ao maior com *(vizinhos.begin())
 };
-/*
-//Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
-class Step {
-public:
-Step(unsigned short rPos, glm::vec3 rVert, unsigned short ePos, glm::vec3 eVert, std::vector<unsigned short> pInd) : replaced_position(rPos), replaced_vertice(rVert), erased_position(ePos), erased_vertice(eVert),previousIndices(pInd){};
-
-unsigned short replaced_position;
-glm::vec3 replaced_vertice;
-unsigned short erased_position;
-glm::vec3 erased_vertice;
-std::vector<unsigned short> previousIndices;
-};
-*/
 //Define a custon data type to store the alteration dones to the mesh, so it can be "undone"
 class Step {
 public:

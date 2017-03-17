@@ -13,6 +13,12 @@
 
 #define GEOMETRYLIMIT 0.0f
 
+//Boundaries
+#define LEFTBOUNDARY -16.0f
+#define RIGHTBOUNDARY 16.0f
+#define TOPBOUNDARY 12.0f
+#define BOTTOMBOUNDARY 12.0f
+
 
 //Constructor
 ModelManager::ModelManager()
@@ -21,6 +27,7 @@ ModelManager::ModelManager()
 	glBindVertexArray(VertexArrayID);
 	currentCamera = 0;
 	difficulty = 1;
+	currentEnemyPattern = "R";
 }
 
 /* -- Getters -- */
@@ -637,19 +644,79 @@ void ModelManager::cameraNoise() {
 void ModelManager::createEnemy(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond, int health) {
 	this->enemies.push_back(Enemy(textPath, textSampler, currentShaderProgramID, meshes, position, "Enemy", speedPerSecond, health));
 }
+
+void ModelManager::updateEnemyMovementPattern() {
+	std::string old = currentEnemyPattern;
+	std::string nova;
+	long double currentTime;
+	//std::cout << "Current Pattern: " << currentEnemyPattern << "\tUpdating pattern.." << std::endl;
+	//Movendo-se para esquerda ou direita
+	if (currentEnemyPattern == "R" || currentEnemyPattern == "L") {
+		bool right = false, left = false;
+		glm::vec3 pos, size;
+		for (auto it = enemies.begin(); it != enemies.end(); ++it) {
+			pos = it->getPosition();
+			size = it->getSize();
+			if (pos.x + size.x / 2 >= RIGHTBOUNDARY) {
+				right = true;
+				break;
+			}
+			else if (pos.x - size.x / 2 <= LEFTBOUNDARY) {
+				left = true;
+				break;
+			}
+		}
+		if (right) {
+			currentEnemyPattern = "DownL";
+			downPatternStart = glfwGetTime();
+			//Go Down, Then Left
+		}
+		else if (left) {
+			currentEnemyPattern = "DownR";
+			downPatternStart = glfwGetTime();
+			//Go Down Then Right
+		}
+	}
+	//Movendo-se para baixo
+	else if (currentEnemyPattern == "DownR" || currentEnemyPattern == "DownL") {
+		//Se já finalizou pattern para baixo, muda para direita ou esquerda
+		currentTime = glfwGetTime();
+		if (currentTime > downPatternStart + downPatternDuration) {
+			if (currentEnemyPattern == "DownR")
+				currentEnemyPattern = "R";
+			else if (currentEnemyPattern == "DownL")
+				currentEnemyPattern = "L";
+		}
+	}
+	//std::cout << "New Pattern: " << currentEnemyPattern << std::endl;
+	nova = currentEnemyPattern;
+	if (old != nova) {
+		std::cout << "Mudando padrão de movimentação " << old << " -> " << nova << std::endl;
+		std::cout << "Tempo decorrido: " << currentTime-downPatternStart << "/" << downPatternDuration << std::endl;
+	}
+}
+
 //Put new sequence of movements to any enemies alive
-void ModelManager::enemyPattern(std::string direction) {
+void ModelManager::movesEnemyInPattern() {
+	std::string direction;
 
-//	case 0: //Go Right
-	if (direction == "Right") {
+	//Updates pattern
+	updateEnemyMovementPattern();
 
+	//Gets current pattern
+	if (currentEnemyPattern == "L")
+		direction = "Left";
+	else if (currentEnemyPattern == "R")
+		direction = "Right";
+	else if (currentEnemyPattern == "DownR" || currentEnemyPattern == "DownL")
+		direction = "Down";
+
+	//Moves
+	for (auto it = enemies.begin(); it != enemies.end(); ++it) {
+		if (it->isAlive())
+			it->moveEnemy(direction);
 	}
-	else if (direction == "Left") {
-
-	}
-	else if (direction == "Down") {
-
-	}
+	
 }
 /* --------------------- */
 

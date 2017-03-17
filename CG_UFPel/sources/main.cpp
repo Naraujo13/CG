@@ -149,9 +149,9 @@ void enemiesSpawn(ModelManager& manager) {
 	meshes.clear();
 	meshes = *manager.getMeshes();
 	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), 0.5f, 1);
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), 0.5f, 1);
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), 0.5f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), 0.025f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), 0.025f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), 0.025f, 1);
 	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
 }
 //Player
@@ -389,6 +389,9 @@ int main(void)
 
 		//Projectiles Movement
 		manager.projectilesMovementPattern();
+
+		//Enemies Movement
+		manager.movesEnemyInPattern();
 
 		//Camera Noise
 		manager.cameraNoise();

@@ -50,6 +50,9 @@ private:
 	double difficulty;
 	//Enemies
 	bool transformEnemies;
+	std::string currentEnemyPattern;
+	long double downPatternStart = 0.0f;
+	long double downPatternDuration = 0.1f;
 	std::vector<Enemy> enemies;
 	//Projectiles
 	bool transformProjectiles;
@@ -117,7 +120,8 @@ public:
 
 	//Enemies
 	void ModelManager::createEnemy(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond, int health);
-	void ModelManager::enemyPattern(std::string direction);
+	void ModelManager::updateEnemyMovementPattern();
+	void ModelManager::movesEnemyInPattern();
 
 	//Projectiles
 	void ModelManager::createProjectile(char *textPath, char *textSampler, std::vector<Mesh> meshes, glm::vec3 position, long double speedPerSecond);

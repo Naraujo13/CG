@@ -31,7 +31,7 @@ public:
 	//Construtor
 	Enemy::Enemy(const char * textPath, const char * textSample, GLuint programID, std::vector<Mesh> meshes, glm::vec3 position, std::string type, long double speed, int health);
 	//Movement
-	void moveEnemy();
+	void moveEnemy(std::string direction);
 	void checkBoundaries();
 	//Health
 	void wasHit();

@@ -20,7 +20,7 @@ Enemy::Enemy(const char * textPath, const char * textSample, GLuint programID, s
 {
 	lastTimeMoved = glfwGetTime();
 	this->speedPerSecond = speed;
-	stepTime = 0.05f;
+	stepTime = 0.1f;
 	speedPerStep = speedPerSecond / stepTime;
 	
 	this->maxHealth = health;
@@ -29,15 +29,20 @@ Enemy::Enemy(const char * textPath, const char * textSample, GLuint programID, s
 }
 
 /* Moves Enemy */
-void Enemy::moveEnemy()
+void Enemy::moveEnemy(std::string direction)
 {
 	long double currentTime = glfwGetTime();
 	if (currentTime > lastTimeMoved + stepTime) {
 		lastTimeMoved = glfwGetTime();
-		this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(0, speedPerStep, 0)));
+		if (direction == "Right")
+			this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(speedPerStep, 0, 0)));
+		else if (direction == "Left")
+			this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(-speedPerStep, 0, 0)));
+		else if (direction == "Down")
+			this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(0, -speedPerStep/2, 0)));
 
 		//Debug
-		glm::vec3 pos = glm::vec3(this->getModelMatrix()[3][0], this->getModelMatrix()[3][1], this->getModelMatrix()[3][2]);
+		//glm::vec3 pos = glm::vec3(this->getModelMatrix()[3][0], this->getModelMatrix()[3][1], this->getModelMatrix()[3][2]);
 		/*std::cout << "Posição Atual do Inimigo: (" << pos.x << ", " << pos.y << ", "<< pos.z << ")"<< std::endl;
 		if (pos.y == 10 && pos.z == -5)
 		getchar();*/
