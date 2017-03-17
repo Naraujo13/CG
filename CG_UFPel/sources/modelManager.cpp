@@ -20,8 +20,8 @@
 #define BOTTOMBOUNDARY 12.0f
 
 //Dead Models Time Limits
-#define CLEANPROJECTILES 2.0f
-#define CLEANENEMIES 5.0f
+#define CLEANPROJECTILES 1.0f
+#define CLEANENEMIES 1.3f
 
 
 //Constructor

@@ -20,7 +20,7 @@ Enemy::Enemy(const char * textPath, const char * textSample, GLuint programID, s
 {
 	lastTimeMoved = glfwGetTime();
 	this->speedPerSecond = speed;
-	stepTime = 0.1f;
+	stepTime = 0.025f;
 	speedPerStep = speedPerSecond / stepTime;
 	
 	this->maxHealth = health;

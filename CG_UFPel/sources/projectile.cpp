@@ -20,7 +20,7 @@ Projectile::Projectile(const char * textPath, const char * textSample, GLuint pr
 {
 	lastTimeMoved = glfwGetTime();
 	this->speedPerSecond = speed;
-	stepTime = 0.05f;
+	stepTime = 0.025f;
 	speedPerStep = speedPerSecond / stepTime;
 }
 

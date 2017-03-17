@@ -41,6 +41,9 @@ using namespace glm;
 #include <vboindexer.hpp>
 #include <glerror.hpp>
 
+//Defines
+#define ENEMY_BASE_SPEED 0.006125f
+
 // Create an internal enum
 typedef enum { MODEL, CAMERA } ACTIVE_TYPE;
 // A variable for the current selection - will be updated by ATB
@@ -149,9 +152,27 @@ void enemiesSpawn(ModelManager& manager) {
 	meshes.clear();
 	meshes = *manager.getMeshes();
 	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), 0.025f, 1);
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), 0.025f, 1);
-	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), 0.025f, 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-9, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-6, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(6, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(9, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-9, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-6, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(6, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(9, 7, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-9, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-6, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(0, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(6, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), 1);
+	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(9, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), 1);
 	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
 }
 //Player
@@ -197,7 +218,7 @@ void playerShooting(ModelManager& manager) {
 		std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
 
 		meshes.push_back((*manager.getMeshes())[2]);
-		Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, (*manager.getPlayers())[0].getPosition(), "Projectile", manager.getDifficulty()*0.1f);
+		Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, (*manager.getPlayers())[0].getPosition(), "Projectile", manager.getDifficulty()*0.025f);
 		projectile.setModelMatrix(glm::translate(projectile.getModelMatrix(), glm::vec3(0,2.0f,0)));
 		projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f,0.25f,0.25f)));
 
@@ -354,7 +375,7 @@ int main(void)
 			nUseMouse = 1;
 
 		//Dead Models Collector
-		if (currentTime > lastCollected + 2.0f) {
+		if (currentTime > lastCollected + 1.0f) {
 			lastCollected = glfwGetTime();
 			manager.deadModelsCollector();
 		}
@@ -376,7 +397,7 @@ int main(void)
 			lastPlayerMovement = glfwGetTime();
 		}
 		//Shooting
-		if (currentTime > lastPlayerShooting + 0.5f) {
+		if (currentTime > lastPlayerShooting + 0.3f) {
 			playerShooting(manager);
 			lastPlayerShooting = glfwGetTime();
 		}
