@@ -725,8 +725,9 @@ void ModelManager::deadModelsCollector() {
 	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
 		if (!it->isAlive()) {
 			if (glfwGetTime() > it->getTimeOfDeath() + CLEANPROJECTILES) {
-				projectiles.erase(it);
-				std::cout << "Apagou projétil." << std::endl;
+				auto it2 = it;
+				it--;
+				projectiles.erase(it2);
 			}
 		}
 	}
@@ -734,8 +735,9 @@ void ModelManager::deadModelsCollector() {
 	for (auto it = enemies.begin(); it != enemies.end(); ++it) {
 		if (!it->isAlive()) {
 			if (glfwGetTime() > it->getTimeOfDeath() + CLEANENEMIES) {
-				enemies.erase(it);
-				std::cout << "Apagou inimigo." << std::endl;			
+				auto it2 = it;
+				it--;
+				enemies.erase(it2);			
 			}
 		}
 	}
