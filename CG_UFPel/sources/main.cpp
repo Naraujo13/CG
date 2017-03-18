@@ -42,7 +42,7 @@ using namespace glm;
 #include <glerror.hpp>
 
 //Defines
-#define ENEMY_BASE_SPEED 0.006125f
+#define ENEMY_BASE_SPEED 0.006125f * 30
 
 // Create an internal enum
 typedef enum { MODEL, CAMERA } ACTIVE_TYPE;
@@ -148,10 +148,19 @@ void cameraSpawn(ModelManager& manager) {
 //Enemies
 void enemiesSpawn(ModelManager& manager) {
 	std::vector <Mesh> meshes;
-	manager.loadMeshes("mesh/suzanne.obj");
+	manager.loadMeshes("mesh/Space_Invader.obj");
 	meshes.clear();
 	meshes = *manager.getMeshes();
 	std::cout << "DEBUG:: LOADING ENEMIES MODELS... ::DEBUG" << std::endl;
+	for (int i = 10; i >= 1; i = i - 3) {
+		for (int j = -12; j <= 12; j = j + 3) { //-12 a 12
+			Enemy enemy("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(j, i, -5), "Enemy", ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
+			enemy.setModelMatrix(glm::scale(enemy.getModelMatrix(), glm::vec3(0.01f)));
+			manager.addModel(enemy);
+		}
+	}
+	//Suzanne 
+/*
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-9, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-6, 10, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(-3, 10,-5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
@@ -173,15 +182,15 @@ void enemiesSpawn(ModelManager& manager) {
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(3, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), manager.getDifficulty());
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(6, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), 1);
 	manager.createEnemy("mesh/uvmap.DDS", "myTextureSampler", meshes, glm::vec3(9, 4, -5), ENEMY_BASE_SPEED * manager.getDifficulty(), 1);
-	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;
+	std::cout << "DEBUG:: FINISHED LOADING ENEMIES MODELS ::DEBUG" << std::endl;*/
 }
 //Player
 void playersSpawn(ModelManager& manager) {
 	std::vector <Mesh> meshes;
 	std::cout << "DEBUG:: LOADING PLAYER MODEL... ::DEBUG" << std::endl;
-	manager.loadMeshes("mesh/goose.obj");
+	manager.loadMeshes("mesh/sphere.obj");
 	meshes.clear();
-	meshes.push_back((*manager.getMeshes())[1]);
+	meshes.push_back((*manager.getMeshes())[60]);
 
 	Model player("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0, -10, -5), "Player");
 	player.setModelMatrix(glm::rotate(player.getModelMatrix(), 180.0f, glm::vec3(0, 1, 0)));
@@ -189,8 +198,81 @@ void playersSpawn(ModelManager& manager) {
 	manager.addModel(player);
 	std::cout << "DEBUG:: FINISHED LOADING PLAYER MODEL ::DEBUG" << std::endl;
 	
-	manager.loadMeshes("mesh/cube.obj"); //[2]
+	manager.loadMeshes("mesh/capsule.obj"); //[61]
 
+}
+//Scenerie
+void scenerieSpawn(ModelManager& manager) {
+	std::vector <Mesh> meshes;
+	std::cout << "DEBUG:: LOADING SCENERIE MODEL... ::DEBUG" << std::endl;
+	manager.loadMeshes("mesh/sphere.obj"); //[62]
+	meshes.clear();
+	meshes.push_back((*manager.getMeshes())[62]);
+	
+	Model scenerie("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-5 , 5 , -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.45)));
+	manager.addModel(scenerie);
+	
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(3, 12, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.35)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(12, 7, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.6)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-11, 12, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.24)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(6, -10, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.78)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(0.5, -3, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.56)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-6.89, -8.98, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.256)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-12.35, 1, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.385)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-9.56, -14, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.67)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(14, -1.5, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.466)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(7.5, 7.5, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.3256)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(15.7, -13.5, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.355)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-15.7, -8.5, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.4896)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(-14.7, 10.3, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.3867)));
+	manager.addModel(scenerie);
+
+	scenerie = Model("mesh/goose.dds", "myTextureSampler", manager.getProgramID(), meshes, glm::vec3(12.662, -12.5, -10), "Scenerie");
+	scenerie.setModelMatrix(glm::scale(scenerie.getModelMatrix(), glm::vec3(0.192)));
+	manager.addModel(scenerie);
+
+
+	std::cout << "DEBUG:: FINISHED LOADING PLAYER MODEL ::DEBUG" << std::endl;
+
+	
 }
 /* ----------------- */
 
@@ -215,15 +297,16 @@ void playerMovement(ModelManager& manager) {
 void playerShooting(ModelManager& manager) {
 	if (glfwGetKey(g_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS) {
 		std::vector <Mesh> meshes;
-		std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
+		//std::cout << "DEBUG:: LOADING PROJECTILE MODEL... ::DEBUG" << std::endl;
 
-		meshes.push_back((*manager.getMeshes())[2]);
+		meshes.push_back((*manager.getMeshes())[61]);
 		Projectile projectile("mesh/uvmap.dds", "myTextureSampler", manager.getProgramID(), meshes, (*manager.getPlayers())[0].getPosition(), "Projectile", manager.getDifficulty()*0.025f);
 		projectile.setModelMatrix(glm::translate(projectile.getModelMatrix(), glm::vec3(0,2.0f,0)));
+		projectile.setModelMatrix(glm::rotate(projectile.getModelMatrix(), 90.0f, glm::vec3(1, 0, 0)));
 		projectile.setModelMatrix(glm::scale(projectile.getModelMatrix(), glm::vec3(0.25f,0.25f,0.25f)));
 
 		manager.addModel(projectile);
-		std::cout << "DEBUG:: FINISHED LOADING PROJECTILE MODEL ::DEBUG" << std::endl;
+		//std::cout << "DEBUG:: FINISHED LOADING PROJECTILE MODEL ::DEBUG" << std::endl;
 	}
 }
 /* ---------------------------- */
@@ -300,7 +383,7 @@ int main(void)
 	glfwSetCursorPos(g_pWindow, g_nWidth / 2, g_nHeight / 2);
 
 	//Gray background
-	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -344,6 +427,8 @@ int main(void)
 	cameraSpawn(manager);
 	enemiesSpawn(manager);
 	playersSpawn(manager);
+	//scenerieSpawn(manager);
+
 
 	// ------ Shader Control
 	bool drawNormals = false;
@@ -358,7 +443,10 @@ int main(void)
 
 	//Draw Loop
 	do{
-        check_gl_error();
+		if ((*manager.getEnemies()).empty()) {
+			manager.increaseDifficulty();
+			enemiesSpawn(manager);
+		}
 		// Measure speed
 		long double currentTime = glfwGetTime();
 		
@@ -375,7 +463,7 @@ int main(void)
 			nUseMouse = 1;
 
 		//Dead Models Collector
-		if (currentTime > lastCollected + 1.0f) {
+		if (currentTime > lastCollected + 0.5f) {
 			lastCollected = glfwGetTime();
 			manager.deadModelsCollector();
 		}
@@ -383,7 +471,7 @@ int main(void)
 		//Collisions
 		if ((currentTime > lastTime3 + 5)) {
 			lastTime3 = glfwGetTime();
-			manager.printCollisions();
+			//manager.printCollisions();
 		}
 		if (currentTime > collisionCheckTime + 0.1) {
 			collisionCheckTime = glfwGetTime();

@@ -29,6 +29,7 @@ Model::Model(const char *textPath, const char *textSample, GLuint programID, std
 		this->modelMatrix[3][1],
 		this->modelMatrix[3][2]);
 	this->alive = true;
+	this->calculateSize();
 }
 
 //Getters
@@ -334,6 +335,33 @@ double Model::getScalingFactor() {
 
 }
 
+void Model::calculateSize() {
+	GLfloat
+		min_x, max_x,
+		min_y, max_y,
+		min_z, max_z;
+	min_x = max_x = (*(meshes[0].getIndexedVertices()))[0].x;
+	min_y = max_y = (*(meshes[0].getIndexedVertices()))[0].y;
+	min_z = max_z = (*(meshes[0].getIndexedVertices()))[0].z;
+
+	for (auto it = meshes.begin(); it != meshes.end(); ++it) {
+		for (int i = 0; i < (*it->getIndexedVertices()).size(); i++) {
+			if ((*it->getIndexedVertices())[i].x < min_x) min_x = (*it->getIndexedVertices())[i].x;
+			if ((*it->getIndexedVertices())[i].x > max_x) max_x = (*it->getIndexedVertices())[i].x;
+			if ((*it->getIndexedVertices())[i].y < min_y) min_y = (*it->getIndexedVertices())[i].y;
+			if ((*it->getIndexedVertices())[i].y > max_y) max_y = (*it->getIndexedVertices())[i].y;
+			if ((*it->getIndexedVertices())[i].z < min_z) min_z = (*it->getIndexedVertices())[i].z;
+			if ((*it->getIndexedVertices())[i].z > max_z) max_z = (*it->getIndexedVertices())[i].z;
+		}
+	}
+
+	this->size.x = max_x - min_x;
+	this->size.y = max_y - min_y;
+	this->size.z = max_z - min_z;
+
+}
+
 glm::vec3 Model::getSize() {
-	return meshes[0].getSize();
+	//return meshes[0].getSize();
+	return this->size * glm::vec3(this->getScalingFactor()) * glm::vec3(2.8f, 3.0f, 3.5f);
 }

@@ -21,7 +21,7 @@
 
 //Dead Models Time Limits
 #define CLEANPROJECTILES 1.0f
-#define CLEANENEMIES 1.3f
+#define CLEANENEMIES 1.0f
 
 
 //Constructor
@@ -67,6 +67,10 @@ GLuint ModelManager::getLightID() {
 }
 double ModelManager::getDifficulty() {
 	return difficulty;
+}
+
+void ModelManager::increaseDifficulty() {
+	this->difficulty++;
 }
 /* ------------- */
 
@@ -285,6 +289,66 @@ void ModelManager::drawModels(GLuint ViewMatrixID, glm::mat4 ViewMatrix, glm::ma
 
 	//Draw projectiles
 	for (auto it = projectiles.begin(); it != projectiles.end(); ++it) {
+		//Calculate MVP matrix
+		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
+
+		//Geometry Shader Data
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "projection"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getProjectionMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "view"), 1, GL_FALSE, glm::value_ptr(cameras[currentCamera].getViewMatrix()));
+		glUniformMatrix4fv(glGetUniformLocation(currentShaderProgramID, "model"), 1, GL_FALSE, glm::value_ptr(it->getModelMatrix()));
+		if (it->getGeometry()) {
+			long double time = (it->getLastUsedGeometry() + (glfwGetTime() - it->getGeometryStart()));
+			if (time < GEOMETRYLIMIT) {
+				glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), time);
+			}
+			else
+				it->setGeometry(false);
+		}
+		else {
+			glUniform1f(glGetUniformLocation(currentShaderProgramID, "time"), it->getLastUsedGeometry());
+		}
+
+		// Send our transformation to the currently bound shader,
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv((*it).getModelMatrixID(), 1, GL_FALSE, &(*it).getModelMatrix()[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
+
+		glm::vec3 lightPos = glm::vec3(4, 4, 4);
+		glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, *(*it).getTexture());
+		// Set our "myTextureSampler" sampler to user Texture Unit 0
+		glUniform1i((*it).getTextureID(), 0);
+
+		//Load/Draw meshes
+		for (auto it2 = (*it->getMeshes()).begin(); it2 < (*it->getMeshes()).end(); ++it2) {
+
+			//Load mesh
+			it2->loadMesh();
+
+			// Draw the triangles !
+			glDrawElements(
+				GL_TRIANGLES,        // mode
+				(*it2->getIndices()).size(),      // count
+				GL_UNSIGNED_SHORT,   // type
+				(void*)0             // element array buffer offset
+			);
+
+		}
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+
+		// Draw tweak bars
+		TwDraw();
+	}
+
+	//Draw Sceneries
+	for (auto it = sceneries.begin(); it != sceneries.end(); ++it) {
 		//Calculate MVP matrix
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * (*it).getModelMatrix();
 

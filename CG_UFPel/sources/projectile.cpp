@@ -30,7 +30,9 @@ void Projectile::moveProjectile()
 	long double currentTime = glfwGetTime();
 	if (currentTime > lastTimeMoved + stepTime) {
 		lastTimeMoved = glfwGetTime();
+		this->setModelMatrix(glm::rotate(this->getModelMatrix(), -90.0f, glm::vec3(1, 0, 0)));
 		this->setModelMatrix(translate(this->getModelMatrix(), glm::vec3(0, speedPerStep, 0)));
+		this->setModelMatrix(glm::rotate(this->getModelMatrix(), 90.0f, glm::vec3(1, 0, 0)));
 
 		//Debug
 		glm::vec3 pos = glm::vec3(this->getModelMatrix()[3][0], this->getModelMatrix()[3][1], this->getModelMatrix()[3][2]);

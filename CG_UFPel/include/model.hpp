@@ -50,6 +50,7 @@ private:
 	long double timeOfDeath = 0;
 	glm::vec3 position;
 	glm::vec3 collisionBox;
+	glm::vec3 size;
 	
 
 	//Game Related info
@@ -95,6 +96,7 @@ public:
 
 	double getScalingFactor();
 	glm::vec3 Model::getSize();
+	void calculateSize();
 
 };
 

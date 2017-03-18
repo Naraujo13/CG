@@ -79,6 +79,7 @@ public:
 	GLuint getMatrixID();
 	GLuint getLightID();
 	double ModelManager::getDifficulty();
+	void ModelManager::increaseDifficulty();
 	
 	//Shaders
 	void createShader(const GLchar* vertex_file_path, const GLchar* fragment_file_path);
